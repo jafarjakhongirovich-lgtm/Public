@@ -1,0 +1,88 @@
+<!doctype html>
+<html lang="uz">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>{% block title %}Davomat tizimi{% endblock %}</title>
+<style>
+  :root {
+    --bg: #f5f6f8; --card: #ffffff; --line: #e3e6ea; --text: #1b1f24;
+    --muted: #6a737d; --brand: #1f3864; --ok: #1a7f45; --warn: #a5680a;
+    --bad: #b3261e; --info: #14567a;
+  }
+  * { box-sizing: border-box; }
+  body { margin: 0; font: 15px/1.5 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+         background: var(--bg); color: var(--text); }
+  header { background: var(--brand); color: #fff; padding: 12px 20px; display: flex;
+           flex-wrap: wrap; gap: 16px; align-items: center; }
+  header h1 { font-size: 17px; margin: 0; font-weight: 600; }
+  header nav { display: flex; gap: 14px; flex-wrap: wrap; }
+  header nav a { color: #cfd8e6; text-decoration: none; font-size: 14px; }
+  header nav a:hover, header nav a.active { color: #fff; text-decoration: underline; }
+  main { padding: 20px; max-width: 1400px; margin: 0 auto; }
+  .card { background: var(--card); border: 1px solid var(--line); border-radius: 8px;
+          padding: 16px 18px; margin-bottom: 18px; }
+  .card > h2 { margin: 0 0 12px; font-size: 15px; text-transform: uppercase;
+               letter-spacing: .04em; color: var(--muted); }
+  .grid { display: grid; gap: 18px; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); }
+  .stats { display: flex; gap: 14px; flex-wrap: wrap; }
+  .stat { flex: 1 1 130px; background: var(--card); border: 1px solid var(--line);
+          border-radius: 8px; padding: 12px 14px; }
+  .stat b { display: block; font-size: 26px; line-height: 1.1; }
+  .stat span { color: var(--muted); font-size: 13px; }
+  .table-wrap { overflow-x: auto; }
+  table { width: 100%; border-collapse: collapse; font-size: 14px; }
+  th, td { padding: 8px 10px; text-align: left; border-bottom: 1px solid var(--line);
+           white-space: nowrap; }
+  th { font-size: 12px; text-transform: uppercase; letter-spacing: .03em;
+       color: var(--muted); font-weight: 600; }
+  tbody tr:hover { background: #fafbfc; }
+  tfoot td { font-weight: 600; border-top: 2px solid var(--line); }
+  .num { text-align: right; font-variant-numeric: tabular-nums; }
+  .tag { display: inline-block; padding: 1px 8px; border-radius: 10px; font-size: 12px;
+         font-weight: 600; border: 1px solid currentColor; }
+  .tag.ok { color: var(--ok); } .tag.warn { color: var(--warn); }
+  .tag.bad { color: var(--bad); } .tag.info { color: var(--info); }
+  .tag.muted { color: var(--muted); }
+  form.inline { display: flex; gap: 8px; flex-wrap: wrap; align-items: flex-end; }
+  label { display: block; font-size: 12px; color: var(--muted); margin-bottom: 3px; }
+  input, select, button { font: inherit; padding: 6px 9px; border: 1px solid var(--line);
+                          border-radius: 6px; background: #fff; color: inherit; }
+  input:focus, select:focus { outline: 2px solid #9db4d8; outline-offset: -1px; }
+  button { background: var(--brand); color: #fff; border-color: var(--brand); cursor: pointer; }
+  button:hover { filter: brightness(1.15); }
+  button.ghost { background: #fff; color: var(--brand); }
+  button.danger { background: #fff; color: var(--bad); border-color: #e0bdba; }
+  .row { display: flex; gap: 10px; flex-wrap: wrap; align-items: flex-end; }
+  .row > div { flex: 1 1 150px; }
+  .muted { color: var(--muted); }
+  .hint { font-size: 13px; color: var(--muted); margin: 6px 0 0; }
+  code.key { background: #eef1f4; padding: 2px 6px; border-radius: 4px; font-size: 12px;
+             word-break: break-all; white-space: normal; }
+  @media (prefers-color-scheme: dark) {
+    :root { --bg: #14171a; --card: #1c2024; --line: #2c3238; --text: #e6e9ec;
+            --muted: #98a2ad; --brand: #24406e; --ok: #4cc38a; --warn: #e0a23c;
+            --bad: #ef6f68; --info: #5aa9d6; }
+    input, select { background: #14171a; }
+    button.ghost { background: #1c2024; color: #b9cbe8; }
+    button.danger { background: #1c2024; border-color: #5a3230; }
+    tbody tr:hover { background: #21262b; }
+    code.key { background: #14171a; }
+  }
+</style>
+</head>
+<body>
+<header>
+  <h1>Davomat va oylik tizimi</h1>
+  <nav>
+    <a href="/admin">Kunlik jadval</a>
+    <a href="/admin/employees">Xodimlar</a>
+    <a href="/admin/payroll">Oylik</a>
+    <a href="/admin/settings">Sozlamalar</a>
+  </nav>
+</header>
+<main>
+{% block content %}{% endblock %}
+</main>
+</body>
+</html>

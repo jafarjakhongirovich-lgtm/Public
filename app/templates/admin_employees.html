@@ -1,0 +1,115 @@
+{% extends "base.html" %}
+{% block title %}Xodimlar{% endblock %}
+{% block content %}
+
+<div class="card">
+  <h2>Xodimlar</h2>
+  <div class="table-wrap">
+  <table>
+    <thead>
+      <tr>
+        <th>F.I.Sh.</th><th>Lavozim</th><th>Telegram</th><th class="num">Oylik (so'm)</th>
+        <th>Jadval</th><th>Ofis</th><th>Ishga kirgan</th><th>Holat</th>
+      </tr>
+    </thead>
+    <tbody>
+    {% for e in employees %}
+      <tr>
+        <td>{{ e.full_name }}</td>
+        <td class="muted">{{ e.position or '—' }}</td>
+        <td class="muted">
+          {% if e.telegram_user_id %}<code class="key">{{ e.telegram_user_id }}</code>
+          {% elif e.telegram_username %}@{{ e.telegram_username }} <span class="tag warn">ulanmagan</span>
+          {% else %}<span class="tag bad">yo'q</span>{% endif %}
+        </td>
+        <td class="num">{{ '{:,.0f}'.format(e.monthly_salary) }}</td>
+        <td class="muted">{{ e.schedule.name }}</td>
+        <td class="muted">{{ e.location.name if e.location else '—' }}</td>
+        <td class="muted">{{ e.hired_at or '—' }}</td>
+        <td>
+          {% if e.is_active %}<span class="tag ok">faol</span>
+          {% else %}<span class="tag muted">arxiv</span>{% endif %}
+        </td>
+      </tr>
+    {% else %}
+      <tr><td colspan="8" class="muted">Hali xodim qo'shilmagan.</td></tr>
+    {% endfor %}
+    </tbody>
+  </table>
+  </div>
+  <p class="hint">
+    <b>Telegram ulanishi:</b> xodim botga <code>/start</code> yozadi, bot uning raqamini
+    ko'rsatadi — shu raqamni «Telegram user_id» maydoniga kiriting. Yoki username'ni
+    yozib qo'ysangiz, xodim <code>/start</code> bosgan zahoti o'zi ulanadi.
+  </p>
+</div>
+
+<div class="card">
+  <h2>Xodim qo'shish / tahrirlash</h2>
+  <form method="post" action="/admin/employees">
+    <div class="row">
+      <div>
+        <label for="e_id">ID (tahrirlash uchun, bo'sh = yangi)</label>
+        <input type="number" id="e_id" name="employee_id" placeholder="">
+      </div>
+      <div>
+        <label for="e_name">F.I.Sh.</label>
+        <input type="text" id="e_name" name="full_name" required>
+      </div>
+      <div>
+        <label for="e_pos">Lavozim</label>
+        <input type="text" id="e_pos" name="position">
+      </div>
+    </div>
+    <div class="row" style="margin-top:10px">
+      <div>
+        <label for="e_uid">Telegram user_id</label>
+        <input type="number" id="e_uid" name="telegram_user_id">
+      </div>
+      <div>
+        <label for="e_uname">Telegram username</label>
+        <input type="text" id="e_uname" name="telegram_username" placeholder="@ belgisiz">
+      </div>
+      <div>
+        <label for="e_salary">Oylik (so'm)</label>
+        <input type="number" step="1000" min="0" id="e_salary" name="monthly_salary" value="0">
+      </div>
+    </div>
+    <div class="row" style="margin-top:10px">
+      <div>
+        <label for="e_sched">Ish jadvali</label>
+        <select id="e_sched" name="schedule_id" required>
+          {% for s in schedules %}
+            <option value="{{ s.id }}">
+              {{ s.name }} ({{ s.start_time|soat }}–{{ s.end_time|soat }})
+            </option>
+          {% endfor %}
+        </select>
+      </div>
+      <div>
+        <label for="e_loc">Ofis</label>
+        <select id="e_loc" name="location_id">
+          <option value="">— hammasi —</option>
+          {% for l in locations %}<option value="{{ l.id }}">{{ l.name }}</option>{% endfor %}
+        </select>
+      </div>
+      <div>
+        <label for="e_hired">Ishga kirgan sana</label>
+        <input type="date" id="e_hired" name="hired_at">
+      </div>
+      <div>
+        <label for="e_active">Faol</label>
+        <select id="e_active" name="is_active">
+          <option value="on">Ha</option><option value="">Yo'q (arxiv)</option>
+        </select>
+      </div>
+      <div style="flex:0 0 auto"><button type="submit">Saqlash</button></div>
+    </div>
+    <p class="hint">
+      «Ofis» tanlansa, xodim faqat shu ofisdagi QR bilan qayd qilishi mumkin.
+      Bo'sh qoldirilsa — barcha ofislarda ishlaydi.
+    </p>
+  </form>
+</div>
+
+{% endblock %}

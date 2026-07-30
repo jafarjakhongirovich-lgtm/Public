@@ -1,0 +1,237 @@
+{% extends "base.html" %}
+{% block title %}Sozlamalar{% endblock %}
+{% block content %}
+
+<div class="card">
+  <h2>QR ekranlari (kiosk)</h2>
+  <div class="table-wrap">
+  <table>
+    <thead><tr><th>Nomi</th><th>Ofis</th><th>Havola</th><th>Oxirgi aloqa</th><th></th></tr></thead>
+    <tbody>
+    {% for k in kiosks %}
+      <tr>
+        <td>{{ k.name }}</td>
+        <td class="muted">{{ k.location.name }}</td>
+        <td><code class="key">/kiosk/{{ k.api_key }}</code></td>
+        <td class="muted">{{ k.last_seen_at|soat if k.last_seen_at else 'hech qachon' }}</td>
+        <td>
+          <form method="post" action="/admin/kiosks/{{ k.id }}/rotate" style="display:inline">
+            <button class="danger" type="submit">Kalitni yangilash</button>
+          </form>
+        </td>
+      </tr>
+    {% else %}
+      <tr><td colspan="5" class="muted">Kiosk yo'q. Pastda qo'shing.</td></tr>
+    {% endfor %}
+    </tbody>
+  </table>
+  </div>
+  <p class="hint">
+    Bu havolani ofisdagi ekran brauzerida to'liq ekran rejimida ochib qo'yasiz.
+    Havola maxfiy: uni bilgan odam QR ni masofadan ko'ra oladi, shuning uchun
+    xodimlarga tarqatmang. Tarqab ketsa — «Kalitni yangilash» bosing.<br>
+    QR har <b>{{ qr_refresh }}</b> sekundda yangilanadi, token <b>{{ qr_ttl }}</b> sekund
+    yashaydi. Bu qiymatlarni <code>.env</code> da o'zgartirasiz.
+  </p>
+  <form method="post" action="/admin/kiosks" class="row" style="margin-top:10px">
+    <div>
+      <label for="k_name">Ekran nomi</label>
+      <input type="text" id="k_name" name="name" required placeholder="Kirish eshigi TV">
+    </div>
+    <div>
+      <label for="k_loc">Ofis</label>
+      <select id="k_loc" name="location_id" required>
+        {% for l in locations %}<option value="{{ l.id }}">{{ l.name }}</option>{% endfor %}
+      </select>
+    </div>
+    <div style="flex:0 0 auto"><button type="submit">Kiosk qo'shish</button></div>
+  </form>
+</div>
+
+<div class="grid">
+  <div class="card">
+    <h2>Ofislar</h2>
+    <div class="table-wrap">
+    <table>
+      <thead><tr><th>ID</th><th>Nomi</th><th>Ruxsat etilgan IP</th></tr></thead>
+      <tbody>
+      {% for l in locations %}
+        <tr>
+          <td class="muted">{{ l.id }}</td>
+          <td>{{ l.name }}</td>
+          <td class="muted">{{ l.ip_allowlist or 'cheklovsiz' }}</td>
+        </tr>
+      {% else %}
+        <tr><td colspan="3" class="muted">Ofis yo'q.</td></tr>
+      {% endfor %}
+      </tbody>
+    </table>
+    </div>
+    <form method="post" action="/admin/locations" class="row" style="margin-top:10px">
+      <div>
+        <label for="l_name">Ofis nomi</label>
+        <input type="text" id="l_name" name="name" required>
+      </div>
+      <div>
+        <label for="l_ip">IP ro'yxati (ixtiyoriy)</label>
+        <input type="text" id="l_ip" name="ip_allowlist" placeholder="84.54.0.0/24, 213.230.1.5">
+      </div>
+      <div style="flex:0 0 auto"><button type="submit">Qo'shish</button></div>
+    </form>
+    <p class="hint">
+      IP ro'yxati faqat <b>kiosk sahifasini</b> cheklaydi. Skanerlash Telegram
+      orqali kelgani uchun xodim IP'si ko'rinmaydi — jismoniy hozirlikni QR
+      tokenining qisqa muddati ta'minlaydi.
+    </p>
+  </div>
+
+  <div class="card">
+    <h2>Ish jadvallari</h2>
+    <div class="table-wrap">
+    <table>
+      <thead>
+        <tr><th>ID</th><th>Nomi</th><th>Vaqt</th><th>Tushlik</th>
+            <th class="num">Norma</th><th class="num">Grace</th><th>Kunlar</th></tr>
+      </thead>
+      <tbody>
+      {% for s in schedules %}
+        <tr>
+          <td class="muted">{{ s.id }}</td>
+          <td>{{ s.name }}</td>
+          <td>{{ s.start_time|soat }}–{{ s.end_time|soat }}</td>
+          <td class="muted">
+            {% if s.lunch_start %}{{ s.lunch_start|soat }}–{{ s.lunch_end|soat }}{% else %}—{% endif %}
+          </td>
+          <td class="num">{{ s.lunch_minutes }} daq</td>
+          <td class="num">{{ s.grace_minutes }} daq</td>
+          <td class="muted">{{ s.work_days }}</td>
+        </tr>
+      {% endfor %}
+      </tbody>
+    </table>
+    </div>
+    <form method="post" action="/admin/schedules" style="margin-top:10px">
+      <div class="row">
+        <div>
+          <label for="s_id">ID (bo'sh = yangi)</label>
+          <input type="number" id="s_id" name="schedule_id">
+        </div>
+        <div>
+          <label for="s_name">Nomi</label>
+          <input type="text" id="s_name" name="name" required value="Asosiy">
+        </div>
+        <div>
+          <label for="s_start">Boshlanish</label>
+          <input type="time" id="s_start" name="start_time" required value="09:00">
+        </div>
+        <div>
+          <label for="s_end">Tugash</label>
+          <input type="time" id="s_end" name="end_time" required value="18:00">
+        </div>
+      </div>
+      <div class="row" style="margin-top:10px">
+        <div>
+          <label for="s_ls">Tushlik boshi</label>
+          <input type="time" id="s_ls" name="lunch_start" value="13:00">
+        </div>
+        <div>
+          <label for="s_le">Tushlik oxiri</label>
+          <input type="time" id="s_le" name="lunch_end" value="14:00">
+        </div>
+        <div>
+          <label for="s_lm">Tushlik normasi (daq)</label>
+          <input type="number" id="s_lm" name="lunch_minutes" value="60" min="0">
+        </div>
+        <div>
+          <label for="s_grace">Grace (daq)</label>
+          <input type="number" id="s_grace" name="grace_minutes" value="5" min="0">
+        </div>
+        <div>
+          <label for="s_days">Ish kunlari (Du=1 … Ya=7)</label>
+          <input type="text" id="s_days" name="work_days" value="1,2,3,4,5">
+        </div>
+        <div style="flex:0 0 auto"><button type="submit">Saqlash</button></div>
+      </div>
+      <p class="hint">
+        <b>Grace</b> — jarima hisoblanmaydigan muhlat. Kechikish, erta ketish va
+        tushlik oshig'iga alohida qo'llanadi.
+      </p>
+    </form>
+  </div>
+</div>
+
+<div class="grid">
+  <div class="card">
+    <h2>Bayram va dam olish kunlari</h2>
+    <div class="table-wrap">
+    <table>
+      <thead><tr><th>Sana</th><th>Nomi</th></tr></thead>
+      <tbody>
+      {% for h in holidays %}
+        <tr><td>{{ h.day.strftime('%d.%m.%Y') }}</td><td>{{ h.name }}</td></tr>
+      {% else %}
+        <tr><td colspan="2" class="muted">Bayram kiritilmagan.</td></tr>
+      {% endfor %}
+      </tbody>
+    </table>
+    </div>
+    <form method="post" action="/admin/holidays" class="row" style="margin-top:10px">
+      <div><label for="h_day">Sana</label><input type="date" id="h_day" name="day" required></div>
+      <div><label for="h_name">Nomi</label><input type="text" id="h_name" name="name" required></div>
+      <div style="flex:0 0 auto"><button type="submit">Qo'shish</button></div>
+    </form>
+    <p class="hint">Bayram kunlari oylik hisobida ish kuni normasiga kirmaydi.</p>
+  </div>
+
+  <div class="card">
+    <h2>Ta'til / kasallik / ruxsat</h2>
+    <div class="table-wrap">
+    <table>
+      <thead><tr><th>Xodim</th><th>Oraliq</th><th>Turi</th><th>To'lov</th></tr></thead>
+      <tbody>
+      {% for lv in leaves %}
+        <tr>
+          <td>{{ lv.employee.full_name }}</td>
+          <td>{{ lv.start_date.strftime('%d.%m') }}–{{ lv.end_date.strftime('%d.%m.%Y') }}</td>
+          <td class="muted">{{ lv.kind.value }}</td>
+          <td>
+            {% if lv.is_paid %}<span class="tag ok">to'lanadi</span>
+            {% else %}<span class="tag warn">to'lanmaydi</span>{% endif %}
+          </td>
+        </tr>
+      {% else %}
+        <tr><td colspan="4" class="muted">Yozuv yo'q.</td></tr>
+      {% endfor %}
+      </tbody>
+    </table>
+    </div>
+    <form method="post" action="/admin/leaves" style="margin-top:10px">
+      <div class="row">
+        <div>
+          <label for="lv_emp">Xodim</label>
+          <select id="lv_emp" name="employee_id" required>
+            {% for e in employees %}<option value="{{ e.id }}">{{ e.full_name }}</option>{% endfor %}
+          </select>
+        </div>
+        <div><label for="lv_s">Dan</label><input type="date" id="lv_s" name="start_date" required></div>
+        <div><label for="lv_e">Gacha</label><input type="date" id="lv_e" name="end_date" required></div>
+        <div>
+          <label for="lv_k">Turi</label>
+          <select id="lv_k" name="kind" required>
+            {% for k in leave_kinds %}<option value="{{ k.value }}">{{ k.value }}</option>{% endfor %}
+          </select>
+        </div>
+        <div>
+          <label for="lv_p">To'lanadimi</label>
+          <select id="lv_p" name="is_paid">
+            <option value="on">Ha</option><option value="">Yo'q</option>
+          </select>
+        </div>
+        <div style="flex:0 0 auto"><button type="submit">Qo'shish</button></div>
+      </div>
+      <p class="hint">Bu kunlarga kechikish/kelmaganlik jarimasi qo'llanmaydi.</p>
+    </form>
+  </div>
+</div>
+
+{% endblock %}
