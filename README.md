@@ -157,6 +157,21 @@ Ochiladi:
 * **Admin panel** — `http://localhost:8000/admin` (login `.env` dan)
 * **Ofis ekrani** — `manage.py init` ko'rsatgan `/kiosk/<kalit>` havolasi
 
+## Ekranlarni shu zahoti ko'rish — `preview/` papkasi
+
+Hech narsa o'rnatmasdan, Python ham ishga tushirmasdan: `preview/index.html`
+faylini brauzerda ochasiz (ustiga ikki marta bosish yetarli).
+
+| Fayl | Nima ko'rsatadi |
+|---|---|
+| `preview/index.html` | Boshlash sahifasi, ikkalasiga havola |
+| `preview/ofis-ekrani.html` | Xodimlar ko'radigan ekran: soat va QR, har 15 sekundda yangilanadi |
+| `preview/admin-panel.html` | Kunlik jadval, oylik hisobi, oylik tabel |
+
+Bular oddiy HTML fayllar — internet, server va hisob kerak emas. QR kodlar
+haqiqiy, lekin tokenlari eskirgan, shuning uchun ular orqali **qayd qilib
+bo'lmaydi**: bu ko'rgazma, ishlaydigan tizim emas.
+
 ## Demo: bot va serversiz ko'rib chiqish
 
 Telegram bot tokeni hali bo'lmasa ham, tizimni to'liq ko'rish mumkin:
