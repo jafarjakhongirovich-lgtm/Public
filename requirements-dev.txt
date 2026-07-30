@@ -1,0 +1,6 @@
+-r requirements.txt
+
+pytest>=8.0
+# starlette TestClient bu paketni talab qiladi (fastapi.testclient uchun)
+httpx2>=0.1
+ruff>=0.8
