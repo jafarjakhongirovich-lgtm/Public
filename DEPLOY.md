@@ -19,10 +19,53 @@ Kod bilim shart emas — quyidagi buyruqlarni tartib bilan bajarsangiz yetarli.
 
 ---
 
-## 2. Server tayyorlash
+## 2. Qayerda ishga tushirish: VPS kerakmi?
+
+**Kerak emas.** Ikkita variant bor, ikkinchisi ko'pchilikka mos keladi.
+
+### Variant A — oddiy kompyuterda (VPS'siz, pulsiz)
+
+Tizim ofisdagi (yoki uydagi) oddiy kompyuterda ishlaydi. Sabab:
+
+* **bot Telegram'ga o'zi ulanadi** (long polling) — tashqi IP, domen, port
+  ochish, HTTPS sertifikat kerak emas, NAT/router ortidan ishlaydi;
+* **QR sahifasini faqat ofisdagi ekran ochadi** — `localhost` yoki lokal
+  tarmoq manzili yetarli, internetdan ochilishi shart emas.
+
+Yaraydi: ish kompyuteri, eski noutbuk, mini-PC, Raspberry Pi.
+
+```bash
+cp .env.example .env          # to'ldirasiz (3-bo'limga qarang)
+docker compose -f docker-compose.local.yml up -d
+docker compose -f docker-compose.local.yml run --rm web python manage.py init
+```
+
+Baza `./data/tabel.db` faylida bo'ladi — Postgres ham kerak emas.
+Docker o'rnatmoqchi bo'lmasangiz, Docker'siz ham bo'ladi (README'dagi
+«Tez boshlash» bo'limi).
+
+**Yagona shart:** kompyuter ish vaqtida yoniq turishi kerak. O'chgan bo'lsa
+o'sha paytdagi kelish-ketish yozilmaydi (keyin qo'lda kiritiladi).
+Nozik joyi shu — quvvat o'chsa yoki kompyuter uxlab qolsa, ma'lumot yo'qoladi.
+Shuning uchun uyquni o'chirib qo'ying:
+
+```bash
+# Ubuntu
+sudo systemctl mask sleep.target suspend.target hibernate.target
+# Windows: Sozlamalar -> Quvvat -> Uyqu -> Hech qachon
+```
+
+Va zaxira nusxani ko'chirib qo'yishni odat qiling — bu shunchaki bitta fayl:
+
+```bash
+cp data/tabel.db "backup-$(date +%F).db"
+```
+
+### Variant B — VPS (agar kompyuter doim yoniq turolmasa)
 
 Eng arzon VPS yetarli: **1 GB RAM, 1 CPU, Ubuntu 22.04/24.04**.
-Domen va HTTPS sertifikat **shart emas** — bot long polling rejimida ishlaydi.
+Domen va HTTPS bu holatda ham shart emas, lekin admin paneli internetdan
+ochiladigan bo'lsa — HTTPS qo'shish kerak (5-bo'limga qarang).
 
 ```bash
 # Docker o'rnatish
@@ -30,6 +73,8 @@ curl -fsSL https://get.docker.com | sh
 sudo usermod -aG docker $USER
 # chiqib, qaytadan kiring (guruh o'zgarishi kuchga kirishi uchun)
 ```
+
+Keyin 4-bo'limdagi `docker compose up -d` (Postgres bilan) ishlatiladi.
 
 ---
 
@@ -71,6 +116,15 @@ QR_TTL_SECONDS=25
 
 ## 4. Ishga tushirish
 
+**Variant A** (oddiy kompyuter, SQLite):
+
+```bash
+docker compose -f docker-compose.local.yml up -d --build
+docker compose -f docker-compose.local.yml run --rm web python manage.py init
+```
+
+**Variant B** (VPS, Postgres):
+
 ```bash
 docker compose up -d --build
 docker compose run --rm web python manage.py init
@@ -80,11 +134,17 @@ Oxirgi buyruq boshlang'ich ma'lumotni yaratadi va **kiosk havolasini** chiqaradi
 
 ```
 Ofis ekranida ochiladigan havolalar (maxfiy!):
+
   Kirish eshigi ekrani [Bosh ofis]
-    http://<server-manzili>/kiosk/aBcD1234...
+    Shu kompyuterda:      http://localhost:8000/kiosk/aBcD1234...
+    Lokal tarmoqdan:      http://192.168.1.50:8000/kiosk/aBcD1234...
 ```
 
-Shu havolani yozib qo'ying. Tekshirish:
+Havola ikki ko'rinishda chiqadi — ekran shu kompyuterda bo'lsa `localhost`,
+lokal tarmoqdagi boshqa qurilmada (TV, planshet) bo'lsa IP manzilli.
+Portni o'zgartirgan bo'lsangiz: `manage.py kiosks --port 9000`.
+
+Tekshirish:
 
 ```bash
 curl http://localhost:8000/healthz          # {"ok":true,...}
@@ -93,7 +153,11 @@ docker compose logs -f bot                  # "bot ishga tushdi: @..."
 
 ---
 
-## 5. Tashqariga chiqarish (nginx)
+## 5. Tashqariga chiqarish (nginx) — faqat Variant B uchun
+
+> Variant A (oddiy kompyuter) da bu bo'lim **kerak emas** — 6-bo'limga o'ting.
+> Tizim lokal tarmoqda ishlaydi, internetga chiqarilmaydi.
+
 
 `docker-compose.yml` web servisni faqat `127.0.0.1:8000` ga bog'laydi, ya'ni
 tashqaridan ochilmaydi. Oldiga nginx qo'yamiz:
@@ -201,7 +265,10 @@ docker compose logs -f web
 # Yangilanish
 git pull && docker compose up -d --build
 
-# Baza zaxirasi (kuniga bir marta cron'ga qo'ying)
+# Baza zaxirasi — Variant A (SQLite): shunchaki fayl nusxasi
+cp data/tabel.db "backup-$(date +%F).db"
+
+# Baza zaxirasi — Variant B (Postgres)
 docker compose exec -T db pg_dump -U tabel tabel | gzip > backup-$(date +%F).sql.gz
 
 # Eski QR tokenlarini tozalash (haftada bir marta yetarli)
@@ -211,10 +278,13 @@ docker compose run --rm web python manage.py purge-tokens --hours 48
 docker compose run --rm web python manage.py recompute --start 2026-07-01 --end 2026-07-31
 ```
 
-Zaxira nusxani cron'ga qo'shish:
+> Variant A da buyruqlarga `-f docker-compose.local.yml` qo'shiladi, masalan:
+> `docker compose -f docker-compose.local.yml logs -f bot`
+
+Zaxirani cron'ga qo'shish (Variant A):
 
 ```bash
-(crontab -l 2>/dev/null; echo "0 2 * * * cd $HOME/tabel && docker compose exec -T db pg_dump -U tabel tabel | gzip > backup-\$(date +\%F).sql.gz") | crontab -
+(crontab -l 2>/dev/null; echo "0 2 * * * cd $HOME/tabel && cp data/tabel.db backup-\$(date +\%F).db") | crontab -
 ```
 
 ---

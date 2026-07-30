@@ -111,7 +111,24 @@ Ochiladi:
 * **Admin panel** — `http://localhost:8000/admin` (login `.env` dan)
 * **Ofis ekrani** — `manage.py init` ko'rsatgan `/kiosk/<kalit>` havolasi
 
-Docker bilan ishga tushirish va VPS'ga o'rnatish — [`DEPLOY.md`](DEPLOY.md).
+## VPS kerak emas
+
+Tizim ofisdagi oddiy kompyuterda (eski noutbuk, mini-PC, Raspberry Pi) ishlaydi:
+
+* **bot Telegram'ga o'zi ulanadi** (long polling) — tashqi IP, domen, port
+  ochish, HTTPS sertifikat kerak emas, router/NAT ortidan ishlaydi;
+* **QR sahifasini faqat ofisdagi ekran ochadi** — `localhost` yoki lokal tarmoq
+  manzili yetarli.
+
+```bash
+docker compose -f docker-compose.local.yml up -d
+docker compose -f docker-compose.local.yml run --rm web python manage.py init
+```
+
+Baza — bitta SQLite fayli (`./data/tabel.db`), Postgres ham kerak emas.
+Yagona shart: kompyuter ish vaqtida yoniq turishi kerak.
+
+Tafsilotlar, VPS varianti va nosozliklar — [`DEPLOY.md`](DEPLOY.md).
 
 ---
 

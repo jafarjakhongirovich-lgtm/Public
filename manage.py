@@ -14,6 +14,7 @@ from __future__ import annotations
 
 import argparse
 import secrets
+import socket
 import sys
 from datetime import date, time
 
@@ -74,16 +75,46 @@ def cmd_init(args: argparse.Namespace) -> None:
         print("⚠️  BOT_USERNAME bo'sh — QR ichidagi havola ishlamaydi.")
 
 
+def lan_ip() -> str | None:
+    """Bu kompyuterning lokal tarmoqdagi manzili.
+
+    UDP soketni tashqariga "ulaymiz" — hech qanday paket yuborilmaydi, lekin
+    OS qaysi interfeys ishlatilishini aytadi. Bu bir nechta tarmoq kartasi
+    bo'lganda `gethostbyname` dan ishonchliroq.
+    """
+    probe = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)
+    try:
+        probe.connect(("8.8.8.8", 80))
+        return probe.getsockname()[0]
+    except OSError:
+        return None
+    finally:
+        probe.close()
+
+
 def cmd_kiosks(args: argparse.Namespace) -> None:
+    port = args.port
     with session_scope() as db:
         kiosks = db.scalars(select(Kiosk).order_by(Kiosk.id)).all()
         if not kiosks:
             print("Kiosk yo'q. `python manage.py init` ni ishlating.")
             return
+
+        address = lan_ip()
         print("\nOfis ekranida ochiladigan havolalar (maxfiy!):")
         for kiosk in kiosks:
-            print(f"  {kiosk.name} [{kiosk.location.name}]")
-            print(f"    http://<server-manzili>/kiosk/{kiosk.api_key}")
+            print(f"\n  {kiosk.name} [{kiosk.location.name}]")
+            print(f"    Shu kompyuterda:      http://localhost:{port}/kiosk/{kiosk.api_key}")
+            if address:
+                print(f"    Lokal tarmoqdan:      http://{address}:{port}/kiosk/{kiosk.api_key}")
+
+        print(
+            "\nEkran shu kompyuterda bo'lsa — birinchi havola. Boshqa qurilmada"
+            "\n(TV, planshet) bo'lsa — ikkinchisi, lekin server `--host 0.0.0.0`"
+            "\nbilan ishga tushirilgan bo'lishi kerak."
+        )
+        if address is None:
+            print("\n(Lokal IP aniqlanmadi — tarmoq ulanmagan bo'lishi mumkin.)")
 
 
 def cmd_add_employee(args: argparse.Namespace) -> None:
@@ -166,10 +197,13 @@ def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(description="Davomat tizimi boshqaruvi")
     sub = parser.add_subparsers(dest="command", required=True)
 
-    sub.add_parser("init", help="bazani yaratish va boshlang'ich ma'lumot").set_defaults(
-        func=cmd_init
-    )
-    sub.add_parser("kiosks", help="kiosk havolalarini ko'rsatish").set_defaults(func=cmd_kiosks)
+    init = sub.add_parser("init", help="bazani yaratish va boshlang'ich ma'lumot")
+    init.add_argument("--port", type=int, default=8000, help="web server porti (havola uchun)")
+    init.set_defaults(func=cmd_init)
+
+    kiosks = sub.add_parser("kiosks", help="kiosk havolalarini ko'rsatish")
+    kiosks.add_argument("--port", type=int, default=8000, help="web server porti (havola uchun)")
+    kiosks.set_defaults(func=cmd_kiosks)
     sub.add_parser("secret", help="yangi SECRET_KEY yasash").set_defaults(func=cmd_secret)
 
     add = sub.add_parser("add-employee", help="xodim qo'shish")
