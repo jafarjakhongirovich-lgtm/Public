@@ -23,6 +23,21 @@ Kod bilim shart emas — quyidagi buyruqlarni tartib bilan bajarsangiz yetarli.
 
 **Kerak emas.** Ikkita variant bor, ikkinchisi ko'pchilikka mos keladi.
 
+### Eng oson yo'l — `start.bat` / `start.sh`
+
+Python 3.11+ o'rnatilgan bo'lsa, quyidagi bo'limlarni o'qimasdan ham
+boshlash mumkin:
+
+* **Windows** — `start.bat` ustiga ikki marta bosing
+* **macOS / Linux** — `./start.sh`
+
+Skript `.venv`, kutubxonalar, `.env`, `SECRET_KEY` va bazani o'zi tayyorlaydi,
+demo ma'lumot qo'shadi va serverni ishga tushiradi. Docker ham kerak emas.
+Bot tokenini keyinroq `.env` ga yozib qo'yasiz.
+
+Docker bilan ishlashni xohlasangiz yoki VPS'ga o'rnatmoqchi bo'lsangiz —
+pastdagi variantlarni o'qing.
+
 ### Variant A — oddiy kompyuterda (VPS'siz, pulsiz)
 
 Tizim ofisdagi (yoki uydagi) oddiy kompyuterda ishlaydi. Sabab:

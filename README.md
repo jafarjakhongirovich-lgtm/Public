@@ -88,7 +88,53 @@ hisoblanadi. Jarima summalarini qo'shmoqchi bo'lsangiz
 
 ---
 
-## Tez boshlash (lokal)
+## Tez boshlash — bitta fayl
+
+Python 3.11+ o'rnatilgan bo'lsa, boshqa hech narsa sozlash kerak emas:
+
+| Tizim | Nima qilasiz |
+|---|---|
+| **Windows** | `start.bat` ustiga ikki marta bosasiz |
+| **macOS / Linux** | terminalda `./start.sh` |
+
+Skript o'zi: `.venv` yasaydi, kutubxonalarni o'rnatadi, `.env` yaratib yangi
+`SECRET_KEY` yozadi, bazani tayyorlaydi, demo ma'lumot qo'shadi va web
+serverni ishga tushiradi. Oxirida ochish kerak bo'lgan havolalarni chiqaradi.
+
+```
+──────────────────────────────────────────────────────────────
+  TAYYOR — quyidagi havolalarni brauzerda ochasiz
+──────────────────────────────────────────────────────────────
+
+  Admin panel:   http://localhost:8000/admin
+  Login/parol:   admin / admin
+
+  Ofis ekrani:   http://localhost:8000/kiosk/r2LTkyiEmcid...
+  ... tarmoqdan: http://192.168.1.50:8000/kiosk/r2LTkyiEmcid...
+  (bu havola maxfiy — xodimlarga tarqatmang)
+```
+
+Bayroqlar:
+
+```bash
+python start.py --no-demo      # demo ma'lumotsiz, bo'sh baza (haqiqiy ish)
+python start.py --port 9000    # boshqa port
+python start.py --setup-only   # faqat sozlash, serversiz
+```
+
+Ikkinchi va keyingi ishga tushirishlar tez bo'ladi — hamma narsa joyida
+bo'lsa skript ularni qaytadan qilmaydi.
+
+Bot hali ulanmagan bo'lsa panel ishlaydi, lekin QR ichidagi havola ishlamaydi.
+Tokenni [@BotFather](https://t.me/BotFather) dan olib `.env` ga yozasiz, so'ng
+alohida terminalda:
+
+```bash
+.venv/bin/python -m app.bot        # Windows: .venv\Scripts\python -m app.bot
+```
+
+<details>
+<summary>Qo'lda sozlash (skript ishlamasa)</summary>
 
 ```bash
 python3 -m venv .venv
@@ -96,7 +142,6 @@ python3 -m venv .venv
 
 cp .env.example .env
 .venv/bin/python manage.py secret        # SECRET_KEY yasab, .env ga yozing
-# .env ga BOT_TOKEN va BOT_USERNAME ni ham yozing
 
 .venv/bin/python manage.py init          # baza + jadval + ofis + kiosk
 .venv/bin/python manage.py add-employee --name "Aliyev Aziz" --salary 10000000
@@ -106,6 +151,7 @@ cp .env.example .env
 # 2-terminal: bot
 .venv/bin/python -m app.bot
 ```
+</details>
 
 Ochiladi:
 * **Admin panel** — `http://localhost:8000/admin` (login `.env` dan)
@@ -169,6 +215,8 @@ Tafsilotlar, VPS varianti va nosozliklar — [`DEPLOY.md`](DEPLOY.md).
 
 | Fayl | Vazifasi |
 |---|---|
+| `start.py` | Bir buyruq bilan sozlash va ishga tushirish |
+| `start.bat` / `start.sh` | Windows / macOS-Linux uchun ishga tushirgichlar |
 | `app/security.py` | QR token: yasash, imzolash, muddat tekshirish |
 | `app/attendance.py` | Skanerlashni qabul qilish, kunlik xulosani hisoblash |
 | `app/payroll.py` | Oylik hisob-kitobi va ushlanma qoidalari |
