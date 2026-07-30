@@ -11,6 +11,7 @@ from openpyxl.utils import get_column_letter
 from sqlalchemy import select
 from sqlalchemy.orm import Session
 
+from app import attendance as att_mod
 from app.models import Attendance, DayStatus, Employee
 from app.payroll import PayrollResult
 from app.timeutil import UZ_WEEKDAYS, fmt_time, iter_days, month_bounds
@@ -172,6 +173,32 @@ def payroll_workbook(results: list[PayrollResult], period: str) -> bytes:
     return buffer.getvalue()
 
 
+def _cell_for_day(
+    db: Session, employee: Employee, day: date, record: Attendance | None
+) -> tuple[str, DayStatus | None]:
+    """Tabelning bitta katagi: matn va bo'yash uchun holat.
+
+    Yozuv bo'lmasa ham to'g'ri belgi qo'yiladi: dam olish kunlari va ta'til
+    uchun `attendance` qatori umuman yaratilmaydi (skanerlash bo'lmagan),
+    shuning uchun holatni shu yerda hisoblaymiz — aks holda bayram va ta'til
+    tabelda bo'sh katak bo'lib qolardi.
+    """
+    if record is not None:
+        if record.status == DayStatus.HOLIDAY:
+            return "D", DayStatus.HOLIDAY
+        if record.status == DayStatus.LEAVE:
+            return "T", DayStatus.LEAVE
+        if record.check_in_at is None:
+            return "—", record.status
+        return fmt_time(record.check_in_at), record.status
+
+    if not employee.schedule.is_work_day(day) or att_mod.is_holiday(db, day) is not None:
+        return "D", DayStatus.HOLIDAY
+    if att_mod.leave_for(db, employee.id, day) is not None:
+        return "T", DayStatus.LEAVE
+    return "—", DayStatus.ABSENT
+
+
 def attendance_workbook(db: Session, period: str) -> bytes:
     """Oylik davomat tabeli: qatorlar — xodimlar, ustunlar — kunlar."""
     start, end = month_bounds(period)
@@ -206,24 +233,13 @@ def attendance_workbook(db: Session, period: str) -> bytes:
     for emp in employees:
         sheet.cell(row=row, column=1, value=emp.full_name).border = _BORDER
         for col, day in enumerate(days, start=2):
-            record = records.get((emp.id, day))
-            if record is None:
-                text = ""
-            elif record.status == DayStatus.HOLIDAY:
-                text = "D"
-            elif record.status == DayStatus.LEAVE:
-                text = "T"
-            elif record.check_in_at is None:
-                text = "—"
-            else:
-                text = fmt_time(record.check_in_at)
+            text, status = _cell_for_day(db, emp, day, records.get((emp.id, day)))
             cell = sheet.cell(row=row, column=col, value=text)
             cell.border = _BORDER
             cell.alignment = Alignment(horizontal="center")
-            if record is not None:
-                fill = _STATUS_FILLS.get(record.status)
-                if fill is not None:
-                    cell.fill = fill
+            fill = _STATUS_FILLS.get(status) if status is not None else None
+            if fill is not None:
+                cell.fill = fill
         row += 1
 
     _autosize(sheet, [28] + [7] * len(days))

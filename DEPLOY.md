@@ -237,8 +237,37 @@ docker compose run --rm web python manage.py add-employee \
 
 Keyin `/admin/settings` da:
 * **Ish jadvali** — boshlanish/tugash vaqti, tushlik, *grace* muhlati, ish kunlari
-* **Bayramlar** — 2026 yil bayram kunlarini kiritib qo'yasiz
 * **Ta'til/kasallik** — xodim ta'tilga chiqqanda shu yerdan belgilaysiz
+
+**Bayramlarni** esa bitta buyruq bilan qo'shish mumkin:
+
+```bash
+docker compose run --rm web python manage.py holidays --year 2026
+```
+
+Qat'iy sanalar o'zi qo'shiladi. Buyruq **qo'lda kiritish kerak bo'lganlarini
+ham aytadi**: Ramazon va Qurbon hayiti (aniq kunini O'zbekiston musulmonlari
+idorasi e'lon qiladi) va dam olish kuniga tushib qolgan bayramlarning
+ko'chirilgan kunlari.
+
+---
+
+## 7a. Avval demo bilan tanishib chiqish (ixtiyoriy)
+
+Bot tokeni yoki xodimlar ro'yxati hali tayyor bo'lmasa, tizimni namunaviy
+ma'lumot bilan ko'rib chiqing:
+
+```bash
+docker compose run --rm web python manage.py demo --period 2026-07
+```
+
+6 ta soxta xodim va bir oylik davomat yaratiladi (kechikadigan, erta
+ketadigan, kelmaydigan — har xil). `/admin`, `/admin/payroll` va Excel
+eksportini sinab ko'rasiz.
+
+> ⚠️ Bu **soxta ma'lumot**. Haqiqiy ishni boshlashdan oldin bazani tozalang:
+> Variant A da `data/tabel.db` faylini o'chirib, `manage.py init` ni qayta
+> ishlatish yetarli.
 
 ---
 

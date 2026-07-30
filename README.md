@@ -111,6 +111,39 @@ Ochiladi:
 * **Admin panel** — `http://localhost:8000/admin` (login `.env` dan)
 * **Ofis ekrani** — `manage.py init` ko'rsatgan `/kiosk/<kalit>` havolasi
 
+## Demo: bot va serversiz ko'rib chiqish
+
+Telegram bot tokeni hali bo'lmasa ham, tizimni to'liq ko'rish mumkin:
+
+```bash
+.venv/bin/python manage.py demo --period 2026-07
+.venv/bin/uvicorn app.main:app --port 8000
+```
+
+6 ta namunaviy xodim va bir oylik davomat yaratiladi — vaqtida keladigan,
+muntazam kechikadigan, erta ketadigan, tushlikda uzoq yuradigan va ba'zan
+kelmaydigan. Bayram va ta'til kunlari ham bor. Undan keyin `/admin` va
+`/admin/payroll` da hammasi jonli ko'rinadi, Excel eksporti ham ishlaydi.
+
+Muhimi: yozuvlar **haqiqiy kod** orqali qo'shiladi (`record_event`), ya'ni
+kechikish, tushlik oshig'i va oylik qo'lda "chizilmaydi" — demo ko'rsatgan
+raqamlar real ishlashiga to'liq mos.
+
+Bazada allaqachon xodim bo'lsa, demo ishlamaydi (`--force` bilan majburlash
+mumkin). Haqiqiy ishga o'tishda bazani tozalab oling.
+
+### Bayram taqvimi
+
+```bash
+.venv/bin/python manage.py holidays --year 2026
+```
+
+Qat'iy sanalar (Yangi yil, Navro'z, Mustaqillik kuni va boshqalar) o'zi
+qo'shiladi. **Ramazon va Qurbon hayiti qo'lda kiritiladi** — ularning aniq
+kunini O'zbekiston musulmonlari idorasi e'lon qiladi, shuning uchun tizim
+faqat taxminiy sanani eslatadi. Bayram dam olish kuniga tushsa, ko'chirilgan
+dam olish kunini ham qo'lda kiritasiz.
+
 ## VPS kerak emas
 
 Tizim ofisdagi oddiy kompyuterda (eski noutbuk, mini-PC, Raspberry Pi) ishlaydi:

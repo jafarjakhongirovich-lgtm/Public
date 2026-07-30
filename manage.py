@@ -2,6 +2,8 @@
 """Boshqaruv buyruqlari.
 
     python manage.py init          — bazani yaratadi va boshlang'ich ma'lumot qo'yadi
+    python manage.py demo          — namoyish uchun xodimlar va bir oylik davomat
+    python manage.py holidays      — O'zbekiston bayramlarini qo'shadi
     python manage.py kiosks        — kiosk havolalarini ko'rsatadi
     python manage.py add-employee  — xodim qo'shadi
     python manage.py recompute     — oraliqdagi davomatni qayta hisoblaydi
@@ -21,12 +23,13 @@ from datetime import date, time
 from sqlalchemy import select
 
 from app import attendance as att_mod
+from app import demo as demo_mod
+from app import holidays_uz, security
 from app import payroll as payroll_mod
-from app import security
 from app.config import settings
 from app.db import init_db, session_scope
-from app.models import Employee, Kiosk, Location, Schedule
-from app.timeutil import current_period, fmt_minutes, month_bounds
+from app.models import Employee, Holiday, Kiosk, Location, Schedule
+from app.timeutil import UZ_WEEKDAYS, current_period, fmt_minutes, month_bounds
 
 
 def cmd_init(args: argparse.Namespace) -> None:
@@ -117,6 +120,76 @@ def cmd_kiosks(args: argparse.Namespace) -> None:
             print("\n(Lokal IP aniqlanmadi — tarmoq ulanmagan bo'lishi mumkin.)")
 
 
+def cmd_demo(args: argparse.Namespace) -> None:
+    period = args.period or current_period()
+    init_db()
+    with session_scope() as db:
+        try:
+            result = demo_mod.seed_demo(db, period, force=args.force)
+        except demo_mod.DemoDataExists as exc:
+            sys.exit(f"\n{exc}")
+
+    print(f"\nDemo ma'lumot yaratildi — {result['period']}")
+    print(f"  xodimlar:        {result['employees']}")
+    print(f"  davomat yozuvi:  {result['events']}")
+    if result["holiday"]:
+        print(f"  bayram kuni:     {result['holiday']}")
+    if result["vacation_days"]:
+        print(f"  ta'til:          {result['vacation_days']} kun (bitta xodimga)")
+
+    address = lan_ip()
+    host = f"http://{address}:{args.port}" if address else f"http://localhost:{args.port}"
+    print("\nEndi web serverni ishga tushiring:")
+    print(f"  uvicorn app.main:app --host 0.0.0.0 --port {args.port}")
+    print("\nSo'ng ochib ko'ring:")
+    print(f"  Kunlik jadval:  {host}/admin")
+    print(f"  Oylik hisobi:   {host}/admin/payroll?period={result['period']}")
+    print(f"  Ofis ekrani:    {host}/kiosk/{result['kiosk_key']}")
+    print(f"\nAdmin logini: {settings.admin_username} / (.env dagi ADMIN_PASSWORD)")
+    print(
+        "\nDIQQAT: bu o'qitish uchun soxta ma'lumot. Haqiqiy ishga o'tishdan oldin"
+        "\nbazani tozalab oling (SQLite bo'lsa — tabel.db faylini o'chirish yetarli)."
+    )
+
+
+def cmd_holidays(args: argparse.Namespace) -> None:
+    year = args.year
+    added, existed = 0, 0
+    with session_scope() as db:
+        for day, name in holidays_uz.fixed_for_year(year):
+            if db.get(Holiday, day) is None:
+                db.add(Holiday(day=day, name=name))
+                added += 1
+            else:
+                existed += 1
+
+    print(f"\n{year} yil uchun qat'iy bayramlar: {added} ta qo'shildi", end="")
+    print(f", {existed} ta allaqachon bor edi." if existed else ".")
+
+    hints = holidays_uz.lunar_hints_for_year(year)
+    if hints:
+        print(
+            "\n⚠️  QO'LDA KIRITISH KERAK — oy taqvimiga bog'liq bayramlar."
+            "\n   Aniq sanani O'zbekiston musulmonlari idorasi e'lon qiladi,"
+            "\n   quyidagilar faqat taxminiy hisob:"
+        )
+        for day, name in hints:
+            print(f"     ~{day.strftime('%d.%m.%Y')}  {name}")
+    else:
+        print(f"\n(⚠️  {year} yil uchun hayit sanalari bazada yo'q — qo'lda kiritasiz.)")
+
+    collisions = holidays_uz.weekend_collisions(year)
+    if collisions:
+        print(
+            "\n⚠️  DAM OLISH KUNIGA TUSHGAN BAYRAMLAR — dam olish kuni boshqa kunga"
+            "\n   ko'chiriladi, ko'chirish sanasini hukumat qarori belgilaydi:"
+        )
+        for day, name in collisions:
+            print(f"     {day.strftime('%d.%m.%Y')} ({UZ_WEEKDAYS[day.isoweekday()]})  {name}")
+
+    print("\nQo'shish/tahrirlash: admin panel -> Sozlamalar -> Bayramlar")
+
+
 def cmd_add_employee(args: argparse.Namespace) -> None:
     with session_scope() as db:
         schedule_id = args.schedule
@@ -204,6 +277,18 @@ def build_parser() -> argparse.ArgumentParser:
     kiosks = sub.add_parser("kiosks", help="kiosk havolalarini ko'rsatish")
     kiosks.add_argument("--port", type=int, default=8000, help="web server porti (havola uchun)")
     kiosks.set_defaults(func=cmd_kiosks)
+
+    demo = sub.add_parser("demo", help="namoyish uchun soxta ma'lumot yaratish")
+    demo.add_argument("--period", help="YYYY-MM (standart: shu oy)")
+    demo.add_argument("--port", type=int, default=8000, help="web server porti (havola uchun)")
+    demo.add_argument(
+        "--force", action="store_true", help="bazada xodim bo'lsa ham qo'shish"
+    )
+    demo.set_defaults(func=cmd_demo)
+
+    holidays = sub.add_parser("holidays", help="O'zbekiston bayramlarini qo'shish")
+    holidays.add_argument("--year", type=int, default=date.today().year, help="yil, masalan 2026")
+    holidays.set_defaults(func=cmd_holidays)
     sub.add_parser("secret", help="yangi SECRET_KEY yasash").set_defaults(func=cmd_secret)
 
     add = sub.add_parser("add-employee", help="xodim qo'shish")
