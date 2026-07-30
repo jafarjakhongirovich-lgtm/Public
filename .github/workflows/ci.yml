@@ -1,13 +1,15 @@
 name: CI
 
 on:
+  # Faqat main uchun push — feature branchlar PR orqali tekshiriladi, aks holda
+  # har bir push CI'ni ikki marta ishga tushirardi (push + pull_request).
   push:
-    branches: ["**"]
+    branches: [main]
   pull_request:
 
 concurrency:
   # Bir branchga ketma-ket push qilinsa, oldingi ishlayotgan runni to'xtatadi.
-  group: ci-${{ github.ref }}
+  group: ci-${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
 jobs:
