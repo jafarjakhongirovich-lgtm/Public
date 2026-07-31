@@ -23,6 +23,7 @@ from aiogram.client.default import DefaultBotProperties
 from aiogram.enums import ParseMode
 from aiogram.filters import Command, CommandObject, CommandStart
 from aiogram.types import (
+    BotCommand,
     CallbackQuery,
     InlineKeyboardButton,
     InlineKeyboardMarkup,
@@ -410,6 +411,38 @@ async def handle_webhook_update(bot: Bot, payload: dict) -> None:
     """
     update = Update.model_validate(payload, context={"bot": bot})
     await dp.feed_update(bot, update)
+
+
+async def setup_bot_profile() -> dict:
+    """Botning menyusi va tavsifini Telegram'da sozlaydi.
+
+    Buni BotFather'da qo'lda ham qilish mumkin (`/setcommands`, `/setdescription`),
+    lekin u yerda har bir satrni qo'lda kiritish kerak. Shu buyruq bir marta
+    ishlatilsa yetarli.
+    """
+    bot = build_bot()
+    try:
+        me = await bot.get_me()
+
+        await bot.set_my_commands([
+            BotCommand(command="start", description="Boshlash va akkauntni ulash"),
+            BotCommand(command="holat", description="Bugungi davomatim"),
+            BotCommand(command="oylik", description="Shu oydagi hisobim"),
+        ])
+
+        # Bot bilan suhbat boshlanmagunga qadar ko'rinadigan matn
+        await bot.set_my_description(
+            "Ishga kelish va ketishni qayd qiluvchi bot.\n\n"
+            "Ofisdagi ekrandagi QR kodni telefon kamerasi bilan skanerlang — "
+            "vaqtingiz avtomatik yoziladi. Hech narsa yozish shart emas."
+        )
+        # Profil sahifasidagi qisqa matn
+        await bot.set_my_short_description(
+            "Ofisdagi QR orqali davomat qayd qilish"
+        )
+        return {"username": me.username or "", "name": me.full_name}
+    finally:
+        await bot.session.close()
 
 
 async def set_webhook(base_url: str | None = None) -> str:

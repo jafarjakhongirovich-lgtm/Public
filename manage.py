@@ -11,6 +11,10 @@
     python manage.py purge-tokens  — eski QR tokenlarini tozalaydi
     python manage.py secret        — yangi SECRET_KEY yasaydi
 
+Telegram bot:
+
+    python manage.py bot-setup     — menyu va tavsifni sozlaydi, tokenni tekshiradi
+
 Internetga chiqarish (deploy):
 
     python manage.py check-deploy  — sozlamalar yetarlimi, tekshiradi
@@ -298,6 +302,46 @@ def cmd_checkdeploy(args: argparse.Namespace) -> None:
     sys.exit(1)
 
 
+def cmd_bot_setup(args: argparse.Namespace) -> None:
+    """Bot menyusi va tavsifini sozlaydi + tokenni tekshiradi."""
+    import asyncio
+
+    from app import bot as bot_mod
+
+    if not settings.bot_token:
+        sys.exit(
+            "\nBOT_TOKEN sozlanmagan.\n"
+            "  1. Telegramda @BotFather ni oching\n"
+            "  2. /newbot yuboring, nom va username tanlang\n"
+            "  3. Berilgan tokenni .env fayliga yozing: BOT_TOKEN=..."
+        )
+
+    try:
+        info = asyncio.run(bot_mod.setup_bot_profile())
+    except Exception as exc:  # noqa: BLE001
+        sys.exit(
+            f"\nTelegram bilan bog'lanib bo'lmadi: {exc}\n"
+            "BOT_TOKEN to'g'ri ko'chirilganini va internet borligini tekshiring."
+        )
+
+    print(f"\n✓ Bot topildi: @{info['username']} ({info['name']})")
+    print("✓ Menyu sozlandi: /start, /holat, /oylik")
+    print("✓ Tavsif va qisqa matn yozildi")
+
+    if settings.bot_username != info["username"]:
+        print(
+            f"\n⚠️  .env dagi BOT_USERNAME ({settings.bot_username or 'bo‘sh'}) "
+            f"mos emas.\n   To'g'rilang: BOT_USERNAME={info['username']}"
+        )
+        print("   QR ichidagi havola shu qiymatdan yasaladi — mos bo'lmasa ishlamaydi.")
+    else:
+        print("✓ BOT_USERNAME .env da to'g'ri")
+
+    print("\nKeyingi qadam: xodimlarni botga ulash.")
+    print("  Xodim botga /start yozadi -> bot uning raqamini ko'rsatadi ->")
+    print("  o'sha raqamni admin panelda «Telegram user_id» maydoniga kiritasiz.")
+
+
 def cmd_webhook(args: argparse.Namespace) -> None:
     import asyncio
 
@@ -357,6 +401,10 @@ def build_parser() -> argparse.ArgumentParser:
     sub.add_parser(
         "check-deploy", help="internetga chiqarishdan oldingi tekshiruv"
     ).set_defaults(func=cmd_checkdeploy)
+
+    sub.add_parser(
+        "bot-setup", help="bot menyusi va tavsifini sozlash, tokenni tekshirish"
+    ).set_defaults(func=cmd_bot_setup)
 
     webhook = sub.add_parser("webhook", help="Telegram webhook boshqaruvi")
     webhook.add_argument("action", choices=["set", "delete", "info"])
