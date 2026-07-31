@@ -247,3 +247,89 @@ def test_local_mode_starts_with_simple_password(monkeypatch):
     monkeypatch.setattr(settings, "admin_password", "admin")
     with TestClient(app) as client:
         assert client.get("/healthz").status_code == 200
+
+
+# --------------------------------------------------------------------------- #
+# PostgreSQL turlari
+# --------------------------------------------------------------------------- #
+
+
+def test_telegram_user_id_is_64_bit():
+    """Telegram 2^31 dan katta ID beradi.
+
+    SQLite'da tur dinamik, shuning uchun bu xato faqat PostgreSQL'da chiqadi va
+    "yangi xodim qo'shilmayapti" ko'rinishida namoyon bo'ladi. Shu sababli
+    ustun turini to'g'ridan-to'g'ri tekshiramiz.
+    """
+    from sqlalchemy.dialects import postgresql
+
+    from app.models import Employee
+
+    column = Employee.__table__.c.telegram_user_id
+    ddl = column.type.compile(dialect=postgresql.dialect())
+    assert ddl == "BIGINT", f"telegram_user_id turi {ddl}, BIGINT bo'lishi kerak"
+
+
+def test_issued_at_epoch_is_64_bit():
+    """Token ichidagi vaqt uint32 (2106 yilgacha), signed INTEGER 2038 da tugaydi."""
+    from sqlalchemy.dialects import postgresql
+
+    from app.models import UsedToken
+
+    column = UsedToken.__table__.c.issued_at_epoch
+    assert column.type.compile(dialect=postgresql.dialect()) == "BIGINT"
+
+
+def test_large_telegram_id_round_trips(db, schedule):
+    """2^31 dan katta ID saqlanib, qaytib o'qilishi kerak."""
+    from app import attendance as att_mod
+    from app.models import Employee
+
+    big_id = 7_123_456_789  # haqiqiy Telegram ID'lari shu oraliqda
+    assert big_id > 2**31 - 1
+
+    db.add(
+        Employee(
+            full_name="Katta ID",
+            telegram_user_id=big_id,
+            monthly_salary=1_000_000,
+            schedule_id=schedule.id,
+        )
+    )
+    db.flush()
+
+    found = att_mod.employee_by_telegram(db, big_id)
+    assert found is not None
+    assert found.telegram_user_id == big_id
+
+
+def test_transaction_pooler_is_detected():
+    """Supabase serverless uchun 6543-portni tavsiya qiladi — o'sha rejimda
+    prepared statement'lar o'chirilishi kerak."""
+    from app.db import _engine_options, _is_transaction_pooler
+
+    pooler_urls = [
+        "postgresql+psycopg://u:p@aws-0-ap-northeast-1.pooler.supabase.com:6543/postgres",
+        "postgresql+psycopg://u:p@host:5432/db?pgbouncer=true",
+        "postgresql+psycopg://u:p@aws-0-eu.pooler.supabase.com:5432/postgres",
+    ]
+    for url in pooler_urls:
+        assert _is_transaction_pooler(url), url
+        assert _engine_options(url)["connect_args"]["prepare_threshold"] is None
+
+
+def test_direct_connection_keeps_normal_pooling():
+    from app.db import _engine_options, _is_transaction_pooler
+
+    url = "postgresql+psycopg://u:p@db.xtlegrdxgakegrfmezdj.supabase.co:5432/postgres"
+    assert not _is_transaction_pooler(url)
+    options = _engine_options(url)
+    assert options["pool_pre_ping"] is True
+    assert "connect_args" not in options
+
+
+def test_sqlite_options_unchanged():
+    from app.db import _engine_options
+
+    options = _engine_options("sqlite:///./tabel.db")
+    assert options["connect_args"]["check_same_thread"] is False

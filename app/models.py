@@ -17,6 +17,7 @@ import enum
 from datetime import date, datetime, time
 
 from sqlalchemy import (
+    BigInteger,
     Boolean,
     Date,
     DateTime,
@@ -148,8 +149,12 @@ class Employee(Base):
     full_name: Mapped[str] = mapped_column(String(200), nullable=False)
     position: Mapped[str] = mapped_column(String(120), default="", nullable=False)
     # Telegram user_id — QR skanerlaganda xodimni shu bo'yicha tanib olamiz.
+    # BigInteger MAJBURIY: Telegram 2^31 dan katta ID'lar beradi (2021 yildan
+    # beri), ular oddiy INTEGER ustuniga sig'maydi. SQLite'da tur dinamik
+    # bo'lgani uchun bu sezilmaydi, PostgreSQL esa "integer out of range" deb
+    # rad etadi — ya'ni yangi xodimni qo'shib bo'lmay qoladi.
     telegram_user_id: Mapped[int | None] = mapped_column(
-        Integer, unique=True, nullable=True, index=True
+        BigInteger, unique=True, nullable=True, index=True
     )
     telegram_username: Mapped[str] = mapped_column(String(64), default="", nullable=False)
     monthly_salary: Mapped[float] = mapped_column(Numeric(14, 2), default=0, nullable=False)
@@ -235,7 +240,9 @@ class UsedToken(Base):
 
     nonce: Mapped[str] = mapped_column(String(32), primary_key=True)
     location_id: Mapped[int] = mapped_column(Integer, nullable=False)
-    issued_at_epoch: Mapped[int] = mapped_column(Integer, nullable=False)
+    # Token formatida bu qiymat uint32 (2106 yilgacha), signed INTEGER esa
+    # faqat 2038 yilgacha yetadi — shuning uchun BigInteger.
+    issued_at_epoch: Mapped[int] = mapped_column(BigInteger, nullable=False)
     used_at: Mapped[datetime] = mapped_column(DateTime, nullable=False, index=True)
     employee_id: Mapped[int | None] = mapped_column(Integer, nullable=True)
 
