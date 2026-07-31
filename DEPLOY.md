@@ -333,6 +333,105 @@ Zaxirani cron'ga qo'shish (Variant A):
 
 ---
 
+## 10. Internetga chiqarish (Vercel)
+
+> **Avval o'ylab ko'ring.** Bu bo'lim admin panelni — ya'ni xodimlarning
+> oyliklarini — internetga chiqaradi. Agar ekran va kompyuter bitta ofisda
+> bo'lsa, Variant A (lokal) xavfsizroq va arzonroq. Vercel kerak bo'ladigan
+> holat: ofis bir nechta, yoki doim yoniq turadigan kompyuter yo'q.
+
+### Nimasi boshqacha
+
+Vercel *serverless*: kod faqat so'rov kelganda uyg'onadi. Bundan ikki natija:
+
+| | Lokal | Vercel |
+|---|---|---|
+| Baza | SQLite fayli | **PostgreSQL majburiy** — disk saqlanmaydi |
+| Bot | long polling | **webhook** — Telegram o'zi murojaat qiladi |
+| Jadval yaratish | `start.py` o'zi | bir marta qo'lda, lokal kompyuterdan |
+
+### 1-qadam. PostgreSQL
+
+Bepul variantlar: [Neon](https://neon.tech), [Supabase](https://supabase.com)
+yoki Vercel Postgres. Ulanish satrini oling va `postgresql://` ni
+`postgresql+psycopg://` ga almashtiring:
+
+```
+postgresql+psycopg://foydalanuvchi:parol@host/baza
+```
+
+### 2-qadam. Bazani tayyorlash (lokal kompyuterdan)
+
+Vercel'da `manage.py` ishlamaydi, shuning uchun jadvallar bir marta shu yerdan
+yaratiladi:
+
+```bash
+DATABASE_URL="postgresql+psycopg://..." python manage.py init
+DATABASE_URL="postgresql+psycopg://..." python manage.py holidays --year 2026
+```
+
+### 3-qadam. Kalitlar
+
+```bash
+python manage.py secret     # SECRET_KEY uchun
+python manage.py secret     # WEBHOOK_SECRET uchun (alohida!)
+```
+
+### 4-qadam. Vercel'da muhit o'zgaruvchilari
+
+| O'zgaruvchi | Qiymat |
+|---|---|
+| `SECRET_KEY` | yasagan kalitingiz |
+| `WEBHOOK_SECRET` | ikkinchi kalit |
+| `DATABASE_URL` | `postgresql+psycopg://...` |
+| `ADMIN_USERNAME` | masalan `boshqaruvchi` |
+| `ADMIN_PASSWORD` | **kuchli parol**, 12+ belgi |
+| `BOT_TOKEN` | BotFather bergani |
+| `BOT_USERNAME` | bot username, `@` siz |
+| `PUBLIC_BASE_URL` | `https://<loyiha>.vercel.app` |
+| `AUTO_CREATE_TABLES` | `false` |
+| `TIMEZONE` | `Asia/Tashkent` |
+
+Sozlamalar yetarlimi — chiqarishdan oldin tekshiring:
+
+```bash
+python manage.py check-deploy
+```
+
+Zaif sozlamalar bilan ilova **umuman ishga tushmaydi** (oyliklar ochiq qolib
+ketmasligi uchun ataylab shunday qilingan).
+
+### 5-qadam. Deploy va webhook
+
+Deploy tugagach Telegram'ni webhook'ga o'tkazasiz:
+
+```bash
+python manage.py webhook set --url https://<loyiha>.vercel.app
+python manage.py webhook info      # holatni ko'rish
+```
+
+Long polling'ga qaytish (lokalda ishlash uchun):
+
+```bash
+python manage.py webhook delete
+```
+
+> Bir vaqtning o'zida ikkalasi ishlamaydi: webhook o'rnatilgan bo'lsa Telegram
+> polling'ni rad etadi. `start.py` buni o'zi sezib, webhook'ni o'chiradi.
+
+### Xavfsizlik bo'yicha eslatma
+
+Admin panelni faqat login-parol himoyalaydi. Internetda bu **minimum**.
+Qo'shimcha qatlamlar:
+
+* Vercel'ning [Deployment Protection](https://vercel.com/docs/deployment-protection)
+  funksiyasi — butun saytni parol ostiga oladi (kiosk sahifasi ham yopiladi,
+  shuning uchun ofis ekrani uchun alohida yo'l kerak bo'ladi);
+* `ADMIN_USERNAME` ni `admin` dan boshqasiga o'zgartiring — soqov hujumlar
+  aynan `admin` ni sinaydi.
+
+---
+
 ## Nosozliklarni bartaraf etish
 
 | Muammo | Sabab va yechim |
@@ -344,3 +443,7 @@ Zaxirani cron'ga qo'shish (Variant A):
 | Kiosk sahifasi 403 qaytaryapti | Ofisning IP ro'yxati to'ldirilgan, lekin nginx `X-Forwarded-For` bermayapti (5-bo'limga qarang) |
 | Kiosk havolasi xodimlarga tarqab ketdi | `/admin/settings` → «Kalitni yangilash». Eski havola darhol ishlamay qoladi |
 | Oylik noto'g'ri chiqyapti | Ish jadvali, bayramlar va ta'tillar to'g'ri kiritilganini tekshiring, so'ng `manage.py recompute` |
+| Deploy'dan keyin ilova ishga tushmayapti | `python manage.py check-deploy` — zaif sozlama borligini aytadi. Bu ataylab: oyliklar himoyasiz qolmasligi kerak |
+| Bot deploy'dan keyin javob bermayapti | `python manage.py webhook info`. `url` bo'sh bo'lsa — `webhook set` qiling. `last_error` da sabab yoziladi |
+| Lokalda bot ishlamay qoldi (deploy'dan keyin) | Webhook o'rnatilgan bo'lsa Telegram polling'ni rad etadi: `python manage.py webhook delete` |
+| Vercel'da «no such table» | Jadvallar yaratilmagan: `DATABASE_URL="postgresql+psycopg://..." python manage.py init` |

@@ -27,6 +27,7 @@ from aiogram.types import (
     InlineKeyboardButton,
     InlineKeyboardMarkup,
     Message,
+    Update,
 )
 from sqlalchemy import select
 
@@ -394,6 +395,73 @@ def build_bot() -> Bot:
     )
 
 
+async def handle_webhook_update(bot: Bot, payload: dict) -> None:
+    """Telegram yuborgan bitta yangilanishni qayta ishlaydi.
+
+    NEGA WEBHOOK KERAK
+    ------------------
+    Long polling doimiy ishlab turadigan jarayonni talab qiladi. Bulutdagi
+    serverless muhitlarda (Vercel va shunga o'xshash) bunday jarayon yo'q — kod
+    faqat so'rov kelganda uyg'onadi. Shuning uchun u yerda Telegram O'ZI bizga
+    murojaat qilishi kerak, ya'ni webhook.
+
+    Lokal ishlashda long polling qulayroq bo'lib qoladi: domen ham, HTTPS ham
+    kerak emas. Ikkala rejim ham saqlanadi.
+    """
+    update = Update.model_validate(payload, context={"bot": bot})
+    await dp.feed_update(bot, update)
+
+
+async def set_webhook(base_url: str | None = None) -> str:
+    """Telegram'ga «yangilanishlarni shu manzilga yubor» deb aytadi."""
+    if not settings.webhook_secret:
+        raise RuntimeError("WEBHOOK_SECRET sozlanmagan")
+
+    url = (
+        f"{base_url.rstrip('/')}{settings.webhook_path}" if base_url else settings.webhook_url
+    )
+    if not url.startswith("https://"):
+        raise RuntimeError(f"Telegram faqat https qabul qiladi, berilgani: {url}")
+
+    bot = build_bot()
+    try:
+        await bot.set_webhook(
+            url=url,
+            # Telegram har so'rovda shu sarlavhani qo'shadi — biz uni tekshiramiz,
+            # shunda maxfiy yo'lni bilib qolgan begona ham so'rov yubora olmaydi.
+            secret_token=settings.webhook_secret,
+            allowed_updates=dp.resolve_used_update_types(),
+            drop_pending_updates=True,
+        )
+    finally:
+        await bot.session.close()
+    return url
+
+
+async def delete_webhook() -> None:
+    """Webhook'ni o'chiradi — long polling'ga qaytish uchun shart."""
+    bot = build_bot()
+    try:
+        await bot.delete_webhook(drop_pending_updates=False)
+    finally:
+        await bot.session.close()
+
+
+async def webhook_info() -> dict:
+    bot = build_bot()
+    try:
+        info = await bot.get_webhook_info()
+        me = await bot.get_me()
+        return {
+            "url": info.url or "",
+            "pending": info.pending_update_count,
+            "last_error": info.last_error_message or "",
+            "username": me.username or "",
+        }
+    finally:
+        await bot.session.close()
+
+
 async def run_polling() -> None:
     """Long polling — domen ham, HTTPS sertifikat ham kerak emas."""
     logging.basicConfig(
@@ -405,6 +473,15 @@ async def run_polling() -> None:
     if not settings.bot_username and me.username:
         # QR havolasi bot username'iga bog'liq — .env bo'sh bo'lsa o'zi to'ldiradi.
         settings.bot_username = me.username
+
+    # Webhook o'rnatilgan bo'lsa Telegram polling'ni RAD ETADI. Avval deploy
+    # qilib, keyin lokalda ishga tushirganda aynan shu holat yuzaga keladi,
+    # shuning uchun o'zimiz tozalab qo'yamiz.
+    info = await bot.get_webhook_info()
+    if info.url:
+        log.warning("webhook o'chirilmoqda (%s) — long polling uchun xalaqit beradi", info.url)
+        await bot.delete_webhook(drop_pending_updates=False)
+
     log.info("bot ishga tushdi: @%s (%s)", me.username, now_local().strftime("%Y-%m-%d %H:%M"))
 
     await dp.start_polling(bot, allowed_updates=dp.resolve_used_update_types())

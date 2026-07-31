@@ -1,0 +1,11 @@
+.venv
+tests
+preview
+*.db
+*.md
+.github
+docker-compose*.yml
+Dockerfile
+start.bat
+start.sh
+start.py

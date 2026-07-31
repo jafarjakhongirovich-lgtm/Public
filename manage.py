@@ -10,6 +10,13 @@
     python manage.py payroll       — oylik hisobini terminalga chiqaradi
     python manage.py purge-tokens  — eski QR tokenlarini tozalaydi
     python manage.py secret        — yangi SECRET_KEY yasaydi
+
+Internetga chiqarish (deploy):
+
+    python manage.py check-deploy  — sozlamalar yetarlimi, tekshiradi
+    python manage.py webhook set   — Telegram'ni webhook'ga o'tkazadi
+    python manage.py webhook info  — hozirgi holat
+    python manage.py webhook delete — long polling'ga qaytaradi
 """
 
 from __future__ import annotations
@@ -266,6 +273,63 @@ def cmd_secret(args: argparse.Namespace) -> None:
     print(secrets.token_urlsafe(32))
 
 
+def cmd_checkdeploy(args: argparse.Namespace) -> None:
+    """Internetga chiqarishdan oldingi tekshiruv."""
+    problems = settings.deployment_problems()
+    # f-string ichida apostrof bo'lmasligi uchun alohida o'zgaruvchilar
+    empty, yes, no = "(bo'sh)", "bor", "YO'Q"
+
+    print("\nDeploy uchun tayyorlik tekshiruvi\n" + "─" * 46)
+    print(f"  PUBLIC_BASE_URL : {settings.public_base_url or empty}")
+    # Parol ko'rinmasligi uchun faqat host qismini chiqaramiz
+    print(f"  DATABASE_URL    : {settings.database_url.split('@')[-1]}")
+    print(f"  BOT_USERNAME    : {settings.bot_username or empty}")
+    print(f"  BOT_TOKEN       : {yes if settings.bot_token else no}")
+    print(f"  WEBHOOK_SECRET  : {yes if settings.webhook_secret else no}")
+
+    if not problems:
+        print("\n  ✓ Hammasi joyida — chiqarish mumkin.\n")
+        return
+
+    print(f"\n  {len(problems)} ta muammo tuzatilishi kerak:\n")
+    for item in problems:
+        print(f"    ✗ {item}")
+    print("\n  Yangi kalit yasash:  python manage.py secret\n")
+    sys.exit(1)
+
+
+def cmd_webhook(args: argparse.Namespace) -> None:
+    import asyncio
+
+    from app import bot as bot_mod
+
+    if args.action == "set":
+        base = args.url or settings.public_base_url
+        if not base:
+            sys.exit("PUBLIC_BASE_URL sozlanmagan. --url bilan bering.")
+        try:
+            url = asyncio.run(bot_mod.set_webhook(base))
+        except RuntimeError as exc:
+            sys.exit(f"\n{exc}")
+        print(f"\n✓ Webhook o'rnatildi:\n  {url}")
+        print("\n  Endi bot shu manzilga xabar yuboradi. Long polling'ga qaytish:")
+        print("    python manage.py webhook delete")
+
+    elif args.action == "delete":
+        asyncio.run(bot_mod.delete_webhook())
+        print("\n✓ Webhook o'chirildi — endi long polling ishlaydi.")
+
+    else:  # info
+        info = asyncio.run(bot_mod.webhook_info())
+        not_set = "(o'rnatilmagan — long polling)"
+        print(f"\n  Bot        : @{info['username']}")
+        print(f"  Webhook    : {info['url'] or not_set}")
+        print(f"  Navbatda   : {info['pending']} ta yangilanish")
+        if info["last_error"]:
+            print(f"  Oxirgi xato: {info['last_error']}")
+        print()
+
+
 def build_parser() -> argparse.ArgumentParser:
     parser = argparse.ArgumentParser(description="Davomat tizimi boshqaruvi")
     sub = parser.add_subparsers(dest="command", required=True)
@@ -290,6 +354,14 @@ def build_parser() -> argparse.ArgumentParser:
     holidays.add_argument("--year", type=int, default=date.today().year, help="yil, masalan 2026")
     holidays.set_defaults(func=cmd_holidays)
     sub.add_parser("secret", help="yangi SECRET_KEY yasash").set_defaults(func=cmd_secret)
+    sub.add_parser(
+        "check-deploy", help="internetga chiqarishdan oldingi tekshiruv"
+    ).set_defaults(func=cmd_checkdeploy)
+
+    webhook = sub.add_parser("webhook", help="Telegram webhook boshqaruvi")
+    webhook.add_argument("action", choices=["set", "delete", "info"])
+    webhook.add_argument("--url", help="sayt manzili, masalan https://tabel.vercel.app")
+    webhook.set_defaults(func=cmd_webhook)
 
     add = sub.add_parser("add-employee", help="xodim qo'shish")
     add.add_argument("--name", required=True)

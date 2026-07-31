@@ -4,9 +4,11 @@ from __future__ import annotations
 
 import io
 import ipaddress
+import logging
 import secrets
 from contextlib import asynccontextmanager
 from datetime import date, datetime, time
+from pathlib import Path
 
 import qrcode
 from fastapi import Depends, FastAPI, Form, HTTPException, Request, status
@@ -46,17 +48,37 @@ from app.timeutil import (
     today_local,
 )
 
+log = logging.getLogger(__name__)
+
 
 @asynccontextmanager
 async def lifespan(_: FastAPI):
-    init_db()
+    if settings.auto_create_tables:
+        # Serverless muhitda buni o'chirib qo'yiladi: har bir "sovuq start" da
+        # jadval yaratishga urinish keraksiz, bir vaqtda bir nechtasi ishga
+        # tushsa esa poyga holati chiqadi. U yerda `manage.py init` bir marta.
+        init_db()
+
+    if settings.is_public:
+        # Internetga chiqarilgan bo'lsa — zaif sozlamalar bilan ishga tushmaymiz.
+        # Panelda oyliklar ko'rinadi, «keyin o'zgartiraman» bu yerda ishlamaydi.
+        problems = settings.deployment_problems()
+        if problems:
+            details = "\n  - ".join(problems)
+            raise RuntimeError(
+                "Internetga chiqarish uchun sozlamalar yetarli emas:\n  - " + details
+            )
+        log.info("public rejim: %s", settings.public_base_url)
+
     yield
 
 
 app = FastAPI(
     title="Davomat va oylik tizimi", docs_url=None, redoc_url=None, lifespan=lifespan
 )
-templates = Jinja2Templates(directory="app/templates")
+# Absolyut yo'l: bulutda ilova boshqa papkadan ishga tushishi mumkin va
+# nisbiy yo'l ("app/templates") shablonlarni topolmay qoladi.
+templates = Jinja2Templates(directory=str(Path(__file__).parent / "templates"))
 templates.env.filters["soat"] = fmt_time
 templates.env.filters["daqiqa"] = fmt_minutes
 basic_auth = HTTPBasic()
@@ -207,6 +229,61 @@ def root():
 @app.get("/healthz")
 def healthz():
     return {"ok": True, "time": now_local().isoformat()}
+
+
+# --------------------------------------------------------------------------- #
+# Telegram webhook
+# --------------------------------------------------------------------------- #
+
+
+@app.post("/telegram/{secret}")
+async def telegram_webhook(secret: str, request: Request):
+    """Telegram yuborgan yangilanishni qabul qiladi.
+
+    IKKI QAVAT HIMOYA — ikkalasi ham kerak:
+      1. yo'ldagi maxfiy qism (`/telegram/<secret>`) — tasodifiy so'rovlar
+         umuman bu yergacha yetib kelmaydi;
+      2. `X-Telegram-Bot-Api-Secret-Token` sarlavhasi — havola qandaydir yo'l
+         bilan oshkor bo'lsa ham, begona so'rov rad etiladi.
+
+    Ikkalasi ham `compare_digest` bilan solishtiriladi.
+    """
+    # Token yoki maxfiy kalit bo'lmasa endpoint umuman ishlamaydi — 404.
+    # BOT_TOKEN tekshiruvi shu yerda bo'lishi muhim: `build_bot()` uni topmasa
+    # istisno tashlaydi, u esa 500 ga aylanadi, Telegram esa 500 olgan xabarni
+    # to'xtovsiz qayta yuboraveradi.
+    if not settings.webhook_secret or not settings.bot_token:
+        raise HTTPException(status_code=404, detail="Webhook sozlanmagan")
+
+    header = request.headers.get("x-telegram-bot-api-secret-token", "")
+    path_ok = secrets.compare_digest(secret, settings.webhook_secret)
+    header_ok = secrets.compare_digest(header, settings.webhook_secret)
+    if not (path_ok and header_ok):
+        # Sabab aytilmaydi: yo'l xatomi yoki sarlavhami — bu ma'lumot beradi.
+        raise HTTPException(status_code=404, detail="Topilmadi")
+
+    try:
+        payload = await request.json()
+    except Exception as exc:  # noqa: BLE001
+        raise HTTPException(status_code=400, detail="JSON o'qilmadi") from exc
+
+    from app import bot as bot_mod
+
+    # Bot yasash ham `try` ichida: har qanday xato 500 ga aylanmasligi kerak.
+    bot = None
+    try:
+        bot = bot_mod.build_bot()
+        await bot_mod.handle_webhook_update(bot, payload)
+    except Exception:  # noqa: BLE001
+        # Telegram xato javob olsa, o'sha yangilanishni qayta-qayta yuboradi.
+        # Bitta buzuq xabar tufayli navbat tiqilib qolmasligi uchun 200 qaytaramiz,
+        # lekin logga to'liq yozamiz.
+        log.exception("webhook yangilanishini qayta ishlashda xato")
+    finally:
+        if bot is not None:
+            await bot.session.close()
+
+    return {"ok": True}
 
 
 @app.get("/admin", response_class=HTMLResponse)
