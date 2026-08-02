@@ -398,3 +398,15 @@ def test_kiosk_draws_qr_when_username_is_valid(client, kiosk, monkeypatch):
     assert '<img id="qr"' in page.text
     assert 'class="warn"' not in page.text
     assert client.get(f"/kiosk/{kiosk.api_key}/qr.svg").status_code == 200
+
+
+def test_kiosk_shows_bot_address(client, kiosk, monkeypatch):
+    """Ekranda bot manzili yozilib tursin — QR ichida nima borligini tekshirishning
+    eng oson yo'li shu, kodni skanerlab ko'rish shart emas."""
+    from app.config import settings as app_settings
+
+    monkeypatch.setattr(app_settings, "bot_username", "@DavomatTizimiBot")
+    page = client.get(f"/kiosk/{kiosk.api_key}")
+    assert "t.me/DavomatTizimiBot" in page.text
+    # Token ko'rsatilmaydi: har 15 sekundda o'zgaradi va foyda bermaydi
+    assert "?start=" not in page.text

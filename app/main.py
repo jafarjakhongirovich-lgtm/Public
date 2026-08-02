@@ -183,6 +183,7 @@ def kiosk_page(api_key: str, request: Request, db: Session = Depends(get_db)):
             # skanerlanadi-yu hech qayerga olib bormaydi.
             "bot_configured": bool(security.clean_username(settings.bot_username)),
             "bot_username_raw": settings.bot_username.strip(),
+            "bot_username_clean": security.clean_username(settings.bot_username),
         },
     )
 
