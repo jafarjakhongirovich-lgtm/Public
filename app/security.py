@@ -28,6 +28,7 @@ from __future__ import annotations
 import base64
 import hmac
 import os
+import re
 import secrets
 import struct
 import time as _time
@@ -147,11 +148,32 @@ def new_api_key() -> str:
     return secrets.token_urlsafe(24)
 
 
+# Telegram username qoidasi: 5-32 belgi, faqat harf/raqam/pastki chiziq.
+_USERNAME_RE = re.compile(r"^[A-Za-z0-9_]{5,32}$")
+
+
+def clean_username(raw: str) -> str:
+    """`BOT_USERNAME` ni tozalab, to'g'riligini tekshiradi. Xato bo'lsa "" qaytadi.
+
+    NEGA ALOHIDA TEKSHIRUV
+    ----------------------
+    Bu maydonga ko'pincha botning KO'RINADIGAN NOMI yoziladi ("Davomat tizimi")
+    — unda probel bor. Undan yasalgan havola `https://t.me/Davomat tizimi?...`
+    bo'lib chiqadi: telefon bunday QR ni skanerlaydi-yu, hech narsa qilmaydi,
+    chunki manzil yaroqsiz. Xatolik jimgina yuz beradi va sababini topish
+    qiyin — shuning uchun formatni oldindan tekshiramiz.
+    """
+    candidate = (raw or "").strip().lstrip("@")
+    return candidate if _USERNAME_RE.fullmatch(candidate) else ""
+
+
 def deep_link(token: str) -> str:
-    """QR ichiga yoziladigan havola: skanerlangan zahoti Telegram ochiladi."""
-    username = settings.bot_username.lstrip("@")
-    if not username:
-        # Bot hali sozlanmagan — kamida token ko'rinib turadi, kiosk sahifasi
-        # ogohlantirish chiqaradi.
-        return f"TOKEN:{token}"
-    return f"https://t.me/{username}?start={token}"
+    """QR ichiga yoziladigan havola: skanerlangan zahoti Telegram ochiladi.
+
+    Username yaroqsiz bo'lsa "" qaytaradi — chaqiruvchi QR chizmasligi va
+    o'rniga ogohlantirish ko'rsatishi kerak. Buzuq havolali QR chizishdan
+    ko'ra hech narsa chizmaslik yaxshiroq: birinchisi ishlayotgandek
+    ko'rinadi-yu, aslida ishlamaydi.
+    """
+    username = clean_username(settings.bot_username)
+    return f"https://t.me/{username}?start={token}" if username else ""

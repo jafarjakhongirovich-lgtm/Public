@@ -36,20 +36,32 @@
 
   {% if not bot_configured %}
     <div class="warn">
-      Bot sozlanmagan: <code>BOT_USERNAME</code> ni <code>.env</code> ga yozing,
-      aks holda QR ichidagi havola ishlamaydi.
+      {% if bot_username_raw %}
+        <b>BOT_USERNAME xato:</b> «{{ bot_username_raw }}»<br><br>
+        Bu yerga botning <b>ko'rinadigan nomi</b> emas, <b>username</b> yoziladi —
+        probelsiz, lotin harflarida, oxiri <code>bot</code> bilan tugaydi.
+        Masalan: <code>DavomatTizimiBot</code><br><br>
+        Aniq nomini bilish uchun: <code>python manage.py bot-setup</code>
+      {% else %}
+        <b>BOT_USERNAME to'ldirilmagan.</b><br><br>
+        <code>.env</code> fayliga botning username'ini yozing, so'ng
+        <code>start.bat</code> ni qaytadan ishga tushiring.
+      {% endif %}
+      <br><br>
+      QR ataylab ko'rsatilmayapti: buzuq havolali kod skanerlanadi-yu,
+      hech narsa qilmaydi — bunday xatoni topish qiyin bo'lardi.
     </div>
+  {% else %}
+    <div class="qr-frame" id="frame">
+      <img id="qr" alt="QR kod">
+    </div>
+    <div class="bar"><span id="bar"></span></div>
+
+    <p class="hint">
+      Telefon kamerasi bilan skanerlang — Telegram o'zi ochiladi va kelgan/ketgan
+      vaqtingiz yoziladi. QR har {{ refresh_seconds }} sekundda yangilanadi.
+    </p>
   {% endif %}
-
-  <div class="qr-frame" id="frame">
-    <img id="qr" alt="QR kod">
-  </div>
-  <div class="bar"><span id="bar"></span></div>
-
-  <p class="hint">
-    Telefon kamerasi bilan skanerlang — Telegram o'zi ochiladi va kelgan/ketgan
-    vaqtingiz yoziladi. QR har {{ refresh_seconds }} sekundda yangilanadi.
-  </p>
   <div class="offline" id="offline"></div>
 
 <script>
@@ -60,6 +72,10 @@
   var bar = document.getElementById("bar");
   var offline = document.getElementById("offline");
   var failures = 0;
+
+  // BOT_USERNAME xato bo'lsa QR umuman chizilmaydi — sahifada ogohlantirish
+  // turadi. Soat esa ishlashda davom etsin.
+  var qrEnabled = img !== null && bar !== null;
 
   function tick() {
     var el = document.getElementById("clock");
@@ -97,13 +113,15 @@
     bar.style.transform = "scaleX(0)";
   }
 
-  refresh();
-  setInterval(refresh, REFRESH_MS);
+  if (qrEnabled) {
+    refresh();
+    setInterval(refresh, REFRESH_MS);
 
-  // Ekran uzoq vaqt uxlab qolsa (planshet), qaytganda darhol yangilaymiz.
-  document.addEventListener("visibilitychange", function () {
-    if (!document.hidden) refresh();
-  });
+    // Ekran uzoq vaqt uxlab qolsa (planshet), qaytganda darhol yangilaymiz.
+    document.addEventListener("visibilitychange", function () {
+      if (!document.hidden) refresh();
+    });
+  }
 })();
 </script>
 </body>

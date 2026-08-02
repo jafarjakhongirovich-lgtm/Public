@@ -82,6 +82,13 @@ class Settings(BaseSettings):
             )
         if not self.webhook_secret or len(self.webhook_secret) < 16:
             problems.append("WEBHOOK_SECRET yo'q yoki qisqa — bot webhook'i himoyalanmaydi")
+
+        from app.security import clean_username
+
+        if not clean_username(self.bot_username):
+            problems.append(
+                "BOT_USERNAME yo'q yoki xato (probel/belgi bor) — QR ichidagi havola ishlamaydi"
+            )
         if not self.public_base_url.startswith("https://"):
             problems.append("PUBLIC_BASE_URL https:// bilan boshlanishi kerak")
         return problems

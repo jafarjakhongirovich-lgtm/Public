@@ -179,7 +179,10 @@ def kiosk_page(api_key: str, request: Request, db: Session = Depends(get_db)):
             "kiosk": kiosk,
             "api_key": api_key,
             "refresh_seconds": settings.qr_refresh_seconds,
-            "bot_configured": bool(settings.bot_username),
+            # QR faqat username to'g'ri bo'lsa chiziladi — aks holda kod
+            # skanerlanadi-yu hech qayerga olib bormaydi.
+            "bot_configured": bool(security.clean_username(settings.bot_username)),
+            "bot_username_raw": settings.bot_username.strip(),
         },
     )
 
@@ -193,6 +196,13 @@ def kiosk_qr(api_key: str, request: Request, db: Session = Depends(get_db)):
 
     token = security.issue_token(kiosk.location_id)
     payload = security.deep_link(token)
+    if not payload:
+        # Buzuq havolali QR chizmaymiz: u ishlayotgandek ko'rinadi, lekin
+        # skanerlaganda hech narsa bo'lmaydi va sababini topish qiyin.
+        raise HTTPException(
+            status_code=503,
+            detail="BOT_USERNAME sozlanmagan yoki xato — QR yasab bo'lmaydi",
+        )
 
     qr = qrcode.QRCode(
         version=None,

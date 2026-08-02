@@ -144,3 +144,59 @@ def test_location_id_range_enforced():
 def test_deep_link_shape():
     token = security.issue_token(1)
     assert security.deep_link(token) == f"https://t.me/TestTabelBot?start={token}"
+
+
+# --------------------------------------------------------------------------- #
+# BOT_USERNAME formati
+# --------------------------------------------------------------------------- #
+
+
+@pytest.mark.parametrize(
+    "raw",
+    [
+        "Davomat tizimi",   # ko'rinadigan nom — probel bor
+        "Davomat  tizimi",
+        "bot",              # juda qisqa
+        "abcd",             # 5 belgidan kam
+        "a" * 33,           # 32 dan uzun
+        "bot-name",         # chiziqcha ruxsat etilmagan
+        "bot.name",
+        "@",
+        "",
+        "   ",
+        "имя_бота",         # kirill
+    ],
+)
+def test_broken_usernames_are_rejected(raw):
+    """Bunday qiymatlardan yasalgan havola telefonda ochilmaydi, shuning uchun
+    ular umuman qabul qilinmasligi kerak."""
+    assert security.clean_username(raw) == ""
+
+
+@pytest.mark.parametrize(
+    ("raw", "expected"),
+    [
+        ("DavomatTizimiBot", "DavomatTizimiBot"),
+        ("@DavomatTizimiBot", "DavomatTizimiBot"),
+        ("  @DavomatTizimiBot  ", "DavomatTizimiBot"),
+        ("tabel_bot", "tabel_bot"),
+        ("Bot12", "Bot12"),
+    ],
+)
+def test_valid_usernames_are_normalised(raw, expected):
+    assert security.clean_username(raw) == expected
+
+
+def test_deep_link_is_empty_for_broken_username(monkeypatch):
+    """Buzuq havolali QR chizishdan ko'ra hech narsa chizmaslik yaxshiroq:
+    birinchisi ishlayotgandek ko'rinadi, lekin skanerlaganda hech narsa
+    bo'lmaydi."""
+    monkeypatch.setattr(security.settings, "bot_username", "Davomat tizimi")
+    assert security.deep_link("AAAA") == ""
+
+
+def test_deep_link_has_no_spaces(monkeypatch):
+    monkeypatch.setattr(security.settings, "bot_username", "@DavomatTizimiBot")
+    link = security.deep_link("AAAA")
+    assert link == "https://t.me/DavomatTizimiBot?start=AAAA"
+    assert " " not in link

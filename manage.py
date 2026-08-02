@@ -328,7 +328,7 @@ def cmd_bot_setup(args: argparse.Namespace) -> None:
     print("✓ Menyu sozlandi: /start, /holat, /oylik")
     print("✓ Tavsif va qisqa matn yozildi")
 
-    if settings.bot_username != info["username"]:
+    if security.clean_username(settings.bot_username) != info["username"]:
         print(
             f"\n⚠️  .env dagi BOT_USERNAME ({settings.bot_username or 'bo‘sh'}) "
             f"mos emas.\n   To'g'rilang: BOT_USERNAME={info['username']}"

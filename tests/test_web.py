@@ -350,3 +350,51 @@ def test_token_charset_is_url_safe_in_deep_link(client, kiosk, monkeypatch):
     client.get(f"/kiosk/{kiosk.api_key}/qr.svg")
     link = security.deep_link(captured[0])
     assert re.fullmatch(r"https://t\.me/[A-Za-z0-9_]+\?start=[A-Za-z0-9_-]+", link)
+
+
+# --------------------------------------------------------------------------- #
+# BOT_USERNAME xato bo'lganda kiosk
+# --------------------------------------------------------------------------- #
+
+
+def test_kiosk_refuses_to_draw_qr_with_broken_username(client, kiosk, monkeypatch):
+    """Probelli username'dan yasalgan havola telefonda ochilmaydi. Bunday QR
+    chizish — jimgina buziladigan xatolik, shuning uchun 503 qaytaramiz."""
+    from app.config import settings as app_settings
+
+    monkeypatch.setattr(app_settings, "bot_username", "Davomat tizimi")
+    assert client.get(f"/kiosk/{kiosk.api_key}/qr.svg").status_code == 503
+
+
+def test_kiosk_page_explains_broken_username(client, kiosk, monkeypatch):
+    """Ekranda aniq sabab yozilishi kerak, shunda xatoni topish oson bo'ladi."""
+    from app.config import settings as app_settings
+
+    monkeypatch.setattr(app_settings, "bot_username", "Davomat tizimi")
+    page = client.get(f"/kiosk/{kiosk.api_key}")
+    assert page.status_code == 200
+    assert 'class="warn"' in page.text
+    # Xato qiymatning o'zi ko'rsatiladi — nimani tuzatish kerakligi ravshan bo'lsin
+    assert "Davomat tizimi" in page.text
+    # QR elementi umuman chizilmaydi
+    assert '<img id="qr"' not in page.text
+
+
+def test_kiosk_page_explains_missing_username(client, kiosk, monkeypatch):
+    from app.config import settings as app_settings
+
+    monkeypatch.setattr(app_settings, "bot_username", "")
+    page = client.get(f"/kiosk/{kiosk.api_key}")
+    assert 'class="warn"' in page.text
+    assert "to'ldirilmagan" in page.text
+    assert '<img id="qr"' not in page.text
+
+
+def test_kiosk_draws_qr_when_username_is_valid(client, kiosk, monkeypatch):
+    from app.config import settings as app_settings
+
+    monkeypatch.setattr(app_settings, "bot_username", "DavomatTizimiBot")
+    page = client.get(f"/kiosk/{kiosk.api_key}")
+    assert '<img id="qr"' in page.text
+    assert 'class="warn"' not in page.text
+    assert client.get(f"/kiosk/{kiosk.api_key}/qr.svg").status_code == 200
