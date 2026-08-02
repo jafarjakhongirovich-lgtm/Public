@@ -502,7 +502,29 @@ async def run_polling() -> None:
     )
     bot = build_bot()
 
-    me = await bot.get_me()
+    # Birinchi murojaat — token va tarmoqni tekshirish. Bu yerda chiqadigan
+    # xatolarni "tushunarli tilga" o'giramiz: aks holda foydalanuvchi uzun
+    # traceback ko'radi va undan nima qilishni bilmaydi.
+    try:
+        me = await bot.get_me()
+    except Exception as exc:  # noqa: BLE001
+        text = str(exc)
+        if "Unauthorized" in text or "401" in text:
+            log.error(
+                "BOT_TOKEN qabul qilinmadi. .env dagi token to'liq ko'chirilganini "
+                "tekshiring (ikki nuqtagacha bo'lgan qism ham kerak). "
+                "Token yo'qolgan bo'lsa @BotFather da /revoke bilan yangisini oling."
+            )
+        else:
+            log.error(
+                "Telegram bilan bog'lanib bo'lmadi: %s\n"
+                "Internet ulanishini tekshiring. Ish joyida VPN yoki proxy bo'lsa, "
+                "u api.telegram.org ni bloklayotgan bo'lishi mumkin.",
+                text,
+            )
+        await bot.session.close()
+        raise SystemExit(1) from None
+
     if not settings.bot_username and me.username:
         # QR havolasi bot username'iga bog'liq — .env bo'sh bo'lsa o'zi to'ldiradi.
         settings.bot_username = me.username

@@ -28,6 +28,7 @@ import shutil
 import socket
 import subprocess
 import sys
+import time
 import venv
 from pathlib import Path
 
@@ -324,14 +325,59 @@ def main() -> None:
         say("--setup-only: server ishga tushirilmadi.")
         return
 
+    run_services(python, args.port)
+
+
+def run_services(python: Path, port: int) -> None:
+    """Web serverni va (token bo'lsa) botni birga ishga tushiradi.
+
+    Ikkalasi ALOHIDA jarayon: web server so'rovlarga javob beradi, bot esa
+    Telegram'ni doimiy so'rab turadi (long polling). Faqat web serverni ishga
+    tushirish yetarli emas — panel ochiladi, lekin bot jim turadi va xodimning
+    /start xabariga hech kim javob bermaydi.
+    """
+    processes: list[tuple[str, subprocess.Popen]] = []
+
+    web = subprocess.Popen(
+        [str(python), "-m", "uvicorn", "app.main:app",
+         "--host", "0.0.0.0", "--port", str(port)],
+        cwd=ROOT,
+    )
+    processes.append(("web server", web))
+
+    if _bot_configured():
+        bot = subprocess.Popen([str(python), "-m", "app.bot"], cwd=ROOT)
+        processes.append(("bot", bot))
+        say("  bot ham ishga tushdi (Telegram'ni kutmoqda)")
+    else:
+        say("  bot ishga tushirilmadi: .env da BOT_TOKEN yo'q")
+
     try:
-        subprocess.run(
-            [str(python), "-m", "uvicorn", "app.main:app",
-             "--host", "0.0.0.0", "--port", str(args.port)],
-            cwd=ROOT,
-        )
-    except KeyboardInterrupt:
-        say("\nTo'xtatildi.")
+        # Qaysi biri birinchi to'xtasa — ikkinchisini ham to'xtatamiz, aks holda
+        # bot jim o'lib, panel esa ishlayotgandek ko'rinib turadi.
+        while True:
+            for name, process in processes:
+                code = process.poll()
+                if code is not None:
+                    say(f"\n{name} to'xtadi (kod {code}).")
+                    raise _ServiceStopped
+            time.sleep(1)
+    except (KeyboardInterrupt, _ServiceStopped):
+        pass
+    finally:
+        for _name, process in processes:
+            if process.poll() is None:
+                process.terminate()
+        for _name, process in processes:
+            try:
+                process.wait(timeout=10)
+            except subprocess.TimeoutExpired:
+                process.kill()
+        say("To'xtatildi.")
+
+
+class _ServiceStopped(Exception):
+    """Ichki signal: jarayonlardan biri o'zi to'xtadi."""
 
 
 if __name__ == "__main__":
