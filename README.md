@@ -126,12 +126,28 @@ Ikkinchi va keyingi ishga tushirishlar tez bo'ladi — hamma narsa joyida
 bo'lsa skript ularni qaytadan qilmaydi.
 
 Bot hali ulanmagan bo'lsa panel ishlaydi, lekin QR ichidagi havola ishlamaydi.
-Tokenni [@BotFather](https://t.me/BotFather) dan olib `.env` ga yozasiz, so'ng
-alohida terminalda:
+Tokenni [@BotFather](https://t.me/BotFather) dan olib `.env` ga yozasiz — botni
+ishga tushirish shart emas, `start.py` uni web server bilan birga o'zi
+ko'taradi.
+
+### QR skanerlanmayapti (telefon hech narsa qilmaydi)
+
+Sabab deyarli har doim bitta: QR ichidagi havola noto'g'ri. Uni ko'rish uchun:
 
 ```bash
-.venv/bin/python -m app.bot        # Windows: .venv\Scripts\python -m app.bot
+python manage.py qr-check          # Windows: tekshir.bat ga ikki marta bosing
 ```
+
+Bu buyruq QR ichiga tushadigan aniq havolani chiqaradi va `BOT_TOKEN` bo'lsa
+uni Telegramdagi haqiqiy username bilan solishtiradi.
+
+Eng ko'p uchraydigan ikki xato:
+
+* `BOT_USERNAME` ga botning **ko'rinadigan nomi** yozilgan (`Davomat tizimi`).
+  U yerga `@` dan keyingi username yoziladi — probelsiz: `DavomatTizimiBot`.
+* `.env` to'g'rilangan, lekin server qaytadan ishga tushirilmagan. `.env`
+  faqat ishga tushganda o'qiladi, shuning uchun oynani yopib, `start.bat` ni
+  yana bosish kerak.
 
 <details>
 <summary>Qo'lda sozlash (skript ishlamasa)</summary>
@@ -232,6 +248,7 @@ Tafsilotlar, VPS varianti va nosozliklar — [`DEPLOY.md`](DEPLOY.md).
 |---|---|
 | `start.py` | Bir buyruq bilan sozlash va ishga tushirish |
 | `start.bat` / `start.sh` | Windows / macOS-Linux uchun ishga tushirgichlar |
+| `tekshir.bat` / `tekshir.sh` | QR ichidagi havolani tekshirish (skanerlanmasa) |
 | `app/security.py` | QR token: yasash, imzolash, muddat tekshirish |
 | `app/attendance.py` | Skanerlashni qabul qilish, kunlik xulosani hisoblash |
 | `app/payroll.py` | Oylik hisob-kitobi va ushlanma qoidalari |

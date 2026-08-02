@@ -242,6 +242,34 @@ def kiosk_key(python: Path) -> str | None:
     return key or None
 
 
+def qr_link(python: Path) -> str:
+    """QR ichiga tushadigan havolani qaytaradi (BOT_USERNAME buzuq bo'lsa — bo'sh).
+
+    Buni har ishga tushganda ekranga chiqaramiz. Sababi: `.env` faqat server
+    ko'tarilganda o'qiladi, shuning uchun «tuzatdim, lekin ishlamayapti» holati
+    juda oson yuzaga keladi — odam faylni to'g'rilaydi-yu, serverni qayta
+    ishga tushirmaydi. Ekrandagi havola esa har doim HOZIRGI holatni ko'rsatadi.
+    """
+    code = (
+        "from app import security\n"
+        "print(security.deep_link(security.issue_token(1)))\n"
+    )
+    result = subprocess.run(
+        [str(python), "-c", code], cwd=ROOT, capture_output=True, text=True
+    )
+    lines = [line for line in result.stdout.strip().splitlines() if line.startswith("https://")]
+    return lines[-1] if lines else ""
+
+
+def bot_username() -> str:
+    env = ROOT / ".env"
+    if env.exists():
+        for line in env.read_text(encoding="utf-8").splitlines():
+            if line.startswith("BOT_USERNAME="):
+                return line.split("=", 1)[1].strip()
+    return ""
+
+
 def admin_password() -> str:
     env = ROOT / ".env"
     if env.exists():
@@ -275,6 +303,18 @@ def print_links(python: Path, port: int, demo_added: bool) -> None:
         say("\n  Eslatma: .env da BOT_TOKEN va BOT_USERNAME bo'sh, shuning uchun")
         say("  QR ichidagi havola hali ishlamaydi. Panelni ko'rish uchun bu xalal")
         say("  bermaydi. Bot tokenini @BotFather dan olasiz.")
+    else:
+        link = qr_link(python)
+        if link:
+            say(f"\n  QR ichidagi havola: {link.split('?')[0]}")
+            say("  (shu manzilni brauzerda ochib ko'ring — bot sahifasi chiqishi kerak)")
+        else:
+            raw = bot_username() or "bo'sh"
+            say("\n  [!] BOT_USERNAME xato — QR KO'RSATILMAYDI.")
+            say(f"      Hozirgi qiymat: «{raw}»")
+            say("      U yerga botning ko'rinadigan nomi emas, @ dan keyingi")
+            say("      username yoziladi: probelsiz, masalan DavomatTizimiBot.")
+            say("      To'g'rilagach shu oynani yopib, qaytadan ishga tushiring.")
 
     say("\n  To'xtatish uchun: Ctrl+C")
     say("─" * 62 + "\n")
