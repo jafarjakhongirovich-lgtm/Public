@@ -38,7 +38,7 @@ from app import attendance as att_mod
 from app import demo as demo_mod
 from app import holidays_uz, security
 from app import payroll as payroll_mod
-from app.config import settings
+from app.config import ENV_FILE, settings
 from app.db import init_db, session_scope
 from app.models import Employee, Holiday, Kiosk, Location, Schedule
 from app.timeutil import UZ_WEEKDAYS, current_period, fmt_minutes, month_bounds
@@ -315,12 +315,17 @@ def cmd_qr_check(args: argparse.Namespace) -> None:
 
     print("\nQR ichidagi havola tekshiruvi")
     print("─" * 58)
+    print(f"  O'qilgan fayl          : {ENV_FILE}")
+    if not ENV_FILE.exists():
+        print("                           ⚠️  BUNDAY FAYL YO'Q")
     print(f"  .env dagi BOT_USERNAME : {settings.bot_username.strip() or '(bo‘sh)'}")
 
     if not clean:
         print("  Format                 : ✗ XATO")
         print("\n  Username'da probel yoki noto'g'ri belgi bor, yoki u umuman")
         print("  to'ldirilmagan. Bunday holatda QR yasalmaydi.")
+        print("\n  Yuqorida ko'rsatilgan AYNAN SHU faylni tahrirlang — papka")
+        print("  nusxalangan bo'lsa, boshqa .env ni tahrirlash oson.")
         print("\n  Username — bu botning @ bilan boshlanadigan manzili.")
         print("  Telegramda botingizni oching: nom ostida mayda shriftda")
         print("  @... yozilgan. O'shani @ siz ko'chiring.")

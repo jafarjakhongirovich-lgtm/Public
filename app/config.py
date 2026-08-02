@@ -3,13 +3,20 @@
 from __future__ import annotations
 
 from functools import lru_cache
+from pathlib import Path
 from zoneinfo import ZoneInfo
 
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
+# `.env` loyiha ildizida turadi. Nisbiy yo'l ("./.env") ishlagan katalogga
+# bog'liq bo'lardi: serverni boshqa katalogdan ishga tushirsa, fayl umuman
+# topilmaydi va hamma sozlama jimgina standart qiymatga qaytadi — ya'ni QR
+# ishlamay qoladi, sababi esa hech qayerda ko'rinmaydi.
+ENV_FILE = Path(__file__).resolve().parent.parent / ".env"
+
 
 class Settings(BaseSettings):
-    model_config = SettingsConfigDict(env_file=".env", extra="ignore")
+    model_config = SettingsConfigDict(env_file=ENV_FILE, extra="ignore")
 
     secret_key: str = "dev-insecure-secret-key"
     database_url: str = "sqlite:///./tabel.db"

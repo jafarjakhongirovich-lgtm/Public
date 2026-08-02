@@ -390,6 +390,17 @@ def test_kiosk_page_explains_missing_username(client, kiosk, monkeypatch):
     assert '<img id="qr"' not in page.text
 
 
+def test_kiosk_names_the_env_file_it_read(client, kiosk, monkeypatch):
+    """Papka nusxalanganda odam bir `.env` ni tahrirlaydi, server esa boshqasini
+    o'qiydi. Yo'lni ekranga chiqarmasa, buni topish deyarli imkonsiz."""
+    from app.config import ENV_FILE
+    from app.config import settings as app_settings
+
+    monkeypatch.setattr(app_settings, "bot_username", "")
+    page = client.get(f"/kiosk/{kiosk.api_key}")
+    assert str(ENV_FILE) in page.text
+
+
 def test_kiosk_draws_qr_when_username_is_valid(client, kiosk, monkeypatch):
     from app.config import settings as app_settings
 

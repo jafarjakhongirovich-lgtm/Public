@@ -70,3 +70,26 @@ def test_qr_check_fails_loudly_on_a_broken_username(capsys, monkeypatch):
     assert "Davomat tizimi" in out
     assert "XATO" in out
     assert "https://t.me/" not in out  # buzuq havola ko'rsatilmaydi
+
+
+def test_env_file_is_anchored_to_the_project_root():
+    """`.env` ni nisbiy yo'l bilan izlash ishlagan katalogga bog'liq bo'lardi:
+    serverni boshqa katalogdan ishga tushirsa, fayl topilmay hamma sozlama
+    jimgina standart qiymatga qaytadi."""
+    from pathlib import Path
+
+    from app.config import ENV_FILE
+
+    assert ENV_FILE.is_absolute()
+    assert Path(manage.__file__).resolve().parent / ".env" == ENV_FILE
+
+
+def test_qr_check_names_the_env_file(capsys, monkeypatch):
+    from app.config import ENV_FILE
+
+    monkeypatch.setattr(manage.settings, "bot_username", "TestTabelBot")
+    monkeypatch.setattr(manage.settings, "bot_token", "")
+
+    manage.cmd_qr_check(argparse.Namespace())
+
+    assert str(ENV_FILE) in capsys.readouterr().out

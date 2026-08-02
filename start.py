@@ -300,9 +300,11 @@ def print_links(python: Path, port: int, demo_added: bool) -> None:
         say("  Haqiqiy ishni boshlashda bazani o'chirib, qaytadan ishga tushiring.")
 
     if not _bot_configured():
-        say("\n  Eslatma: .env da BOT_TOKEN va BOT_USERNAME bo'sh, shuning uchun")
-        say("  QR ichidagi havola hali ishlamaydi. Panelni ko'rish uchun bu xalal")
-        say("  bermaydi. Bot tokenini @BotFather dan olasiz.")
+        say("\n  Eslatma: BOT_TOKEN va BOT_USERNAME bo'sh, shuning uchun QR ichidagi")
+        say("  havola hali ishlamaydi. Panelni ko'rish uchun bu xalal bermaydi.")
+        # Papka nusxalanganda yoki arxiv ichma-ich ochilganda odam bir `.env`
+        # ni to'ldiradi, server esa boshqasini o'qiydi. To'liq yo'lni yozamiz.
+        say(f"  To'ldiriladigan fayl: {ROOT / '.env'}")
     else:
         link = qr_link(python)
         if link:

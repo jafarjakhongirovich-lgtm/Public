@@ -23,7 +23,7 @@ from app import attendance as att_mod
 from app import excel as excel_mod
 from app import payroll as payroll_mod
 from app import security
-from app.config import settings
+from app.config import ENV_FILE, settings
 from app.db import get_db, init_db
 from app.models import (
     Attendance,
@@ -184,6 +184,11 @@ def kiosk_page(api_key: str, request: Request, db: Session = Depends(get_db)):
             "bot_configured": bool(security.clean_username(settings.bot_username)),
             "bot_username_raw": settings.bot_username.strip(),
             "bot_username_clean": security.clean_username(settings.bot_username),
+            # Qaysi `.env` o'qilgani ko'rinib tursin. Papka nusxalanganda yoki
+            # arxiv ichma-ich ochilganda odam bir faylni tahrirlab, server
+            # boshqasini o'qiyotgan bo'ladi — yo'lni ko'rsatmasa bilib bo'lmaydi.
+            "env_file": str(ENV_FILE),
+            "env_file_exists": ENV_FILE.exists(),
         },
     )
 
