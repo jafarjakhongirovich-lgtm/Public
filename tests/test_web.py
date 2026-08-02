@@ -386,8 +386,9 @@ def test_kiosk_page_explains_missing_username(client, kiosk, monkeypatch):
     monkeypatch.setattr(app_settings, "bot_username", "")
     page = client.get(f"/kiosk/{kiosk.api_key}")
     assert 'class="warn"' in page.text
-    assert "to'ldirilmagan" in page.text
     assert '<img id="qr"' not in page.text
+    # Ekran nima qilish kerakligini aytadi, sababni ta'riflab qo'ymaydi
+    assert "/admin/setup" in page.text
 
 
 def test_kiosk_names_the_env_file_it_read(client, kiosk, monkeypatch):

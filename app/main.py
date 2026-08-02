@@ -9,6 +9,7 @@ import secrets
 from contextlib import asynccontextmanager
 from datetime import date, datetime, time
 from pathlib import Path
+from urllib.parse import quote
 
 import qrcode
 from fastapi import Depends, FastAPI, Form, HTTPException, Request, status
@@ -519,6 +520,71 @@ def admin_settings(
             "qr_refresh": settings.qr_refresh_seconds,
         },
     )
+
+
+@app.get("/admin/setup", response_class=HTMLResponse)
+def admin_setup(
+    request: Request,
+    saved: str = "",
+    error: str = "",
+    _: str = Depends(require_admin),
+):
+    """Botni brauzerdan ulash — `.env` ni qo'lda tahrirlamasdan.
+
+    NEGA BU SAHIFA BOR
+    ------------------
+    `.env` ni qo'lda to'ldirish amalda eng ko'p xato beradigan qadam bo'lib
+    chiqdi: username o'rniga botning ko'rinadigan nomi yoziladi, papka
+    nusxalanganda boshqa fayl tahrirlanadi, tahrirlangandan keyin server
+    qayta ishga tushirilmaydi. Bu yerda bittagina maydon bor — token, —
+    qolganini tizim o'zi qiladi: username'ni Telegram'ning o'zidan so'raydi,
+    shuning uchun u xato bo'lishi mumkin emas.
+    """
+    return templates.TemplateResponse(
+        request,
+        "admin_setup.html",
+        {
+            "token_set": bool(settings.bot_token),
+            "username": security.clean_username(settings.bot_username),
+            "env_file": str(ENV_FILE),
+            # Bulutda fayl tizimi odatda faqat o'qish uchun — u yerda sozlama
+            # hosting panelidagi environment variables orqali kiritiladi.
+            "is_public": settings.is_public,
+            "saved": saved,
+            "error": error,
+        },
+    )
+
+
+@app.post("/admin/setup")
+async def admin_setup_save(bot_token: str = Form(""), _: str = Depends(require_admin)):
+    from app import bot as bot_mod
+    from app.envfile import EnvWriteError, update_env
+
+    token = bot_token.strip()
+    if not token:
+        return RedirectResponse("/admin/setup?error=token-bosh", status_code=303)
+
+    # Tokenni Telegram'ning o'zida tekshiramiz va username'ni SHUNDAN olamiz.
+    # Foydalanuvchidan username so'ramaymiz — aynan o'sha maydon eng ko'p
+    # xato qilingan joy edi.
+    try:
+        me = await bot_mod.identify(token)
+    except bot_mod.BotTokenError as exc:
+        return RedirectResponse(f"/admin/setup?error={quote(str(exc))}", status_code=303)
+
+    try:
+        update_env(ENV_FILE, {"BOT_TOKEN": token, "BOT_USERNAME": me["username"]})
+    except EnvWriteError as exc:
+        return RedirectResponse(f"/admin/setup?error={quote(str(exc))}", status_code=303)
+
+    # Ishlab turgan jarayonga darhol qo'llaymiz: `.env` faqat ishga tushganda
+    # o'qiladi, shuning uchun bunisiz QR yangi qiymatni faqat qayta ishga
+    # tushirgandan keyin ko'rardi.
+    settings.bot_token = token
+    settings.bot_username = me["username"]
+
+    return RedirectResponse(f"/admin/setup?saved={quote(me['username'])}", status_code=303)
 
 
 @app.post("/admin/schedules")

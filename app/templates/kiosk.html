@@ -45,23 +45,20 @@
 
   {% if not bot_configured %}
     <div class="warn">
+      <b>Bot hali ulanmagan — QR shuning uchun yo'q.</b>
+      <br><br>
+      Tuzatish uchun shu kompyuterda <code class="path">/admin/setup</code>
+      sahifasini oching va BotFather bergan tokenni qo'ying. Boshqa hech narsa
+      kerak emas — bot nomini tizim o'zi aniqlaydi va saqlaydi.
+      <br><br>
       {% if bot_username_raw %}
-        <b>BOT_USERNAME xato:</b> «{{ bot_username_raw }}»<br><br>
-        Bu yerga botning <b>ko'rinadigan nomi</b> emas, <b>username</b> yoziladi —
-        probelsiz, lotin harflarida, oxiri <code>bot</code> bilan tugaydi.
-        Masalan: <code>DavomatTizimiBot</code><br><br>
-        Aniq nomini bilish uchun: <code>python manage.py bot-setup</code>
+        (Hozirgi <code>BOT_USERNAME</code> qiymati — «{{ bot_username_raw }}» —
+        username emas: unda probel yoki noto'g'ri belgi bor.)
+      {% elif env_file_exists %}
+        (Sozlamalar fayli: <code class="path">{{ env_file }}</code> — unda
+        <code>BOT_USERNAME</code> bo'sh.)
       {% else %}
-        <b>BOT_USERNAME to'ldirilmagan.</b><br><br>
-        {% if env_file_exists %}
-          Server mana bu faylni o'qidi va unda <code>BOT_USERNAME</code> bo'sh edi:
-        {% else %}
-          Server bu faylni <b>umuman topmadi</b> — papka nusxalanganda
-          <code>.env</code> ko'chmagan bo'lishi mumkin:
-        {% endif %}
-        <br><code class="path">{{ env_file }}</code><br><br>
-        Aynan shu faylga <code>BOT_USERNAME=...</code> yozing, so'ng
-        <code>start.bat</code> ni qaytadan ishga tushiring.
+        (Sozlamalar fayli topilmadi: <code class="path">{{ env_file }}</code>.)
       {% endif %}
       <br><br>
       QR ataylab ko'rsatilmayapti: buzuq havolali kod skanerlanadi-yu,

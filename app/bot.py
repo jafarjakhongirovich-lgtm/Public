@@ -21,6 +21,7 @@ import logging
 from aiogram import Bot, Dispatcher, F
 from aiogram.client.default import DefaultBotProperties
 from aiogram.enums import ParseMode
+from aiogram.exceptions import TelegramNetworkError, TelegramUnauthorizedError
 from aiogram.filters import Command, CommandObject, CommandStart
 from aiogram.types import (
     BotCommand,
@@ -394,6 +395,44 @@ def build_bot() -> Bot:
         token=settings.bot_token,
         default=DefaultBotProperties(parse_mode=ParseMode.HTML),
     )
+
+
+class BotTokenError(RuntimeError):
+    """Token noto'g'ri yoki Telegram'ga ulanib bo'lmadi (odam o'qiy oladigan matn)."""
+
+
+async def identify(token: str) -> dict:
+    """Tokenni Telegram'da tekshiradi va bot haqidagi ma'lumotni qaytaradi.
+
+    Sozlamalarga tegmaydi — hali saqlanmagan tokenni sinab ko'rish uchun.
+    Username shu yerdan olinadi: foydalanuvchidan so'rasak, u ko'rinadigan
+    nomni yozib qo'yishi mumkin va QR jimgina ishlamay qoladi.
+    """
+    token = token.strip()
+    if ":" not in token or not token.split(":", 1)[0].isdigit():
+        raise BotTokenError(
+            "Bu token shaklida emas. BotFather bergan qatorni to'liq ko'chiring — "
+            "u 8123456789:AAH... ko'rinishida bo'ladi."
+        )
+
+    probe = Bot(token=token, default=DefaultBotProperties(parse_mode=ParseMode.HTML))
+    try:
+        me = await probe.get_me()
+    except TelegramUnauthorizedError as exc:
+        raise BotTokenError(
+            "Telegram bu tokenni qabul qilmadi. Token bekor qilingan bo'lishi "
+            "mumkin — BotFather'da /mybots -> API Token orqali yangisini oling."
+        ) from exc
+    except TelegramNetworkError as exc:
+        raise BotTokenError(f"Telegram'ga ulanib bo'lmadi: {exc}") from exc
+    except Exception as exc:  # noqa: BLE001 — kutilmagan xatoni ham matnga aylantiramiz
+        raise BotTokenError(str(exc)) from exc
+    finally:
+        await probe.session.close()
+
+    if not me.username:
+        raise BotTokenError("Bu botda username yo'q — BotFather'da uni belgilang.")
+    return {"username": me.username, "name": me.full_name, "id": me.id}
 
 
 async def handle_webhook_update(bot: Bot, payload: dict) -> None:

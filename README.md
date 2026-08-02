@@ -125,10 +125,16 @@ python start.py --setup-only   # faqat sozlash, serversiz
 Ikkinchi va keyingi ishga tushirishlar tez bo'ladi — hamma narsa joyida
 bo'lsa skript ularni qaytadan qilmaydi.
 
-Bot hali ulanmagan bo'lsa panel ishlaydi, lekin QR ichidagi havola ishlamaydi.
-Tokenni [@BotFather](https://t.me/BotFather) dan olib `.env` ga yozasiz — botni
-ishga tushirish shart emas, `start.py` uni web server bilan birga o'zi
-ko'taradi.
+### Botni ulash
+
+Panelda **`/admin/setup`** sahifasini oching va [@BotFather](https://t.me/BotFather)
+bergan tokenni qo'ying. Boshqa hech narsa kiritilmaydi: bot username'ini tizim
+Telegram'ning o'zidan so'raydi, `.env` ga yozadi va ishlab turgan serverga
+darhol qo'llaydi. `start.py` `.env` o'zgarganini sezib botni qayta ko'taradi.
+
+Username'ni qo'lda so'ramaslik ataylab: aynan o'sha maydonga botning
+ko'rinadigan nomi (`Davomat tizimi`) yozilib qolsa, QR skanerlanadi-yu hech
+narsa qilmaydi.
 
 ### QR skanerlanmayapti (telefon hech narsa qilmaydi)
 

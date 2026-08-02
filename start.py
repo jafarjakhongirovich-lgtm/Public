@@ -378,26 +378,60 @@ def run_services(python: Path, port: int) -> None:
     tushirish yetarli emas — panel ochiladi, lekin bot jim turadi va xodimning
     /start xabariga hech kim javob bermaydi.
     """
+    env_file = ROOT / ".env"
     processes: list[tuple[str, subprocess.Popen]] = []
 
-    web = subprocess.Popen(
-        [str(python), "-m", "uvicorn", "app.main:app",
-         "--host", "0.0.0.0", "--port", str(port)],
-        cwd=ROOT,
-    )
-    processes.append(("web server", web))
+    def spawn() -> None:
+        processes.clear()
+        web = subprocess.Popen(
+            [str(python), "-m", "uvicorn", "app.main:app",
+             "--host", "0.0.0.0", "--port", str(port)],
+            cwd=ROOT,
+        )
+        processes.append(("web server", web))
 
-    if _bot_configured():
-        bot = subprocess.Popen([str(python), "-m", "app.bot"], cwd=ROOT)
-        processes.append(("bot", bot))
-        say("  bot ham ishga tushdi (Telegram'ni kutmoqda)")
-    else:
-        say("  bot ishga tushirilmadi: .env da BOT_TOKEN yo'q")
+        if _bot_configured():
+            bot = subprocess.Popen([str(python), "-m", "app.bot"], cwd=ROOT)
+            processes.append(("bot", bot))
+            say("  bot ham ishga tushdi (Telegram'ni kutmoqda)")
+        else:
+            say("  bot ishga tushirilmadi: .env da BOT_TOKEN yo'q")
+            say(f"  tokenni brauzerda kiritish mumkin: http://localhost:{port}/admin/setup")
+
+    def stop() -> None:
+        for _name, process in processes:
+            if process.poll() is None:
+                process.terminate()
+        for _name, process in processes:
+            try:
+                process.wait(timeout=10)
+            except subprocess.TimeoutExpired:
+                process.kill()
+
+    def env_stamp() -> float:
+        try:
+            return env_file.stat().st_mtime
+        except OSError:
+            return 0.0
+
+    spawn()
+    stamp = env_stamp()
 
     try:
-        # Qaysi biri birinchi to'xtasa — ikkinchisini ham to'xtatamiz, aks holda
-        # bot jim o'lib, panel esa ishlayotgandek ko'rinib turadi.
         while True:
+            # `.env` o'zgarsa — qayta ishga tushiramiz. Sozlamalar faqat
+            # ishga tushganda o'qiladi, shuning uchun bunisiz brauzerdan
+            # kiritilgan token botga umuman yetib bormaydi: odam saqlaydi,
+            # "tayyor" yozuvini ko'radi, lekin bot jim turaveradi.
+            current = env_stamp()
+            if current != stamp:
+                stamp = current
+                say("\n.env o'zgardi — qayta ishga tushirilmoqda...")
+                stop()
+                spawn()
+
+            # Qaysi biri birinchi to'xtasa — ikkinchisini ham to'xtatamiz, aks
+            # holda bot jim o'lib, panel esa ishlayotgandek ko'rinib turadi.
             for name, process in processes:
                 code = process.poll()
                 if code is not None:
@@ -407,14 +441,7 @@ def run_services(python: Path, port: int) -> None:
     except (KeyboardInterrupt, _ServiceStopped):
         pass
     finally:
-        for _name, process in processes:
-            if process.poll() is None:
-                process.terminate()
-        for _name, process in processes:
-            try:
-                process.wait(timeout=10)
-            except subprocess.TimeoutExpired:
-                process.kill()
+        stop()
         say("To'xtatildi.")
 
 
