@@ -14,6 +14,7 @@
 Telegram bot:
 
     python manage.py bot-setup     — menyu va tavsifni sozlaydi, tokenni tekshiradi
+    python manage.py qr-check      — QR ichida qanday havola borligini ko'rsatadi
 
 Internetga chiqarish (deploy):
 
@@ -302,6 +303,63 @@ def cmd_checkdeploy(args: argparse.Namespace) -> None:
     sys.exit(1)
 
 
+def cmd_qr_check(args: argparse.Namespace) -> None:
+    """QR ichida aynan nima borligini ko'rsatadi.
+
+    Telefon QR ni skanerlab «hech narsa qilmasa», sababni topishning yagona
+    ishonchli yo'li — kod ichidagi havolani o'z ko'zi bilan ko'rish. Aks holda
+    faqat taxmin qilib qoladi.
+    """
+    clean = security.clean_username(settings.bot_username)
+    link = security.deep_link(security.issue_token(1))
+
+    print("\nQR ichidagi havola tekshiruvi")
+    print("─" * 58)
+    print(f"  .env dagi BOT_USERNAME : {settings.bot_username.strip() or '(bo‘sh)'}")
+
+    if not clean:
+        print("  Format                 : ✗ XATO")
+        print("\n  Username'da probel yoki noto'g'ri belgi bor, yoki u umuman")
+        print("  to'ldirilmagan. Bunday holatda QR yasalmaydi.")
+        print("\n  Username — bu botning @ bilan boshlanadigan manzili.")
+        print("  Telegramda botingizni oching: nom ostida mayda shriftda")
+        print("  @... yozilgan. O'shani @ siz ko'chiring.")
+        sys.exit(1)
+
+    print("  Format                 : ✓ to'g'ri")
+    print(f"\n  QR ichidagi havola     :\n    {link}")
+    print(f"\n  Shu manzilni brauzerda oching:\n    https://t.me/{clean}")
+    print("\n  «User not found» chiqsa — bunday bot yo'q, username xato.")
+    print("  Bot sahifasi ochilsa — username to'g'ri.")
+
+    if not settings.bot_token:
+        print("\n  (BOT_TOKEN yo'q — Telegramdan tasdiqlab bo'lmadi.)")
+        return
+
+    print("\n  Telegramdan tekshirilmoqda...")
+    import asyncio
+
+    from app import bot as bot_mod
+
+    try:
+        info = asyncio.run(bot_mod.webhook_info())
+    except Exception as exc:  # noqa: BLE001
+        print(f"  ⚠️  Telegram bilan bog'lanib bo'lmadi: {exc}")
+        return
+
+    real = info["username"]
+    if real == clean:
+        print(f"  ✓ Tasdiqlandi: bot haqiqatan @{real}")
+        print("\n  Demak QR to'g'ri. Telefon ochmayotgan bo'lsa:")
+        print("    * o'sha telefonda Telegram o'rnatilganmi?")
+        print("    * .env o'zgargandan keyin start.bat qayta ishga tushirilganmi?")
+    else:
+        print(f"  ✗ MOS EMAS. Haqiqiy username: @{real}")
+        print(f"\n  .env da to'g'rilang:\n    BOT_USERNAME={real}")
+        print("  So'ng start.bat ni QAYTA ishga tushiring — .env faqat")
+        print("  ishga tushganda o'qiladi.")
+
+
 def cmd_bot_setup(args: argparse.Namespace) -> None:
     """Bot menyusi va tavsifini sozlaydi + tokenni tekshiradi."""
     import asyncio
@@ -401,6 +459,10 @@ def build_parser() -> argparse.ArgumentParser:
     sub.add_parser(
         "check-deploy", help="internetga chiqarishdan oldingi tekshiruv"
     ).set_defaults(func=cmd_checkdeploy)
+
+    sub.add_parser(
+        "qr-check", help="QR ichidagi havolani ko'rsatish (skanerlanmasa — shu)"
+    ).set_defaults(func=cmd_qr_check)
 
     sub.add_parser(
         "bot-setup", help="bot menyusi va tavsifini sozlash, tokenni tekshirish"
