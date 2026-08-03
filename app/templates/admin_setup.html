@@ -1,0 +1,84 @@
+{% extends "base.html" %}
+{% block title %}Botni ulash{% endblock %}
+{% block content %}
+
+<div class="card" style="max-width: 760px;">
+  <h2>Telegram botni ulash</h2>
+
+  {% if saved %}
+    <p class="ok-box">
+      <b>Tayyor.</b> Bot ulandi: <code class="key">@{{ saved }}</code><br>
+      QR endi ishlaydi — ofis ekranini yangilang (F5).
+    </p>
+  {% elif error %}
+    <p class="bad-box"><b>Saqlanmadi.</b><br>{{ error }}</p>
+  {% endif %}
+
+  {% if username and not saved %}
+    <p class="muted">Hozir ulangan bot: <code class="key">@{{ username }}</code></p>
+  {% endif %}
+
+  <p>
+    Bu yerga faqat <b>token</b> kiritiladi. Bot nomini tizim Telegram'ning
+    o'zidan so'raydi va <code>.env</code> ga o'zi yozadi — qo'lda hech narsa
+    tahrirlash kerak emas.
+  </p>
+
+  {% if is_public %}
+    <p class="hint">
+      Sayt bulutda ishlayapti. U yerda fayl tizimi ko'pincha faqat o'qish
+      uchun bo'ladi — saqlash xato bersa, <code>BOT_TOKEN</code> va
+      <code>BOT_USERNAME</code> ni hosting panelidagi «Environment Variables»
+      bo'limiga kiriting.
+    </p>
+  {% endif %}
+
+  <form method="post" action="/admin/setup" class="row" style="margin-top: 14px;">
+    <div style="flex: 3 1 380px;">
+      <label for="bot_token">BOT_TOKEN</label>
+      <input id="bot_token" name="bot_token" type="password" autocomplete="off"
+             placeholder="{% if token_set %}saqlangan — o‘zgartirish uchun yangisini kiriting{% else %}8123456789:AAH...{% endif %}"
+             style="width: 100%;">
+    </div>
+    <div style="flex: 0 0 auto;">
+      <button type="submit">Tekshirish va saqlash</button>
+    </div>
+  </form>
+
+  <p class="hint">
+    Token — parol kabi maxfiy: unga ega odam bot nomidan xabar yubora oladi.
+    Ekranga chiqarmang va hech kimga yubormang.
+  </p>
+</div>
+
+<div class="card" style="max-width: 760px;">
+  <h2>Token qayerdan olinadi</h2>
+  <ol class="steps">
+    <li>Telegramda qidiruvga <code>@BotFather</code> deb yozing va uni oching.</li>
+    <li><b>Start</b> tugmasini bosing.</li>
+    <li>
+      Bot allaqachon bor bo'lsa: <code>/mybots</code> → botni tanlang →
+      <b>API Token</b>.<br>
+      Bot hali yo'q bo'lsa: <code>/newbot</code> → nom yozasiz → so'ng
+      username (probelsiz, oxiri <code>bot</code> bilan tugaydi).
+    </li>
+    <li>BotFather bergan uzun qatorni to'liq nusxalab, yuqoridagi maydonga qo'ying.</li>
+  </ol>
+</div>
+
+<div class="card" style="max-width: 760px;">
+  <h2>Texnik ma'lumot</h2>
+  <p class="muted" style="margin: 0;">
+    Sozlamalar shu faylga yoziladi:<br>
+    <code class="key">{{ env_file }}</code>
+  </p>
+</div>
+
+<style>
+  .ok-box, .bad-box { padding: 10px 14px; border-radius: 6px; border: 1px solid; }
+  .ok-box { color: var(--ok); border-color: currentColor; }
+  .bad-box { color: var(--bad); border-color: currentColor; }
+  .steps { margin: 0; padding-left: 20px; }
+  .steps li { margin-bottom: 8px; }
+</style>
+{% endblock %}

@@ -1,0 +1,146 @@
+<!doctype html>
+<html lang="uz">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>{{ kiosk.location.name }} — QR</title>
+<style>
+  * { box-sizing: border-box; }
+  html, body { height: 100%; margin: 0; }
+  body { background: #0e1116; color: #e8ecf1; display: flex; flex-direction: column;
+         align-items: center; justify-content: center; gap: 3vh;
+         font: 16px/1.4 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif;
+         -webkit-user-select: none; user-select: none; }
+  h1 { margin: 0; font-size: clamp(20px, 3.2vw, 38px); font-weight: 600; text-align: center; }
+  .qr-frame { background: #fff; padding: min(2.5vh, 22px); border-radius: 20px;
+              box-shadow: 0 12px 40px rgba(0,0,0,.5); line-height: 0; }
+  /* QR `<img>` sifatida yuklanadi (SVG fayl), shuning uchun o'lchamni
+     rasmning o'ziga beramiz — aks holda intrinsik kichik o'lchamda qoladi. */
+  .qr-frame img { display: block; width: min(46vh, 74vw); height: auto; }
+  .clock { font-size: clamp(34px, 7vw, 82px); font-weight: 700;
+           font-variant-numeric: tabular-nums; letter-spacing: .02em; }
+  .bar { width: min(46vh, 74vw); height: 7px; background: #232a33; border-radius: 4px;
+         overflow: hidden; }
+  .bar span { display: block; height: 100%; width: 100%; background: #4c8ff0;
+              transform-origin: left; }
+  .hint { color: #93a0b0; font-size: clamp(13px, 1.7vw, 19px); text-align: center;
+          max-width: 46ch; padding: 0 16px; }
+  .botname { color: #5d6a78; font-size: clamp(12px, 1.3vw, 15px); margin: 0;
+             font-family: ui-monospace, "SF Mono", Menlo, monospace;
+             letter-spacing: .02em; }
+  /* Ogohlantirish ekrandan chiqib ketmasin: 60ch tor telefonda viewport'dan
+     keng bo'lib qoladi va matnning chap tomoni kesiladi. */
+  .warn { background: #6b2b26; color: #ffd9d5; padding: 12px 18px; border-radius: 8px;
+          font-size: 15px; text-align: center; width: min(60ch, calc(100vw - 24px));
+          overflow-wrap: anywhere; }
+  .warn code { overflow-wrap: anywhere; }
+  .warn code.path { display: inline-block; margin-top: 4px; padding: 3px 7px;
+                    background: rgba(0,0,0,.28); border-radius: 5px; font-size: 13px; }
+  .offline { color: #ffb4ad; font-size: 14px; min-height: 1.4em; }
+</style>
+</head>
+<body>
+  <h1>{{ kiosk.location.name }}</h1>
+  <div class="clock" id="clock">--:--</div>
+
+  {% if not bot_configured %}
+    <div class="warn">
+      <b>Bot hali ulanmagan — QR shuning uchun yo'q.</b>
+      <br><br>
+      Tuzatish uchun shu kompyuterda <code class="path">/admin/setup</code>
+      sahifasini oching va BotFather bergan tokenni qo'ying. Boshqa hech narsa
+      kerak emas — bot nomini tizim o'zi aniqlaydi va saqlaydi.
+      <br><br>
+      {% if bot_username_raw %}
+        (Hozirgi <code>BOT_USERNAME</code> qiymati — «{{ bot_username_raw }}» —
+        username emas: unda probel yoki noto'g'ri belgi bor.)
+      {% elif env_file_exists %}
+        (Sozlamalar fayli: <code class="path">{{ env_file }}</code> — unda
+        <code>BOT_USERNAME</code> bo'sh.)
+      {% else %}
+        (Sozlamalar fayli topilmadi: <code class="path">{{ env_file }}</code>.)
+      {% endif %}
+      <br><br>
+      QR ataylab ko'rsatilmayapti: buzuq havolali kod skanerlanadi-yu,
+      hech narsa qilmaydi — bunday xatoni topish qiyin bo'lardi.
+    </div>
+  {% else %}
+    <div class="qr-frame" id="frame">
+      <img id="qr" alt="QR kod">
+    </div>
+    <div class="bar"><span id="bar"></span></div>
+
+    <p class="hint">
+      Telefon kamerasi bilan skanerlang — Telegram o'zi ochiladi va kelgan/ketgan
+      vaqtingiz yoziladi. QR har {{ refresh_seconds }} sekundda yangilanadi.
+    </p>
+    {# Bot manzili ko'rinib tursin: QR ichida nima borligini tekshirishning eng
+       oson yo'li shu. Xato username qo'yilgan bo'lsa, ekranga qarash bilanoq
+       bilinadi — kodni skanerlab ko'rish shart emas. Token ko'rsatilmaydi:
+       u har 15 sekundda o'zgaradi va foyda bermaydi. #}
+    <p class="botname">t.me/{{ bot_username_clean }}</p>
+  {% endif %}
+  <div class="offline" id="offline"></div>
+
+<script>
+(function () {
+  var REFRESH_MS = {{ refresh_seconds }} * 1000;
+  var SRC = "/kiosk/{{ api_key }}/qr.svg";
+  var img = document.getElementById("qr");
+  var bar = document.getElementById("bar");
+  var offline = document.getElementById("offline");
+  var failures = 0;
+
+  // BOT_USERNAME xato bo'lsa QR umuman chizilmaydi — sahifada ogohlantirish
+  // turadi. Soat esa ishlashda davom etsin.
+  var qrEnabled = img !== null && bar !== null;
+
+  function tick() {
+    var el = document.getElementById("clock");
+    var now = new Date();
+    el.textContent = String(now.getHours()).padStart(2, "0") + ":" +
+                     String(now.getMinutes()).padStart(2, "0") + ":" +
+                     String(now.getSeconds()).padStart(2, "0");
+  }
+  tick();
+  setInterval(tick, 1000);
+
+  // Yangi QR ni fonda yuklab, faqat tayyor bo'lgach almashtiramiz — ekran
+  // "miltillamaydi" va yarim yuklangan rasm hech qachon ko'rinmaydi.
+  function refresh() {
+    var next = new Image();
+    next.onload = function () {
+      img.src = next.src;
+      failures = 0;
+      offline.textContent = "";
+      restartBar();
+    };
+    next.onerror = function () {
+      failures += 1;
+      offline.textContent = "Server bilan aloqa yo'q (" + failures + "). Qayta urinilmoqda…";
+    };
+    next.src = SRC + "?t=" + Date.now();
+  }
+
+  function restartBar() {
+    bar.style.transition = "none";
+    bar.style.transform = "scaleX(1)";
+    // reflow — transition qaytadan boshlanishi uchun
+    void bar.offsetWidth;
+    bar.style.transition = "transform " + REFRESH_MS + "ms linear";
+    bar.style.transform = "scaleX(0)";
+  }
+
+  if (qrEnabled) {
+    refresh();
+    setInterval(refresh, REFRESH_MS);
+
+    // Ekran uzoq vaqt uxlab qolsa (planshet), qaytganda darhol yangilaymiz.
+    document.addEventListener("visibilitychange", function () {
+      if (!document.hidden) refresh();
+    });
+  }
+})();
+</script>
+</body>
+</html>

@@ -1,0 +1,38 @@
+# Serversiz variant: oddiy kompyuterda (ofisdagi yoki uydagi) ishga tushirish.
+# Postgres kerak emas — baza bitta SQLite fayli, `./data/tabel.db`.
+#
+#   cp .env.example .env      -> SECRET_KEY, BOT_TOKEN, BOT_USERNAME, parollar
+#   docker compose -f docker-compose.local.yml up -d
+#   docker compose -f docker-compose.local.yml run --rm web python manage.py init
+#
+# Nega VPS kerak emas:
+#   * bot Telegram'ga O'ZI ulanadi (long polling) — tashqi IP, domen, port
+#     ochish, HTTPS sertifikat — hech biri kerak emas, NAT ortidan ishlaydi;
+#   * QR sahifasini faqat ofisdagi ekran ochadi — localhost yoki lokal tarmoq
+#     manzili yetarli.
+#
+# Yagona shart: kompyuter ish vaqtida yoniq turishi kerak.
+
+services:
+  web:
+    build: .
+    restart: unless-stopped
+    env_file: .env
+    environment:
+      DATABASE_URL: sqlite:////data/tabel.db
+    volumes:
+      # Baza konteyner o'chsa ham saqlanib qoladi.
+      - ./data:/data
+    ports:
+      # 0.0.0.0 — lokal tarmoqdagi TV/planshet ham ochishi uchun.
+      - "8000:8000"
+
+  bot:
+    build: .
+    restart: unless-stopped
+    env_file: .env
+    environment:
+      DATABASE_URL: sqlite:////data/tabel.db
+    volumes:
+      - ./data:/data
+    command: ["python", "-m", "app.bot"]

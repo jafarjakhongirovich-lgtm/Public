@@ -1,0 +1,128 @@
+{% extends "base.html" %}
+{% block title %}Kunlik jadval — {{ day }}{% endblock %}
+{% block content %}
+
+<div class="card">
+  <form class="inline" method="get" action="/admin">
+    <div>
+      <label for="day">Sana</label>
+      <input type="date" id="day" name="day" value="{{ day.isoformat() }}">
+    </div>
+    <button type="submit">Ko'rish</button>
+    <span class="muted" style="margin-left:8px">{{ weekday }}</span>
+  </form>
+</div>
+
+<div class="stats">
+  <div class="stat"><b>{{ summary.jami }}</b><span>Faol xodim</span></div>
+  <div class="stat"><b>{{ summary.keldi }}</b><span>Keldi</span></div>
+  <div class="stat"><b>{{ summary.kechikdi }}</b><span>Kechikdi</span></div>
+  <div class="stat"><b>{{ summary.kelmadi }}</b><span>Kelmadi</span></div>
+</div>
+
+<div class="card">
+  <h2>Davomat — {{ day.strftime('%d.%m.%Y') }}</h2>
+  <div class="table-wrap">
+  <table>
+    <thead>
+      <tr>
+        <th>F.I.Sh.</th><th>Lavozim</th><th>Jadval</th>
+        <th>Keldi</th><th>Tushlik</th><th>Ketdi</th>
+        <th class="num">Kechikish</th><th class="num">Hisobga olinadi</th>
+        <th class="num">Erta ketish</th><th class="num">Ishlangan</th><th>Holat</th>
+      </tr>
+    </thead>
+    <tbody>
+    {% for row in rows %}
+      {% set r = row.record %}
+      <tr>
+        <td>{{ row.employee.full_name }}</td>
+        <td class="muted">{{ row.employee.position or '—' }}</td>
+        <td class="muted">
+          {{ row.employee.schedule.start_time|soat }}–{{ row.employee.schedule.end_time|soat }}
+        </td>
+        <td>{{ (r.check_in_at if r else None)|soat }}</td>
+        <td class="muted">
+          {% if r and (r.lunch_out_at or r.lunch_in_at) %}
+            {{ r.lunch_out_at|soat }}–{{ r.lunch_in_at|soat }}
+          {% else %}—{% endif %}
+        </td>
+        <td>{{ (r.check_out_at if r else None)|soat }}</td>
+        <td class="num">{{ (r.late_minutes if r else 0)|daqiqa }}</td>
+        <td class="num">{{ (r.billable_late_minutes if r else 0)|daqiqa }}</td>
+        <td class="num">{{ (r.early_leave_minutes if r else 0)|daqiqa }}</td>
+        <td class="num">{{ (r.worked_minutes if r else 0)|daqiqa }}</td>
+        <td><span class="tag {{ row.tone }}">{{ row.label }}</span></td>
+      </tr>
+    {% else %}
+      <tr><td colspan="11" class="muted">Faol xodim yo'q. «Xodimlar» bo'limidan qo'shing.</td></tr>
+    {% endfor %}
+    </tbody>
+  </table>
+  </div>
+</div>
+
+<div class="grid">
+  <div class="card">
+    <h2>Qo'lda qayd kiritish</h2>
+    <form method="post" action="/admin/manual">
+      <div class="row">
+        <div>
+          <label for="m_emp">Xodim</label>
+          <select id="m_emp" name="employee_id" required>
+            {% for e in employees %}<option value="{{ e.id }}">{{ e.full_name }}</option>{% endfor %}
+          </select>
+        </div>
+        <div>
+          <label for="m_type">Harakat</label>
+          <select id="m_type" name="event_type" required>
+            {% for t in event_types %}
+              <option value="{{ t.value }}">{{ event_labels[t] }}</option>
+            {% endfor %}
+          </select>
+        </div>
+        <div>
+          <label for="m_at">Vaqt</label>
+          <input type="datetime-local" id="m_at" name="happened_at" required
+                 value="{{ day.isoformat() }}T09:00">
+        </div>
+        <div>
+          <label for="m_note">Izoh</label>
+          <input type="text" id="m_note" name="note" placeholder="masalan: telefoni yo'q edi">
+        </div>
+        <div style="flex:0 0 auto"><button type="submit">Saqlash</button></div>
+      </div>
+      <p class="hint">Qo'lda kiritilgan har bir yozuv audit jurnaliga tushadi.</p>
+    </form>
+  </div>
+
+  <div class="card">
+    <h2>Shu kundagi skanerlashlar</h2>
+    <div class="table-wrap">
+    <table>
+      <thead><tr><th>Vaqt</th><th>Xodim</th><th>Harakat</th><th>Manba</th><th></th></tr></thead>
+      <tbody>
+      {% for ev in events %}
+        <tr {% if ev.is_voided %}style="opacity:.45;text-decoration:line-through"{% endif %}>
+          <td>{{ ev.happened_at|soat }}</td>
+          <td>{{ ev.employee.full_name }}</td>
+          <td>{{ event_labels.get(ev.event_type, ev.event_type.value) }}</td>
+          <td class="muted">{{ ev.source.value }}</td>
+          <td>
+            {% if not ev.is_voided %}
+            <form method="post" action="/admin/events/{{ ev.id }}/void" style="display:inline">
+              <button class="danger" type="submit">Bekor</button>
+            </form>
+            {% endif %}
+          </td>
+        </tr>
+      {% else %}
+        <tr><td colspan="5" class="muted">Yozuv yo'q.</td></tr>
+      {% endfor %}
+      </tbody>
+    </table>
+    </div>
+  </div>
+</div>
+
+{% endblock %}

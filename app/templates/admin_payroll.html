@@ -1,0 +1,117 @@
+{% extends "base.html" %}
+{% block title %}Oylik — {{ period }}{% endblock %}
+
+{# Nol summani "−0" ko'rinishida ko'rsatmaslik uchun #}
+{% macro minus(value) -%}
+  {%- if value %}−{{ '{:,.0f}'.format(value) }}{% else %}0{% endif -%}
+{%- endmacro %}
+
+{% block content %}
+
+<div class="card">
+  <form class="inline" method="get" action="/admin/payroll">
+    <div>
+      <label for="period">Oy</label>
+      <input type="month" id="period" name="period" value="{{ period }}">
+    </div>
+    <button type="submit">Hisoblash</button>
+    <a href="/admin/payroll.xlsx?period={{ period }}"><button class="ghost" type="button">Oylik .xlsx</button></a>
+    <a href="/admin/tabel.xlsx?period={{ period }}"><button class="ghost" type="button">Tabel .xlsx</button></a>
+  </form>
+</div>
+
+<div class="stats">
+  <div class="stat"><b>{{ '{:,.0f}'.format(totals.salary) }}</b><span>Oylik fondi</span></div>
+  <div class="stat"><b>{{ minus(totals.unpaid) }}</b><span>Ishlanmagan vaqt</span></div>
+  <div class="stat"><b>{{ minus(totals.late_fine) }}</b><span>Kechikish jarimasi</span></div>
+  <div class="stat"><b>{{ minus(totals.bonus) }}</b><span>Ustama kamayishi</span></div>
+  <div class="stat"><b>{{ '{:,.0f}'.format(totals.net) }}</b><span>To'lanadi</span></div>
+</div>
+
+<div class="card">
+  <h2>Hisob-kitob — {{ period }}</h2>
+  <div class="table-wrap">
+  <table>
+    <thead>
+      <tr>
+        <th>F.I.Sh.</th>
+        <th class="num">Oylik</th>
+        <th class="num">Norma (kun)</th>
+        <th class="num">Ishlagan</th>
+        <th class="num">Kelmagan</th>
+        <th class="num">Ta'til</th>
+        <th class="num">Kechikish</th>
+        <th class="num">Kechikish (daq)</th>
+        <th class="num">Jarima ostida</th>
+        <th class="num">Kechikish jarimasi</th>
+        <th class="num">To'lanmaydigan</th>
+        <th class="num">Ishlanmagan vaqt</th>
+        <th class="num">Ustama kamayishi</th>
+        <th class="num">To'lanadi</th>
+      </tr>
+    </thead>
+    <tbody>
+    {% for r in results %}
+      <tr>
+        <td>{{ r.employee_name }}</td>
+        <td class="num">{{ '{:,.0f}'.format(r.monthly_salary) }}</td>
+        <td class="num">{{ r.scheduled_days }}</td>
+        <td class="num">{{ r.worked_days }}</td>
+        <td class="num">{% if r.absent_days %}<span class="tag bad">{{ r.absent_days }}</span>{% else %}—{% endif %}</td>
+        <td class="num">{{ r.leave_days or '—' }}</td>
+        <td class="num">{% if r.late_count %}<span class="tag warn">{{ r.late_count }}</span>{% else %}—{% endif %}</td>
+        <td class="num">{{ r.total_late_minutes|daqiqa }}</td>
+        <td class="num">{{ r.total_fined_late_minutes|daqiqa if r.total_fined_late_minutes else '—' }}</td>
+        <td class="num">{{ '−{:,.0f}'.format(r.late_fine) if r.late_fine else '—' }}</td>
+        <td class="num">{{ r.unpaid_minutes|daqiqa }}</td>
+        <td class="num">{{ '−{:,.0f}'.format(r.unpaid_time_deduction) if r.unpaid_time_deduction else '—' }}</td>
+        <td class="num">
+          {{ '−{:,.0f}'.format(r.bonus_reduction) if r.bonus_reduction else '—' }}
+          {%- if r.reduction_was_capped %}
+            <span class="tag info" title="Qonuniy chegara: hisoblangan summaning 20%idan ko‘p ushlanmaydi">chegara</span>
+          {%- endif %}
+        </td>
+        <td class="num"><b>{{ '{:,.0f}'.format(r.net_payable) }}</b></td>
+      </tr>
+    {% else %}
+      <tr><td colspan="14" class="muted">Faol xodim yo'q.</td></tr>
+    {% endfor %}
+    </tbody>
+    <tfoot>
+      <tr>
+        <td>JAMI</td>
+        <td class="num">{{ '{:,.0f}'.format(totals.salary) }}</td>
+        <td colspan="7"></td>
+        <td class="num">{{ minus(totals.late_fine) }}</td>
+        <td class="num">{{ minus(totals.unpaid) }}</td>
+        <td class="num">{{ minus(totals.bonus) }}</td>
+        <td class="num">{{ '{:,.0f}'.format(totals.net) }}</td>
+      </tr>
+    </tfoot>
+  </table>
+  </div>
+
+  <form method="post" action="/admin/payroll/save" style="margin-top:14px">
+    <input type="hidden" name="period" value="{{ period }}">
+    <button type="submit">Bu oyni muhrlab qo'yish</button>
+    <span class="hint" style="margin-left:10px">
+      Hisob natijasi <code>payroll_items</code> jadvaliga yoziladi — keyinchalik
+      davomat tuzatilsa ham muhrlangan summa saqlanib qoladi.
+    </span>
+  </form>
+</div>
+
+<div class="card">
+  <h2>Hisob usuli</h2>
+  <p class="hint" style="font-size:14px">
+    <b>Hisoblangan summa</b> = oylik × (to'lanadigan daqiqa ÷ oydagi norma daqiqa).<br>
+    <b>To'lanmaydigan daqiqalar</b>: kechikish, erta ketish, tushlikdan oshgan vaqt
+    (har biriga grace muhlati alohida qo'llanadi), sababsiz kelmagan kun uchun
+    to'liq kunlik norma, to'lovsiz ruxsat kuni uchun to'liq kunlik norma.<br>
+    <b>Ustama kamayishi</b> — intizom uchun, hisoblangan summaning 20%idan oshmaydi.
+    Bu ish haqidan «jarima» ushlash emas: Mehnat kodeksi bo'yicha ishlanmagan vaqt
+    va rag'batlantirish qismi alohida yuritiladi.
+  </p>
+</div>
+
+{% endblock %}
