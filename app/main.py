@@ -463,7 +463,27 @@ def admin_employee_save(
     db: Session = Depends(get_db),
     actor: str = Depends(require_admin),
 ):
-    employee = db.get(Employee, int(employee_id)) if employee_id else None
+    # "ID" — bazadagi yozuv raqami (1, 2, 3...), Telegram raqami EMAS. Ikkalasi
+    # ham son bo'lgani uchun ularni almashtirib yuborish oson. Ilgari bunday
+    # holatda yangi xodim jimgina yaratilardi: kiritilgan raqam yo'qolar,
+    # Telegram esa ulanmagan qolar edi — buni sezish deyarli imkonsiz.
+    employee = None
+    if employee_id.strip():
+        try:
+            employee = db.get(Employee, int(employee_id))
+        except ValueError as exc:
+            raise HTTPException(status_code=400, detail="ID butun son bo'lishi kerak") from exc
+        if employee is None:
+            raise HTTPException(
+                status_code=404,
+                detail=(
+                    f"{employee_id} raqamli xodim yo'q. Yuqoridagi «ID» — bazadagi "
+                    "yozuv raqami (1, 2, 3...), yangi xodim qo'shayotgan bo'lsangiz "
+                    "uni BO'SH qoldiring. Telegram raqamini «Telegram user_id» "
+                    "maydoniga yozing."
+                ),
+            )
+
     created = employee is None
     if employee is None:
         employee = Employee(full_name=full_name, schedule_id=schedule_id)

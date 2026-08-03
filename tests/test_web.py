@@ -422,3 +422,62 @@ def test_kiosk_shows_bot_address(client, kiosk, monkeypatch):
     assert "t.me/DavomatTizimiBot" in page.text
     # Token ko'rsatilmaydi: har 15 sekundda o'zgaradi va foyda bermaydi
     assert "?start=" not in page.text
+
+
+# --------------------------------------------------------------------------- #
+# Xodim formasi: "ID" va Telegram raqamini chalkashtirish
+# --------------------------------------------------------------------------- #
+
+
+def test_employee_form_rejects_unknown_id(client, schedule):
+    """«ID» maydoniga Telegram raqami yozilsa, jimgina yangi xodim yaratilmasin.
+
+    Ikkala maydon ham son qabul qiladi, shuning uchun ularni almashtirib
+    yuborish oson. Ilgari bunday holatda xodim yaratilar, kiritilgan raqam
+    yo'qolar va Telegram ulanmagan qolar edi — natijada QR skanerlanganda
+    "siz tizimda yo'qsiz" chiqardi, sababi esa ko'rinmasdi.
+    """
+    response = client.post(
+        "/admin/employees",
+        auth=ADMIN_AUTH,
+        data={
+            "employee_id": "2003632983",
+            "full_name": "Yangi Xodim",
+            "schedule_id": schedule.id,
+        },
+    )
+    assert response.status_code == 404
+    assert "Telegram user_id" in response.json()["detail"]
+
+
+def test_employee_form_creates_when_id_is_blank(client, schedule):
+    response = client.post(
+        "/admin/employees",
+        auth=ADMIN_AUTH,
+        data={
+            "employee_id": "",
+            "full_name": "Yangi Xodim",
+            "telegram_user_id": "2003632983",
+            "schedule_id": schedule.id,
+        },
+        follow_redirects=False,
+    )
+    assert response.status_code == 303
+
+    page = client.get("/admin/employees", auth=ADMIN_AUTH)
+    assert "Yangi Xodim" in page.text
+
+
+def test_employee_form_still_edits_an_existing_record(client, employee, schedule):
+    response = client.post(
+        "/admin/employees",
+        auth=ADMIN_AUTH,
+        data={
+            "employee_id": str(employee.id),
+            "full_name": "Aliyev Aziz (tuzatildi)",
+            "schedule_id": schedule.id,
+        },
+        follow_redirects=False,
+    )
+    assert response.status_code == 303
+    assert employee.full_name == "Aliyev Aziz (tuzatildi)"

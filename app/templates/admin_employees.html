@@ -49,8 +49,11 @@
   <form method="post" action="/admin/employees">
     <div class="row">
       <div>
-        <label for="e_id">ID (tahrirlash uchun, bo'sh = yangi)</label>
-        <input type="number" id="e_id" name="employee_id" placeholder="">
+        {# Bu maydon Telegram raqami bilan chalkashtiriladi — ikkalasi ham son.
+           Shuning uchun nomida ham, placeholder'da ham "bo'sh qoldiring" deb
+           yozib qo'yamiz. #}
+        <label for="e_id">Yozuv ID (yangi xodim = bo'sh)</label>
+        <input type="number" id="e_id" name="employee_id" placeholder="bo'sh qoldiring">
       </div>
       <div>
         <label for="e_name">F.I.Sh.</label>
