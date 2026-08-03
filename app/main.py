@@ -762,6 +762,7 @@ def admin_payroll(
     totals = {
         "salary": sum(r.monthly_salary for r in results),
         "unpaid": sum(r.unpaid_time_deduction for r in results),
+        "late_fine": sum(r.late_fine for r in results),
         "bonus": sum(r.bonus_reduction for r in results),
         "net": sum(r.net_payable for r in results),
     }

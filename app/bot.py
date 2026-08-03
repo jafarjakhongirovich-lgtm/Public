@@ -84,6 +84,15 @@ def _do_scan(telegram_user_id: int, token: str) -> dict:
             "at": result.event.happened_at,
             "late_minutes": result.attendance.late_minutes,
             "billable_late": result.attendance.billable_late_minutes,
+            # Jarimani xodimning O'ZI darhol ko'rsin: oy oxirida "bu qayerdan
+            # chiqdi?" degan savol tug'ilmasligi uchun.
+            "fined_late": payroll_mod.fined_late_minutes(result.attendance),
+            "late_fine": payroll_mod.hourly_fine(
+                payroll_mod.fined_late_minutes(result.attendance),
+                payroll_mod.DEFAULT_POLICY.late_fine_per_hour,
+            ),
+            "free_late": payroll_mod.DEFAULT_POLICY.late_fine_free_minutes,
+            "fine_per_hour": payroll_mod.DEFAULT_POLICY.late_fine_per_hour,
             "grace": result.employee.schedule.grace_minutes,
             "scheduled_start": result.employee.schedule.start_time,
             "scheduled_end": result.employee.schedule.end_time,
@@ -108,6 +117,15 @@ def _do_correct(event_id: int, new_type: EventType, telegram_user_id: int) -> di
             "at": result.event.happened_at,
             "late_minutes": result.attendance.late_minutes,
             "billable_late": result.attendance.billable_late_minutes,
+            # Jarimani xodimning O'ZI darhol ko'rsin: oy oxirida "bu qayerdan
+            # chiqdi?" degan savol tug'ilmasligi uchun.
+            "fined_late": payroll_mod.fined_late_minutes(result.attendance),
+            "late_fine": payroll_mod.hourly_fine(
+                payroll_mod.fined_late_minutes(result.attendance),
+                payroll_mod.DEFAULT_POLICY.late_fine_per_hour,
+            ),
+            "free_late": payroll_mod.DEFAULT_POLICY.late_fine_free_minutes,
+            "fine_per_hour": payroll_mod.DEFAULT_POLICY.late_fine_per_hour,
             "grace": result.employee.schedule.grace_minutes,
             "scheduled_start": result.employee.schedule.start_time,
             "scheduled_end": result.employee.schedule.end_time,
@@ -184,7 +202,10 @@ def _my_payroll(telegram_user_id: int) -> dict | None:
             "late_minutes": res.total_late_minutes,
             "unpaid_minutes": res.unpaid_minutes,
             "unpaid_deduction": res.unpaid_time_deduction,
+            "fined_late_minutes": res.total_fined_late_minutes,
+            "late_fine": res.late_fine,
             "bonus_reduction": res.bonus_reduction,
+            "capped": res.reduction_was_capped,
             "net": res.net_payable,
         }
 
@@ -207,6 +228,11 @@ def _correction_keyboard(event_id: int, current: EventType) -> InlineKeyboardMar
     return InlineKeyboardMarkup(inline_keyboard=rows)
 
 
+def _sum(value) -> str:
+    """Pulni o'qishga qulay ko'rinishda: 100 000 (probel bilan, tiyinsiz)."""
+    return f"{int(round(float(value))):,}".replace(",", " ")
+
+
 def _scan_reply(data: dict) -> str:
     kind: EventType = data["event_type"]
     lines = [f"<b>{EVENT_LABELS[kind]}</b> — {fmt_time(data['at'])}", f"{data['name']}"]
@@ -214,15 +240,17 @@ def _scan_reply(data: dict) -> str:
     if kind == EventType.IN:
         if data["late_minutes"] <= 0:
             lines.append(f"Vaqtida keldingiz (jadval {fmt_time(data['scheduled_start'])}).")
-        elif data["billable_late"] <= 0:
+        elif data["fined_late"] <= 0:
             lines.append(
                 f"{data['late_minutes']} daqiqa kechikdingiz — "
-                f"{data['grace']} daqiqalik muhlat ichida, ushlanma yo'q."
+                f"{data['free_late']} daqiqagacha jarima yo'q."
             )
         else:
             lines.append(
-                f"⚠️ {data['late_minutes']} daqiqa kechikdingiz. "
-                f"Hisobga olinadi: {fmt_minutes(data['billable_late'])}."
+                f"⚠️ {fmt_minutes(data['late_minutes'])} kechikdingiz.\n"
+                f"Jarima: <b>{_sum(data['late_fine'])} so'm</b> "
+                f"({data['free_late']} daqiqa bepul, keyingi har soat uchun "
+                f"{_sum(data['fine_per_hour'])} so'm)."
             )
     elif kind == EventType.OUT:
         lines.append(f"Bugun ishlangan vaqt: {fmt_minutes(data['worked_minutes'])}.")
@@ -374,11 +402,14 @@ async def handle_payroll(message: Message) -> None:
         f"Ishlagan kun: {info['worked_days']}\n"
         f"Kelmagan kun: {info['absent_days']}\n"
         f"Kechikish: {info['late_count']} marta, jami {fmt_minutes(info['late_minutes'])}\n"
+        f"Jarima ostida: {fmt_minutes(info['fined_late_minutes'])}\n"
         f"To'lanmaydigan vaqt: {fmt_minutes(info['unpaid_minutes'])}\n\n"
-        f"Oylik: {info['salary']:,.0f} so'm\n"
-        f"Ishlanmagan vaqt: −{info['unpaid_deduction']:,.0f} so'm\n"
-        f"Ustama kamayishi: −{info['bonus_reduction']:,.0f} so'm\n"
-        f"<b>Hozircha to'lanadi: {info['net']:,.0f} so'm</b>\n\n"
+        f"Oylik: {_sum(info['salary'])} so'm\n"
+        f"Ishlanmagan vaqt: −{_sum(info['unpaid_deduction'])} so'm\n"
+        f"Kechikish jarimasi: −{_sum(info['late_fine'])} so'm\n"
+        f"Jami ushlanma: −{_sum(info['bonus_reduction'])} so'm"
+        + (" (qonuniy chegaraga yetdi)" if info["capped"] else "")
+        + f"\n<b>Hozircha to'lanadi: {_sum(info['net'])} so'm</b>\n\n"
         "<i>Oy tugagach yakuniy hisob buxgalteriya tomonidan tasdiqlanadi.</i>"
     )
 

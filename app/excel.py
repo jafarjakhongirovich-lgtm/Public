@@ -77,6 +77,8 @@ def payroll_workbook(results: list[PayrollResult], period: str) -> bytes:
         "Ta'til/ruxsat",
         "Kechikish (marta)",
         "Kechikish (jami daq)",
+        "Jarima ostidagi daq",
+        "Kechikish jarimasi",
         "Erta ketish (daq)",
         "Tushlik oshig'i (daq)",
         "Ishlanmagan vaqt ushlanmasi",
@@ -97,6 +99,8 @@ def payroll_workbook(results: list[PayrollResult], period: str) -> bytes:
             res.leave_days,
             res.late_count,
             res.total_late_minutes,
+            res.total_fined_late_minutes,
+            float(res.late_fine),
             res.total_early_leave_minutes,
             res.total_lunch_overrun_minutes,
             float(res.unpaid_time_deduction),
@@ -106,14 +110,14 @@ def payroll_workbook(results: list[PayrollResult], period: str) -> bytes:
         for col, value in enumerate(values, start=1):
             cell = summary.cell(row=row, column=col, value=value)
             cell.border = _BORDER
-            if col in (3, 12, 13, 14):
+            if col in (3, 11, 14, 15, 16):
                 cell.number_format = _MONEY_FMT
         row += 1
 
     # Jami satri
     total_row = row
     summary.cell(row=total_row, column=2, value="JAMI").font = _TOTAL_FONT
-    for col in (3, 12, 13, 14):
+    for col in (3, 11, 14, 15, 16):
         letter = get_column_letter(col)
         cell = summary.cell(
             row=total_row, column=col, value=f"=SUM({letter}4:{letter}{row - 1})"
@@ -122,7 +126,7 @@ def payroll_workbook(results: list[PayrollResult], period: str) -> bytes:
         cell.number_format = _MONEY_FMT
         cell.border = _BORDER
 
-    _autosize(summary, [4, 28, 15, 12, 12, 12, 12, 12, 14, 13, 15, 20, 16, 18])
+    _autosize(summary, [4, 28, 15, 12, 12, 12, 12, 12, 14, 14, 17, 13, 15, 20, 16, 18])
 
     # Har bir xodim uchun kunlik tafsilot
     for res in results:

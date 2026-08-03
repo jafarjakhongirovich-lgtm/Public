@@ -23,6 +23,7 @@
 <div class="stats">
   <div class="stat"><b>{{ '{:,.0f}'.format(totals.salary) }}</b><span>Oylik fondi</span></div>
   <div class="stat"><b>{{ minus(totals.unpaid) }}</b><span>Ishlanmagan vaqt</span></div>
+  <div class="stat"><b>{{ minus(totals.late_fine) }}</b><span>Kechikish jarimasi</span></div>
   <div class="stat"><b>{{ minus(totals.bonus) }}</b><span>Ustama kamayishi</span></div>
   <div class="stat"><b>{{ '{:,.0f}'.format(totals.net) }}</b><span>To'lanadi</span></div>
 </div>
@@ -41,6 +42,8 @@
         <th class="num">Ta'til</th>
         <th class="num">Kechikish</th>
         <th class="num">Kechikish (daq)</th>
+        <th class="num">Jarima ostida</th>
+        <th class="num">Kechikish jarimasi</th>
         <th class="num">To'lanmaydigan</th>
         <th class="num">Ishlanmagan vaqt</th>
         <th class="num">Ustama kamayishi</th>
@@ -58,13 +61,20 @@
         <td class="num">{{ r.leave_days or '—' }}</td>
         <td class="num">{% if r.late_count %}<span class="tag warn">{{ r.late_count }}</span>{% else %}—{% endif %}</td>
         <td class="num">{{ r.total_late_minutes|daqiqa }}</td>
+        <td class="num">{{ r.total_fined_late_minutes|daqiqa if r.total_fined_late_minutes else '—' }}</td>
+        <td class="num">{{ '−{:,.0f}'.format(r.late_fine) if r.late_fine else '—' }}</td>
         <td class="num">{{ r.unpaid_minutes|daqiqa }}</td>
         <td class="num">{{ '−{:,.0f}'.format(r.unpaid_time_deduction) if r.unpaid_time_deduction else '—' }}</td>
-        <td class="num">{{ '−{:,.0f}'.format(r.bonus_reduction) if r.bonus_reduction else '—' }}</td>
+        <td class="num">
+          {{ '−{:,.0f}'.format(r.bonus_reduction) if r.bonus_reduction else '—' }}
+          {%- if r.reduction_was_capped %}
+            <span class="tag info" title="Qonuniy chegara: hisoblangan summaning 20%idan ko‘p ushlanmaydi">chegara</span>
+          {%- endif %}
+        </td>
         <td class="num"><b>{{ '{:,.0f}'.format(r.net_payable) }}</b></td>
       </tr>
     {% else %}
-      <tr><td colspan="12" class="muted">Faol xodim yo'q.</td></tr>
+      <tr><td colspan="14" class="muted">Faol xodim yo'q.</td></tr>
     {% endfor %}
     </tbody>
     <tfoot>
@@ -72,6 +82,7 @@
         <td>JAMI</td>
         <td class="num">{{ '{:,.0f}'.format(totals.salary) }}</td>
         <td colspan="7"></td>
+        <td class="num">{{ minus(totals.late_fine) }}</td>
         <td class="num">{{ minus(totals.unpaid) }}</td>
         <td class="num">{{ minus(totals.bonus) }}</td>
         <td class="num">{{ '{:,.0f}'.format(totals.net) }}</td>

@@ -56,20 +56,42 @@ hisoblangan  = oylik × (to'lanadigan daqiqa ÷ oydagi norma daqiqa)
 to'lanadigan = hisoblangan − ustama kamayishi
 ```
 
-**To'lanmaydigan daqiqalar:** kechikish, erta ketish, tushlikdan oshgan vaqt
-(har biriga *grace* muhlati alohida qo'llanadi), sababsiz kelmagan kun uchun
-to'liq kunlik norma, to'lovsiz ruxsat kuni uchun to'liq kunlik norma.
-Bayram va dam olish kunlari normaga umuman kirmaydi.
+**To'lanmaydigan daqiqalar:** erta ketish, tushlikdan oshgan vaqt (har biriga
+*grace* muhlati alohida qo'llanadi), sababsiz kelmagan kun uchun to'liq kunlik
+norma, to'lovsiz ruxsat kuni uchun to'liq kunlik norma. Bayram va dam olish
+kunlari normaga umuman kirmaydi.
 
-**Misol** (oylik 10 000 000 so'm, 23 ish kuni, kunlik norma 480 daqiqa,
-grace 5 daqiqa):
+### Kechikish uchun soatbay jarima
+
+Kechikish oylikdan vaqt sifatida ushlanmaydi — uning o'rniga **soatbay jarima**
+qo'llanadi. Ikkalasini birga qo'llash bir aybga ikki jazo bo'lardi.
+
+Qoida (`app/payroll.py` → `DEFAULT_POLICY`):
+
+* **10 daqiqagacha — jarima yo'q**
+* undan keyin **har bir soat uchun 100 000 so'm**, proporsional
+
+| Kechikish | Jarima ostidagi vaqt | Jarima |
+|---|---|---|
+| 8 daqiqa | — | **0** |
+| 10 daqiqa | — | **0** |
+| 40 daqiqa | 30 daqiqa | **50 000 so'm** |
+| 1 soat 10 daqiqa | 1 soat | **100 000 so'm** |
+| 1 soat 40 daqiqa | 1 s 30 daq | **150 000 so'm** |
+| 2 soat 10 daqiqa | 2 soat | **200 000 so'm** |
+
+Summani o'zgartirish uchun `DEFAULT_POLICY` dagi `late_fine_per_hour` ni
+tahrirlaysiz. Butun soatgacha yaxlitlanmaydi: 12 daqiqa kechikkan odam bir
+soatlik jarima to'lamaydi.
+
+**Boshqa misollar** (oylik 10 000 000 so'm, 23 ish kuni, kunlik norma 480
+daqiqa, grace 5 daqiqa):
 
 | Holat | Natija |
 |---|---|
-| 09:04 da keldi | 4 daqiqa kechikish — muhlat ichida, ushlanma **yo'q** |
-| 09:30 da keldi | 30 daqiqa kechikish, 25 daqiqasi hisobga olinadi → **≈22 645 so'm** |
 | Kun kelmadi | 480 daqiqa → **≈434 783 so'm** |
 | Tushlikda 90 daqiqa yurdi | 30 − 5 = 25 daqiqa hisobga olinadi |
+| 17:30 da ketdi | 30 − 5 = 25 daqiqa hisobga olinadi |
 
 ### Huquqiy jihat
 
@@ -82,9 +104,10 @@ ushlash cheklangan. Shuning uchun tizim ikki summani **alohida** yuritadi:
    rag'batlantirish qismidan. Hisoblangan summaning **20%idan oshmaydi**
    (`DeductionPolicy.max_deduction_percent`).
 
-Standart sozlamada ikkinchisi **nolga teng** — ya'ni faqat ishlanmagan vaqt
-hisoblanadi. Jarima summalarini qo'shmoqchi bo'lsangiz
-`app/payroll.py` → `DeductionPolicy` ni sozlaysiz.
+Kechikish jarimasi ham aynan ikkinchi summaga kiradi va shu 20% chegarasiga
+bo'ysunadi. Ya'ni har kuni kech qolgan xodim ham hisoblangan summaning
+beshdan biridan ko'pini yo'qotmaydi; chegara ishga tushganda hisobotda
+«chegara» belgisi chiqadi.
 
 ---
 
