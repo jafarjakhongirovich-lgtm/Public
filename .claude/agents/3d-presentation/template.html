@@ -1,0 +1,799 @@
+<!doctype html>
+<html lang="ru">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>3D Presentation</title>
+<style>
+  /* ============================================================
+     THEME TOKENS — the agent overrides these from DECK.theme
+     ============================================================ */
+  :root{
+    --bg:        #05060c;
+    --ink:       #eef1ff;
+    --muted:     #9aa3c4;
+    --accent:    #6ea8ff;
+    --accent-2:  #b06cff;
+    --panel:     rgba(14,18,34,.55);
+    --edge:      rgba(255,255,255,.10);
+    --font:      "Inter", system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    --font-head: var(--font);
+    --pad:       clamp(24px, 5vw, 96px);
+  }
+
+  *,*::before,*::after{ box-sizing:border-box; }
+  html,body{ height:100%; }
+  body{
+    margin:0; background:var(--bg); color:var(--ink);
+    font-family:var(--font); overflow:hidden;
+    -webkit-font-smoothing:antialiased; text-rendering:optimizeLegibility;
+  }
+
+  /* WebGL layer ------------------------------------------------ */
+  #gl{ position:fixed; inset:0; width:100%; height:100%; display:block; z-index:0; }
+
+  /* Vignette + grain sit between GL and text for depth --------- */
+  .veil{
+    position:fixed; inset:0; z-index:1; pointer-events:none;
+    background:
+      radial-gradient(120% 90% at 50% 45%, transparent 30%, rgba(0,0,0,.55) 100%),
+      linear-gradient(to top, rgba(0,0,0,.45), transparent 40%);
+  }
+
+  /* Slide text layer ------------------------------------------ */
+  #stage{ position:fixed; inset:0; z-index:2; pointer-events:none; }
+
+  .slide{
+    position:absolute; inset:0;
+    display:grid; align-content:center;
+    padding:var(--pad);
+    opacity:0; visibility:hidden;
+    transition:opacity .45s ease, visibility .45s;
+  }
+  .slide.is-active{ opacity:1; visibility:visible; }
+
+  /* Scrim: buys the text contrast over whatever the 3D layer is doing.
+     Shaped per layout so it never dims the object it sits beside. */
+  .slide::before{
+    content:""; position:absolute; inset:0; z-index:-1; pointer-events:none;
+    opacity:0; transition:opacity .5s ease;
+  }
+  .slide.is-active::before{ opacity:1; }
+  .slide[data-layout="content"]::before{
+    background:linear-gradient(90deg,
+      color-mix(in oklab, var(--bg) 94%, transparent) 0%,
+      color-mix(in oklab, var(--bg) 80%, transparent) 32%,
+      transparent 64%);
+  }
+  .slide[data-layout="title"]::before,
+  .slide[data-layout="quote"]::before,
+  .slide[data-layout="stats"]::before{
+    background:radial-gradient(60% 48% at 50% 50%,
+      color-mix(in oklab, var(--bg) 88%, transparent) 0%,
+      color-mix(in oklab, var(--bg) 58%, transparent) 55%,
+      transparent 100%);
+  }
+  .slide[data-layout="full"]::before{
+    background:linear-gradient(0deg,
+      color-mix(in oklab, var(--bg) 94%, transparent) 0%,
+      color-mix(in oklab, var(--bg) 62%, transparent) 32%,
+      transparent 58%);
+  }
+
+  /* layout: content — text hugs the left, 3D object breathes right */
+  .slide[data-layout="content"] .box{ max-width:min(620px, 46vw); }
+  /* layout: title / quote — centred */
+  .slide[data-layout="title"],
+  .slide[data-layout="quote"]{ justify-items:center; text-align:center; }
+  /* Absolute units, not ch: `ch` resolves against the box's own 16px font,
+     which is far too narrow for a 90px headline and breaks long words. */
+  .slide[data-layout="title"] .box,
+  .slide[data-layout="quote"] .box{ max-width:min(1180px, 84vw); }
+  /* layout: full — object dominates, caption pinned low */
+  .slide[data-layout="full"]{ align-content:end; }
+  .slide[data-layout="full"] .box{ max-width:min(46ch, 60vw); }
+  /* layout: stats — centred headline over a KPI row */
+  .slide[data-layout="stats"]{ justify-items:center; text-align:center; }
+
+  /* Kinetic reveal: children rise + fade with a stagger -------- */
+  .box > *{
+    opacity:0; transform:translateY(22px) rotateX(-8deg);
+    transition:opacity .6s cubic-bezier(.2,.7,.3,1), transform .7s cubic-bezier(.2,.7,.3,1);
+    transition-delay:calc(var(--i, 0) * 90ms + 120ms);
+  }
+  .slide.is-active .box > *{ opacity:1; transform:none; }
+
+  .eyebrow{
+    font-size:clamp(11px,1.1vw,14px); letter-spacing:.22em; text-transform:uppercase;
+    color:var(--accent); font-weight:600; margin:0 0 18px;
+    display:flex; align-items:center; gap:12px;
+  }
+  .slide[data-layout="title"] .eyebrow,
+  .slide[data-layout="stats"] .eyebrow{ justify-content:center; }
+  .eyebrow::after{
+    content:""; height:1px; width:clamp(28px,6vw,84px);
+    background:linear-gradient(90deg, var(--accent), transparent);
+  }
+  .slide[data-layout="title"] .eyebrow::after,
+  .slide[data-layout="stats"] .eyebrow::after{ display:none; }
+
+  /* No `hyphens:auto` — without a locale dictionary it splits words mid-glyph. */
+  h1, h2{ overflow-wrap:break-word; text-wrap:balance; }
+  h1{
+    font-family:var(--font-head); margin:0 0 20px; padding-bottom:.06em;
+    font-size:clamp(38px, 6.4vw, 104px); line-height:1.04;
+    letter-spacing:-.03em; font-weight:750;
+    background:linear-gradient(180deg, var(--ink), color-mix(in oklab, var(--ink) 62%, var(--accent)));
+    -webkit-background-clip:text; background-clip:text; color:transparent;
+  }
+  h2{
+    font-family:var(--font-head); margin:0 0 20px;
+    font-size:clamp(28px, 3.9vw, 60px); line-height:1.08;
+    letter-spacing:-.022em; font-weight:700;
+  }
+  .lead{
+    margin:0 0 26px; color:var(--muted);
+    font-size:clamp(16px, 1.5vw, 23px); line-height:1.55; max-width:52ch;
+  }
+  .slide[data-layout="title"] .lead,
+  .slide[data-layout="quote"] .lead,
+  .slide[data-layout="stats"] .lead{ margin-inline:auto; }
+
+  ul{ margin:0; padding:0; list-style:none; display:grid; gap:14px; }
+  li{
+    position:relative; padding-left:34px; line-height:1.5;
+    font-size:clamp(15px, 1.35vw, 20px); color:color-mix(in oklab, var(--ink) 88%, transparent);
+  }
+  li::before{
+    content:""; position:absolute; left:0; top:.55em;
+    width:12px; height:12px; border-radius:3px;
+    background:linear-gradient(135deg, var(--accent), var(--accent-2));
+    box-shadow:0 0 18px color-mix(in oklab, var(--accent) 60%, transparent);
+    transform:rotate(45deg);
+  }
+  li b, li strong{ color:var(--ink); font-weight:650; }
+
+  blockquote{
+    margin:0; font-family:var(--font-head); font-weight:600;
+    font-size:clamp(24px, 3.4vw, 52px); line-height:1.22; letter-spacing:-.02em;
+  }
+  blockquote::before{ content:"\201C"; color:var(--accent); }
+  blockquote::after{ content:"\201D"; color:var(--accent); }
+  .cite{ margin-top:22px; color:var(--muted); font-size:clamp(14px,1.2vw,18px); }
+
+  /* KPI row ---------------------------------------------------- */
+  .kpis{
+    display:flex; flex-wrap:wrap; gap:clamp(16px,3vw,54px);
+    justify-content:center; margin-top:14px;
+  }
+  .kpi{ min-width:150px; }
+  .kpi .v{
+    font-family:var(--font-head); font-weight:750; letter-spacing:-.03em;
+    font-size:clamp(34px, 5.2vw, 76px); line-height:1;
+    background:linear-gradient(135deg, var(--accent), var(--accent-2));
+    -webkit-background-clip:text; background-clip:text; color:transparent;
+  }
+  .kpi .k{ margin-top:10px; color:var(--muted); font-size:clamp(12px,1.1vw,16px); letter-spacing:.04em; }
+
+  /* HUD -------------------------------------------------------- */
+  .hud{
+    position:fixed; z-index:3; left:var(--pad); right:var(--pad);
+    display:flex; align-items:center; gap:16px;
+    font-size:12px; letter-spacing:.14em; text-transform:uppercase; color:var(--muted);
+  }
+  .hud.top{ top:clamp(18px,3vh,34px); }
+  .hud.bot{ bottom:clamp(18px,3vh,34px); }
+  .brand{ font-weight:600; color:color-mix(in oklab, var(--ink) 70%, transparent); }
+  .spacer{ flex:1; }
+
+  .dots{ display:flex; gap:9px; pointer-events:auto; }
+  .dot{
+    width:9px; height:9px; padding:0; border:0; border-radius:99px; cursor:pointer;
+    background:rgba(255,255,255,.22); transition:all .3s cubic-bezier(.2,.7,.3,1);
+  }
+  .dot:hover{ background:rgba(255,255,255,.5); }
+  .dot.on{ width:28px; background:linear-gradient(90deg,var(--accent),var(--accent-2)); }
+  .dot:focus-visible{ outline:2px solid var(--accent); outline-offset:3px; }
+
+  .counter{ font-variant-numeric:tabular-nums; }
+  .counter b{ color:var(--ink); font-weight:600; }
+
+  #bar{
+    position:fixed; left:0; top:0; height:2px; z-index:4; width:0%;
+    background:linear-gradient(90deg,var(--accent),var(--accent-2));
+    box-shadow:0 0 14px var(--accent); transition:width .6s cubic-bezier(.2,.7,.3,1);
+  }
+
+  .hint{ opacity:.55; }
+  kbd{
+    font:inherit; font-size:11px; border:1px solid var(--edge); border-radius:5px;
+    padding:2px 6px; background:rgba(255,255,255,.05);
+  }
+
+  /* Speaker notes ---------------------------------------------- */
+  #notes{
+    position:fixed; z-index:5; left:50%; bottom:0; translate:-50% 100%;
+    width:min(820px, 92vw); max-height:44vh; overflow:auto;
+    padding:22px 26px; border-radius:18px 18px 0 0;
+    background:var(--panel); border:1px solid var(--edge); border-bottom:0;
+    backdrop-filter:blur(18px); -webkit-backdrop-filter:blur(18px);
+    color:var(--ink); font-size:16px; line-height:1.6;
+    transition:translate .4s cubic-bezier(.2,.7,.3,1);
+  }
+  #notes.open{ translate:-50% 0; }
+  #notes h4{ margin:0 0 10px; font-size:11px; letter-spacing:.2em; text-transform:uppercase; color:var(--accent); }
+
+  /* Fallback if WebGL / CDN is unavailable — text still reads --- */
+  #fallback{
+    position:fixed; z-index:6; left:50%; bottom:16px; translate:-50% 0;
+    display:none; padding:9px 16px; border-radius:99px;
+    background:var(--panel); border:1px solid var(--edge); backdrop-filter:blur(12px);
+    color:var(--muted); font-size:12px; letter-spacing:.06em;
+  }
+  body.no-gl #fallback{ display:block; }
+  body.no-gl{ background:
+      radial-gradient(90% 70% at 20% 10%, color-mix(in oklab, var(--accent) 22%, transparent), transparent 60%),
+      radial-gradient(80% 70% at 85% 90%, color-mix(in oklab, var(--accent-2) 20%, transparent), transparent 60%),
+      var(--bg); }
+
+  @media (max-width: 780px){
+    .slide[data-layout="content"] .box{ max-width:none; }
+    .hud .hint{ display:none; }
+  }
+  @media (prefers-reduced-motion: reduce){
+    .box > *{ transition-duration:.01ms; transition-delay:0ms; }
+    .slide{ transition-duration:.01ms; }
+  }
+  @media print{ #gl,.veil,.hud,#bar,#notes{ display:none; } .slide{ position:static; opacity:1; visibility:visible; page-break-after:always; } }
+</style>
+</head>
+<body>
+  <canvas id="gl"></canvas>
+  <div class="veil"></div>
+  <div id="stage"></div>
+  <div id="bar"></div>
+
+  <div class="hud top">
+    <span class="brand" id="brand"></span>
+    <span class="spacer"></span>
+    <span class="counter"><b id="cur">1</b> / <span id="tot">1</span></span>
+  </div>
+
+  <div class="hud bot">
+    <span class="hint"><kbd>&larr;</kbd> <kbd>&rarr;</kbd> навигация &nbsp;·&nbsp; <kbd>N</kbd> заметки &nbsp;·&nbsp; <kbd>F</kbd> полный экран</span>
+    <span class="spacer"></span>
+    <nav class="dots" id="dots" aria-label="Слайды"></nav>
+  </div>
+
+  <aside id="notes"><h4>Заметки докладчика</h4><div id="notesBody"></div></aside>
+  <div id="fallback">3D-слой недоступен — показан текстовый режим</div>
+
+<script type="importmap">
+{ "imports": { "three": "https://unpkg.com/three@0.169.0/build/three.module.js" } }
+</script>
+
+<script type="module">
+/* ============================================================
+   DECK — THIS IS THE ONLY BLOCK THE AGENT EDITS.
+   Everything below it is the engine and stays untouched.
+   ============================================================ */
+const DECK = {
+  brand: "Название доклада",
+  theme: {
+    bg: "#05060c", ink: "#eef1ff", muted: "#9aa3c4",
+    accent: "#6ea8ff", accent2: "#b06cff"
+  },
+  slides: [
+    {
+      layout: "title",
+      eyebrow: "2026",
+      title: "Заголовок презентации",
+      lead: "Подзаголовок в одну–две строки, который задаёт контекст.",
+      visual: "particles",
+      notes: "Поздороваться, назвать тему, обозначить, сколько это займёт."
+    },
+    {
+      layout: "content",
+      eyebrow: "Проблема",
+      title: "О чём идёт речь",
+      bullets: [
+        "<b>Первый тезис</b> — короткое пояснение к нему.",
+        "<b>Второй тезис</b> — почему это важно именно сейчас.",
+        "<b>Третий тезис</b> — что из этого следует."
+      ],
+      visual: "network",
+      notes: "Держаться одной мысли на пункт."
+    },
+    {
+      layout: "stats",
+      eyebrow: "Цифры",
+      title: "Масштаб",
+      kpis: [ {v:"4.8×", k:"рост за год"}, {v:"120 мс", k:"время отклика"}, {v:"99.95%", k:"аптайм"} ],
+      visual: "bars",
+      notes: "Назвать источник данных."
+    },
+    {
+      layout: "full",
+      eyebrow: "Решение",
+      title: "Как это устроено",
+      lead: "Одно предложение, которое объясняет картинку на экране.",
+      visual: "helix",
+      notes: "Дать паузу — пусть посмотрят на анимацию."
+    },
+    {
+      layout: "quote",
+      quote: "Короткая цитата, которая закрывает мысль.",
+      cite: "— Автор, должность",
+      visual: "globe",
+      notes: "Пауза перед финалом."
+    }
+  ]
+};
+/* =================== END OF EDITABLE BLOCK =================== */
+
+
+/* ------------------------------------------------------------------
+   1. Theme + DOM build (works with or without WebGL)
+------------------------------------------------------------------ */
+const $ = (s) => document.querySelector(s);
+const slides = DECK.slides;
+const N = slides.length;
+
+(function applyTheme(){
+  const t = DECK.theme || {};
+  const map = { bg:"--bg", ink:"--ink", muted:"--muted", accent:"--accent", accent2:"--accent-2",
+                font:"--font", fontHead:"--font-head" };
+  for (const [k, v] of Object.entries(map)) if (t[k]) document.documentElement.style.setProperty(v, t[k]);
+  document.title = DECK.brand || "3D Presentation";
+  $("#brand").textContent = DECK.brand || "";
+  $("#tot").textContent = N;
+})();
+
+const esc = (s) => String(s ?? "");
+
+const stage = $("#stage");
+stage.innerHTML = slides.map((s, i) => {
+  const parts = [];
+  if (s.eyebrow) parts.push(`<p class="eyebrow">${esc(s.eyebrow)}</p>`);
+  if (s.quote)   parts.push(`<blockquote>${esc(s.quote)}</blockquote>`);
+  if (s.title)   parts.push(s.layout === "title" ? `<h1>${esc(s.title)}</h1>` : `<h2>${esc(s.title)}</h2>`);
+  if (s.lead)    parts.push(`<p class="lead">${esc(s.lead)}</p>`);
+  if (s.bullets?.length) parts.push(`<ul>${s.bullets.map(b => `<li>${esc(b)}</li>`).join("")}</ul>`);
+  if (s.kpis?.length)
+    parts.push(`<div class="kpis">${s.kpis.map(k => `<div class="kpi"><div class="v">${esc(k.v)}</div><div class="k">${esc(k.k)}</div></div>`).join("")}</div>`);
+  if (s.cite)    parts.push(`<p class="cite">${esc(s.cite)}</p>`);
+
+  const staggered = parts.map((h, j) => h.replace(/^<(\w+)/, `<$1 style="--i:${j}"`)).join("");
+  return `<section class="slide" data-layout="${esc(s.layout || "content")}" aria-hidden="true">
+            <div class="box">${staggered}</div>
+          </section>`;
+}).join("");
+
+const panels = [...document.querySelectorAll(".slide")];
+const dots = $("#dots");
+dots.innerHTML = slides.map((s, i) =>
+  `<button class="dot" data-i="${i}" aria-label="Слайд ${i + 1}: ${esc(s.title || s.quote || "")}"></button>`).join("");
+dots.addEventListener("click", (e) => {
+  const b = e.target.closest(".dot"); if (b) go(+b.dataset.i);
+});
+
+/* ------------------------------------------------------------------
+   2. Navigation state — drives both the DOM and the camera
+------------------------------------------------------------------ */
+let cur = 0;
+const reduced = matchMedia("(prefers-reduced-motion: reduce)").matches;
+let onSlideChange = () => {};   // the 3D engine hooks into this
+
+function go(i){
+  i = Math.max(0, Math.min(N - 1, i));
+  if (i === cur && panels[cur].classList.contains("is-active")) return;
+  cur = i;
+
+  panels.forEach((p, j) => {
+    p.classList.toggle("is-active", j === i);
+    p.setAttribute("aria-hidden", j === i ? "false" : "true");
+  });
+  [...dots.children].forEach((d, j) => d.classList.toggle("on", j === i));
+  $("#cur").textContent = i + 1;
+  $("#bar").style.width = (N < 2 ? 100 : (i / (N - 1)) * 100) + "%";
+  $("#notesBody").textContent = slides[i].notes || "—";
+  location.hash = String(i + 1);
+
+  onSlideChange(i);
+}
+
+const next = () => go(cur + 1);
+const prev = () => go(cur - 1);
+
+addEventListener("keydown", (e) => {
+  switch (e.key) {
+    case "ArrowRight": case "ArrowDown": case " ": case "PageDown": e.preventDefault(); next(); break;
+    case "ArrowLeft":  case "ArrowUp":   case "PageUp":             e.preventDefault(); prev(); break;
+    case "Home": go(0); break;
+    case "End":  go(N - 1); break;
+    case "n": case "N": case "т": case "Т": $("#notes").classList.toggle("open"); break;
+    case "f": case "F": case "а": case "А":
+      document.fullscreenElement ? document.exitFullscreen() : document.documentElement.requestFullscreen(); break;
+  }
+});
+
+addEventListener("click", (e) => { if (!e.target.closest("button, a, #notes")) next(); });
+addEventListener("wheel", (() => {
+  let lock = 0;
+  return (e) => {
+    if (Math.abs(e.deltaY) < 24 || performance.now() < lock) return;
+    lock = performance.now() + 700;
+    e.deltaY > 0 ? next() : prev();
+  };
+})(), { passive: true });
+
+let touchX = 0, touchY = 0;
+addEventListener("touchstart", (e) => { touchX = e.touches[0].clientX; touchY = e.touches[0].clientY; }, { passive: true });
+addEventListener("touchend", (e) => {
+  const dx = e.changedTouches[0].clientX - touchX;
+  const dy = e.changedTouches[0].clientY - touchY;
+  if (Math.abs(dx) > 55 && Math.abs(dx) > Math.abs(dy)) dx < 0 ? next() : prev();
+}, { passive: true });
+
+/* Pointer parallax, normalised to [-1, 1] — read by the camera rig */
+const pointer = { x: 0, y: 0, tx: 0, ty: 0 };
+addEventListener("pointermove", (e) => {
+  pointer.tx = (e.clientX / innerWidth) * 2 - 1;
+  pointer.ty = (e.clientY / innerHeight) * 2 - 1;
+});
+
+/* ------------------------------------------------------------------
+   3. 3D engine — degrades to the text layer if it cannot start
+------------------------------------------------------------------ */
+try {
+  const THREE = await import("three");
+
+  const canvas = $("#gl");
+  const renderer = new THREE.WebGLRenderer({ canvas, antialias: true, alpha: false, powerPreference: "high-performance" });
+  renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
+  renderer.setSize(innerWidth, innerHeight);
+  renderer.outputColorSpace = THREE.SRGBColorSpace;
+  renderer.toneMapping = THREE.ACESFilmicToneMapping;
+  renderer.toneMappingExposure = 1.15;
+
+  const css = getComputedStyle(document.documentElement);
+  const col = (name, fallback) => new THREE.Color((css.getPropertyValue(name).trim() || fallback));
+  const BG = col("--bg", "#05060c"), A1 = col("--accent", "#6ea8ff"), A2 = col("--accent-2", "#b06cff");
+
+  const scene = new THREE.Scene();
+  scene.background = BG;
+  /* Tight fog is what keeps neighbouring stations from cluttering the frame. */
+  const SPACING = 48;
+  scene.fog = new THREE.Fog(BG, 22, 120);
+
+  const camera = new THREE.PerspectiveCamera(52, innerWidth / innerHeight, 0.1, 800);
+  scene.add(new THREE.AmbientLight(0xffffff, 0.55));
+  const key = new THREE.DirectionalLight(A1.clone().lerp(new THREE.Color("#ffffff"), .5), 2.4);
+  key.position.set(6, 10, 8); scene.add(key);
+  const rim = new THREE.PointLight(A2, 140, 90); rim.position.set(-10, -6, -8); scene.add(rim);
+
+  /* --- Ambient starfield: constant depth cue across the whole flight --- */
+  (function stars(){
+    const n = 2600, pos = new Float32Array(n * 3), colr = new Float32Array(n * 3);
+    const c = new THREE.Color();
+    for (let i = 0; i < n; i++){
+      pos[i*3]   = (Math.random() - .5) * 340;
+      pos[i*3+1] = (Math.random() - .5) * 200;
+      pos[i*3+2] = -Math.random() * (N * SPACING + 160) + 60;
+      c.copy(A1).lerp(A2, Math.random()).lerp(new THREE.Color("#ffffff"), Math.random() * .7);
+      c.toArray(colr, i * 3);
+    }
+    const g = new THREE.BufferGeometry();
+    g.setAttribute("position", new THREE.BufferAttribute(pos, 3));
+    g.setAttribute("color", new THREE.BufferAttribute(colr, 3));
+    scene.add(new THREE.Points(g, new THREE.PointsMaterial({
+      size: .5, vertexColors: true, transparent: true, opacity: .75,
+      blending: THREE.AdditiveBlending, depthWrite: false, sizeAttenuation: true
+    })));
+  })();
+
+  /* --- Visual generators. Each returns { group, update(t, dt) } ------ */
+  const line = (o = .5) => new THREE.LineBasicMaterial({ color: A1, transparent: true, opacity: o });
+  const solid = (c, rough = .28) => new THREE.MeshStandardMaterial({ color: c, roughness: rough, metalness: .55 });
+
+  const VISUALS = {
+    particles(){
+      const g = new THREE.Group(), n = 1400;
+      const pos = new Float32Array(n * 3), seed = [];
+      for (let i = 0; i < n; i++){
+        const r = 3 + Math.random() * 6, a = Math.random() * Math.PI * 2, y = (Math.random() - .5) * 10;
+        pos[i*3] = Math.cos(a) * r; pos[i*3+1] = y; pos[i*3+2] = Math.sin(a) * r;
+        seed.push({ r, a, y, s: .2 + Math.random() * .5 });
+      }
+      const geo = new THREE.BufferGeometry();
+      geo.setAttribute("position", new THREE.BufferAttribute(pos, 3));
+      g.add(new THREE.Points(geo, new THREE.PointsMaterial({
+        size: .13, color: A1, transparent: true, opacity: .9,
+        blending: THREE.AdditiveBlending, depthWrite: false
+      })));
+      return { group: g, update(t){
+        const p = geo.attributes.position.array;
+        for (let i = 0; i < n; i++){
+          const s = seed[i], a = s.a + t * s.s * .3;
+          p[i*3]   = Math.cos(a) * s.r;
+          p[i*3+1] = s.y + Math.sin(t * .6 + s.r) * .7;
+          p[i*3+2] = Math.sin(a) * s.r;
+        }
+        geo.attributes.position.needsUpdate = true;
+      }};
+    },
+
+    globe(){
+      const g = new THREE.Group();
+      const wire = new THREE.LineSegments(
+        new THREE.WireframeGeometry(new THREE.IcosahedronGeometry(4.6, 3)), line(.22));
+      g.add(wire);
+      const core = new THREE.Mesh(new THREE.IcosahedronGeometry(4.3, 4), solid(A2, .5));
+      core.material.transparent = true; core.material.opacity = .16; g.add(core);
+      const sats = new THREE.Group(); g.add(sats);
+      for (let i = 0; i < 60; i++){
+        const d = new THREE.Mesh(new THREE.SphereGeometry(.07, 8, 8), solid(A1, .2));
+        const phi = Math.acos(1 - 2 * (i + .5) / 60), th = Math.PI * (1 + Math.sqrt(5)) * i, r = 4.8;
+        d.position.set(r * Math.sin(phi) * Math.cos(th), r * Math.cos(phi), r * Math.sin(phi) * Math.sin(th));
+        sats.add(d);
+      }
+      return { group: g, update(t){ wire.rotation.y = t * .12; sats.rotation.y = -t * .18; core.rotation.y = t * .08; }};
+    },
+
+    knot(){
+      const g = new THREE.Group();
+      const m = new THREE.Mesh(new THREE.TorusKnotGeometry(3.1, .82, 220, 32), solid(A1, .16));
+      m.material.metalness = .9; g.add(m);
+      const halo = new THREE.LineSegments(
+        new THREE.WireframeGeometry(new THREE.TorusKnotGeometry(3.5, .95, 90, 12)), line(.14));
+      g.add(halo);
+      return { group: g, update(t){ m.rotation.set(t * .22, t * .3, 0); halo.rotation.set(-t * .12, t * .16, 0); }};
+    },
+
+    bars(){
+      const g = new THREE.Group(), bars = [];
+      const vals = [.45, .72, .38, .95, .6, .82, .5];
+      vals.forEach((v, i) => {
+        const h = 1 + v * 7;
+        const b = new THREE.Mesh(new THREE.BoxGeometry(.9, h, .9),
+          solid(A1.clone().lerp(A2, i / vals.length), .3));
+        b.position.set((i - (vals.length - 1) / 2) * 1.5, h / 2 - 3.2, 0);
+        b.scale.y = 0.001; bars.push({ b, h, d: i * .09 }); g.add(b);
+      });
+      const floor = new THREE.GridHelper(18, 18, A1, A1);
+      floor.position.y = -3.2; floor.material.transparent = true; floor.material.opacity = .16;
+      g.add(floor);
+      return { group: g, update(t, _, local){
+        bars.forEach(({ b, h, d }) => {
+          const p = Math.max(0, Math.min(1, (local - d) * 1.6));
+          const e = 1 - Math.pow(1 - p, 3);
+          b.scale.y = Math.max(.001, e);
+          b.position.y = (h * e) / 2 - 3.2;
+        });
+        g.rotation.y = Math.sin(t * .18) * .25;
+      }};
+    },
+
+    grid(){
+      const g = new THREE.Group();
+      const a = new THREE.GridHelper(80, 40, A1, A2);
+      const b = a.clone();
+      a.material.transparent = b.material.transparent = true;
+      a.material.opacity = b.material.opacity = .3;
+      a.position.y = b.position.y = -4; b.position.z = -80;
+      g.add(a, b);
+      const sun = new THREE.Mesh(new THREE.CircleGeometry(5.5, 64), new THREE.MeshBasicMaterial({
+        color: A2, transparent: true, opacity: .5 }));
+      sun.position.set(0, 1.6, -34); g.add(sun);
+      return { group: g, update(t){
+        const z = (t * 6) % 80;
+        a.position.z = z; b.position.z = z - 80;
+      }};
+    },
+
+    helix(){
+      const g = new THREE.Group(), n = 84, rungs = [];
+      const strand = (off, c) => {
+        const pts = [];
+        for (let i = 0; i <= n; i++){
+          const y = (i / n - .5) * 13, a = i * .28 + off;
+          pts.push(new THREE.Vector3(Math.cos(a) * 2.6, y, Math.sin(a) * 2.6));
+        }
+        const m = new THREE.Mesh(new THREE.TubeGeometry(new THREE.CatmullRomCurve3(pts), 200, .17, 10, false), solid(c, .25));
+        g.add(m); return m;
+      };
+      strand(0, A1); strand(Math.PI, A2);
+      for (let i = 0; i <= n; i += 3){
+        const y = (i / n - .5) * 13, a = i * .28;
+        const r = new THREE.Mesh(new THREE.CylinderGeometry(.05, .05, 5.2, 6), solid(A1.clone().lerp(A2, .5), .4));
+        r.position.y = y; r.rotation.set(0, -a, Math.PI / 2); rungs.push(r); g.add(r);
+      }
+      return { group: g, update(t){ g.rotation.y = t * .35; }};
+    },
+
+    waves(){
+      const g = new THREE.Group();
+      const geo = new THREE.PlaneGeometry(30, 30, 70, 70);
+      const m = new THREE.Mesh(geo, new THREE.MeshStandardMaterial({
+        color: A1, wireframe: true, transparent: true, opacity: .45 }));
+      m.rotation.x = -Math.PI / 2.3; m.position.y = -2; g.add(m);
+      const base = geo.attributes.position.array.slice();
+      return { group: g, update(t){
+        const p = geo.attributes.position.array;
+        for (let i = 0; i < p.length; i += 3){
+          const x = base[i], y = base[i + 1];
+          p[i + 2] = Math.sin(x * .35 + t * 1.1) * .9 + Math.cos(y * .3 - t * .8) * .9;
+        }
+        geo.attributes.position.needsUpdate = true;
+      }};
+    },
+
+    cubes(){
+      const g = new THREE.Group(), items = [];
+      for (let i = 0; i < 46; i++){
+        const s = .4 + Math.random() * 1.5;
+        const c = new THREE.Mesh(new THREE.BoxGeometry(s, s, s), solid(A1.clone().lerp(A2, Math.random()), .25));
+        c.position.set((Math.random() - .5) * 15, (Math.random() - .5) * 12, (Math.random() - .5) * 12);
+        c.rotation.set(Math.random() * 3, Math.random() * 3, 0);
+        items.push({ c, sp: (Math.random() - .5) * .5, ph: Math.random() * 9 }); g.add(c);
+      }
+      return { group: g, update(t){
+        items.forEach(({ c, sp, ph }) => {
+          c.rotation.x += sp * .004; c.rotation.y += sp * .006;
+          c.position.y += Math.sin(t + ph) * .004;
+        });
+        g.rotation.y = Math.sin(t * .15) * .3;
+      }};
+    },
+
+    rings(){
+      const g = new THREE.Group(), rs = [];
+      for (let i = 0; i < 7; i++){
+        const r = new THREE.Mesh(new THREE.TorusGeometry(1.6 + i * .85, .045, 12, 140),
+          solid(A1.clone().lerp(A2, i / 6), .2));
+        r.rotation.x = Math.PI / 2 + (Math.random() - .5) * .8;
+        r.rotation.y = Math.random() * Math.PI;
+        rs.push({ r, s: (i % 2 ? 1 : -1) * (.1 + i * .04) }); g.add(r);
+      }
+      const core = new THREE.Mesh(new THREE.IcosahedronGeometry(.9, 2), solid(A2, .1));
+      g.add(core);
+      return { group: g, update(t){
+        rs.forEach(({ r, s }) => { r.rotation.z = t * s; r.rotation.y += s * .002; });
+        core.rotation.set(t * .4, t * .3, 0);
+        core.scale.setScalar(1 + Math.sin(t * 1.6) * .07);
+      }};
+    },
+
+    network(){
+      const g = new THREE.Group(), nodes = [];
+      const n = 34;
+      for (let i = 0; i < n; i++){
+        const v = new THREE.Vector3((Math.random() - .5) * 13, (Math.random() - .5) * 9, (Math.random() - .5) * 9);
+        const m = new THREE.Mesh(new THREE.SphereGeometry(.16, 12, 12), solid(A1.clone().lerp(A2, Math.random()), .2));
+        m.position.copy(v); g.add(m); nodes.push({ m, v, ph: Math.random() * 9 });
+      }
+      const pts = [];
+      for (let i = 0; i < n; i++) for (let j = i + 1; j < n; j++)
+        if (nodes[i].v.distanceTo(nodes[j].v) < 4.6) pts.push(nodes[i].v.clone(), nodes[j].v.clone());
+      const lg = new THREE.BufferGeometry().setFromPoints(pts);
+      g.add(new THREE.LineSegments(lg, line(.2)));
+      return { group: g, update(t){
+        nodes.forEach(({ m, v, ph }) => { m.position.y = v.y + Math.sin(t * .8 + ph) * .25; });
+        g.rotation.y = t * .1;
+      }};
+    }
+  };
+
+  /* --- Lay the slides out along a gentle spiral through space ------- */
+  const stations = slides.map((s, i) => {
+    const gen = VISUALS[s.visual] || VISUALS.particles;
+    const built = gen();
+    const centre = new THREE.Vector3(Math.cos(i * .75) * 11, Math.sin(i * .6) * 4.5, -i * SPACING);
+    built.group.position.copy(centre);
+    scene.add(built.group);
+
+    /* Text sits left on "content"; nudge the camera so the object clears it. */
+    const layout = s.layout || "content";
+    const shift = layout === "content" ? -7.5 : 0;
+    const dist  = layout === "full" ? 15 : layout === "title" ? 21 : 18;
+    if (layout === "content") built.group.scale.setScalar(.88);
+
+    const eye = centre.clone().add(new THREE.Vector3(shift, 1.2, dist));
+    const dummy = new THREE.Object3D();
+    dummy.position.copy(eye);
+    dummy.lookAt(centre);
+
+    return { built, centre, eye, quat: dummy.quaternion.clone() };
+  });
+
+  /* --- Camera flight: bezier arc + slerp, eased ---------------------- */
+  const DUR = reduced ? 0.01 : 1.35;
+  const ease = (x) => x < .5 ? 4 * x * x * x : 1 - Math.pow(-2 * x + 2, 3) / 2;
+
+  let flight = null;                 // { from, to, ctrl, qFrom, qTo, t }
+  let localT = 0;                    // seconds since the current slide landed
+  const basePos = stations[0].eye.clone();
+  const baseQuat = stations[0].quat.clone();
+
+  camera.position.copy(basePos);
+  camera.quaternion.copy(baseQuat);
+
+  onSlideChange = (i) => {
+    const to = stations[i];
+    const from = basePos.clone();
+    /* Pull the arc outward so the flight reads as travel, not a cut. */
+    const ctrl = from.clone().lerp(to.eye, .5)
+      .add(new THREE.Vector3(0, 6 + Math.abs(i % 2 ? 4 : -4), 12));
+    flight = { from, ctrl, to: to.eye.clone(), qFrom: baseQuat.clone(), qTo: to.quat, t: 0 };
+    localT = 0;
+  };
+
+  const tmp = new THREE.Vector3();
+  const bezier = (out, p0, p1, p2, t) => {
+    const u = 1 - t;
+    return out.set(
+      u * u * p0.x + 2 * u * t * p1.x + t * t * p2.x,
+      u * u * p0.y + 2 * u * t * p1.y + t * t * p2.y,
+      u * u * p0.z + 2 * u * t * p1.z + t * t * p2.z
+    );
+  };
+
+  addEventListener("resize", () => {
+    camera.aspect = innerWidth / innerHeight;
+    camera.updateProjectionMatrix();
+    renderer.setSize(innerWidth, innerHeight);
+  });
+
+  const clock = new THREE.Clock();
+  renderer.setAnimationLoop(() => {
+    const dt = Math.min(clock.getDelta(), .05);
+    const t = clock.getElapsedTime();
+    localT += dt;
+
+    if (flight){
+      flight.t = Math.min(1, flight.t + dt / DUR);
+      const e = ease(flight.t);
+      bezier(basePos, flight.from, flight.ctrl, flight.to, e);
+      baseQuat.slerpQuaternions(flight.qFrom, flight.qTo, e);
+      if (flight.t >= 1){ basePos.copy(flight.to); baseQuat.copy(flight.qTo); flight = null; }
+    }
+
+    /* Parallax + idle drift, applied in camera space so it always reads. */
+    pointer.x += (pointer.tx - pointer.x) * .05;
+    pointer.y += (pointer.ty - pointer.y) * .05;
+    tmp.set(
+      pointer.x * 1.6 + Math.sin(t * .25) * .5,
+      -pointer.y * 1.1 + Math.cos(t * .21) * .4,
+      0
+    ).applyQuaternion(baseQuat);
+
+    camera.position.copy(basePos).add(tmp);
+    camera.quaternion.copy(baseQuat);
+    camera.lookAt(stations[cur].centre);
+
+    /* Only draw and animate what is near the camera — keeps long decks
+       smooth, and keeps the neighbouring slide's object out of the frame. */
+    stations.forEach((st, i) => {
+      const near = Math.abs(i - cur) <= 1;
+      st.built.group.visible = near;
+      if (near) st.built.update(t, dt, i === cur ? localT : 0);
+    });
+
+    renderer.render(scene, camera);
+  });
+
+} catch (err){
+  console.warn("3D layer disabled:", err);
+  document.body.classList.add("no-gl");
+}
+
+/* ------------------------------------------------------------------
+   4. Boot — honour a #n deep link, and follow it when it changes
+      in place (back/forward, or a pasted link on an open deck).
+------------------------------------------------------------------ */
+const fromHash = () => Math.max(0, Math.min(N - 1, (parseInt(location.hash.slice(1), 10) || 1) - 1));
+addEventListener("hashchange", () => { if (fromHash() !== cur) go(fromHash()); });
+go(fromHash());
+</script>
+</body>
+</html>
