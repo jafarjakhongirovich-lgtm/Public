@@ -186,6 +186,18 @@
   .brand{ font-weight:600; color:color-mix(in oklab, var(--ink) 70%, transparent); }
   .spacer{ flex:1; }
 
+  .play{
+    pointer-events:auto; cursor:pointer; margin-right:16px;
+    width:30px; height:30px; padding:0; line-height:1;
+    display:grid; place-items:center;
+    border:1px solid var(--edge); border-radius:99px;
+    background:rgba(255,255,255,.05); color:var(--muted);
+    font-size:11px; transition:all .3s cubic-bezier(.2,.7,.3,1);
+  }
+  .play:hover{ color:var(--ink); border-color:var(--accent); }
+  .play.on{ color:var(--bg); background:var(--accent); border-color:var(--accent); }
+  .play:focus-visible{ outline:2px solid var(--accent); outline-offset:3px; }
+
   .dots{ display:flex; gap:9px; pointer-events:auto; }
   .dot{
     width:9px; height:9px; padding:0; border:0; border-radius:99px; cursor:pointer;
@@ -260,8 +272,9 @@
   </div>
 
   <div class="hud bot">
-    <span class="hint"><kbd>&larr;</kbd> <kbd>&rarr;</kbd> навигация &nbsp;·&nbsp; <kbd>N</kbd> заметки &nbsp;·&nbsp; <kbd>F</kbd> полный экран</span>
+    <span class="hint"><kbd>&larr;</kbd> <kbd>&rarr;</kbd> навигация &nbsp;·&nbsp; <kbd>P</kbd> автопоказ &nbsp;·&nbsp; <kbd>N</kbd> заметки &nbsp;·&nbsp; <kbd>F</kbd> полный экран</span>
     <span class="spacer"></span>
+    <button class="play" id="play" aria-label="Автопоказ">&#9654;</button>
     <nav class="dots" id="dots" aria-label="Слайды"></nav>
   </div>
 
@@ -279,6 +292,8 @@
    ============================================================ */
 const DECK = {
   brand: "3D Presentation Agent",
+  autoplay: false,
+  slideDuration: 11,
   theme: {
     bg: "#04101c", ink: "#eaf4ff", muted: "#8ba6c4",
     accent: "#4cc9f0", accent2: "#7b6cff"
@@ -290,6 +305,9 @@ const DECK = {
       title: "Слайды, через которые летят",
       lead: "Агент собирает презентацию из темы или конспекта — один HTML-файл, который открывается в любом браузере.",
       visual: "particles",
+      build: "grow",
+      motion: "drift",
+      duration: 8,
       notes: "Это тот самый файл, который агент отдаёт на выходе. Всё, что видно — сгенерировано из блока DECK."
     },
     {
@@ -297,11 +315,14 @@ const DECK = {
       eyebrow: "Проблема",
       title: "Обычная дека не удерживает зал",
       bullets: [
-        "<b>Плоские слайды</b> — глаз не за что зацепить между переходами.",
+        "<b>Плоские слайды</b> — глазу не за что зацепиться между переходами.",
         "<b>Текст вместо мысли</b> — докладчик читает то, что все уже прочли.",
         "<b>Тяжёлые инструменты</b> — правка одной цифры открывает редактор на полчаса."
       ],
       visual: "network",
+      build: "assemble",
+      motion: "orbit",
+      duration: 14,
       notes: "Не задерживаться: это разгон к тому, что предлагается взамен."
     },
     {
@@ -310,6 +331,9 @@ const DECK = {
       title: "Камера летит сквозь сцену",
       lead: "Слайды расставлены по спирали в 3D-пространстве. Переход — не смена картинки, а перелёт по дуге между точками.",
       visual: "helix",
+      build: "rise",
+      motion: "dolly",
+      duration: 11,
       notes: "Дать паузу на четыре-пять секунд. Пусть посмотрят на движение, а не на меня."
     },
     {
@@ -318,30 +342,48 @@ const DECK = {
       title: "Один файл, ноль сборки",
       kpis: [
         { v: "1", k: "HTML-файл на выходе" },
-        { v: "10", k: "3D-объектов на выбор" },
+        { v: "14", k: "3D-сцен на выбор" },
         { v: "5", k: "раскладок слайда" }
       ],
       visual: "bars",
+      motion: "push",
+      duration: 10,
       notes: "Показать, что файл открывается двойным кликом — ни сервера, ни установки."
+    },
+    {
+      layout: "full",
+      eyebrow: "Анимация",
+      title: "Движение вместо оформления",
+      lead: "Облако точек перетекает из формы в форму, конструкция собирает себя по блокам, частицы идут по трубе через ворота.",
+      visual: "morph",
+      motion: "orbit",
+      duration: 16,
+      notes: "Здесь стоит помолчать и дать сцене отработать полный цикл превращений."
     },
     {
       layout: "content",
       eyebrow: "Редактирование",
       title: "Меняется только блок DECK",
       bullets: [
-        "<b>Движок не трогаем</b> — вся логика камеры и сцены уже отлажена.",
+        "<b>Движок не трогаем</b> — камера, сцены и хореография уже отлажены.",
         "<b>Контент — это данные</b> — заголовки, тезисы, цифры, заметки.",
         "<b>Тема — две краски</b> — accent и accent2 перекрашивают и текст, и 3D."
       ],
       visual: "cubes",
+      build: "assemble",
+      motion: "drift",
+      duration: 14,
       notes: "Здесь можно вживую открыть исходник и показать блок DECK."
     },
     {
       layout: "quote",
       quote: "Хорошая презентация — это не файл, а то, что осталось в голове у зала.",
       cite: "— принцип, по которому агент режет текст",
-      visual: "globe",
-      notes: "Финал. Сказать про клавиши: N — заметки, F — полный экран."
+      visual: "orbitals",
+      build: "spin",
+      motion: "dolly",
+      duration: 10,
+      notes: "Финал. Сказать про клавиши: P — автопоказ, N — заметки, F — полный экран."
     }
   ]
 };
@@ -421,6 +463,18 @@ function go(i){
 const next = () => go(cur + 1);
 const prev = () => go(cur - 1);
 
+/* Cinematic mode: the deck advances itself, each slide held for its own
+   beat. The 3D loop reads `playing`; everything here is presentation. */
+let playing = false;
+function setPlaying(v){
+  playing = v;
+  const b = $("#play");
+  b.classList.toggle("on", v);
+  b.textContent = v ? "❚❚" : "▶";
+  b.setAttribute("aria-label", v ? "Пауза" : "Автопоказ");
+}
+$("#play").addEventListener("click", (e) => { e.stopPropagation(); setPlaying(!playing); });
+
 addEventListener("keydown", (e) => {
   switch (e.key) {
     case "ArrowRight": case "ArrowDown": case " ": case "PageDown": e.preventDefault(); next(); break;
@@ -428,6 +482,7 @@ addEventListener("keydown", (e) => {
     case "Home": go(0); break;
     case "End":  go(N - 1); break;
     case "n": case "N": case "т": case "Т": $("#notes").classList.toggle("open"); break;
+    case "p": case "P": case "з": case "З": setPlaying(!playing); break;
     case "f": case "F": case "а": case "А":
       document.fullscreenElement ? document.exitFullscreen() : document.documentElement.requestFullscreen(); break;
   }
@@ -697,30 +752,261 @@ try {
         nodes.forEach(({ m, v, ph }) => { m.position.y = v.y + Math.sin(t * .8 + ph) * .25; });
         g.rotation.y = t * .1;
       }};
+    },
+
+    /* ---- Scenes below are choreographed: the motion IS the content. ---- */
+
+    morph(){
+      /* One cloud of points that re-forms into a different solid every few
+         seconds. The shape change carries the meaning, not a spin. */
+      const g = new THREE.Group(), n = 3000;
+      const sphere = [], knot = [], box = [], wave = [];
+      for (let i = 0; i < n; i++){
+        const phi = Math.acos(1 - 2 * (i + .5) / n), th = Math.PI * (1 + Math.sqrt(5)) * i, R = 6.4;
+        sphere.push(R * Math.sin(phi) * Math.cos(th), R * Math.cos(phi), R * Math.sin(phi) * Math.sin(th));
+
+        const u = (i / n) * Math.PI * 6, rr = 2 + Math.cos(u * 1.5) * .9;
+        knot.push(Math.cos(u) * rr * 2.2, Math.sin(u * 1.5) * 2.5, Math.sin(u) * rr * 2.2);
+
+        const s = 5.2, a = (Math.random() - .5) * 10.4, b = (Math.random() - .5) * 10.4;
+        const face = [[a,b,s],[a,b,-s],[a,s,b],[a,-s,b],[s,a,b],[-s,a,b]][i % 6];
+        box.push(face[0], face[1], face[2]);
+
+        const gx = ((i % 60) / 60 - .5) * 21, gz = (Math.floor(i / 60) / 50 - .5) * 21;
+        wave.push(gx, Math.sin(gx * .55) * 1.8 + Math.cos(gz * .45) * 1.8, gz);
+      }
+      const forms = [sphere, knot, box, wave].map(f => new Float32Array(f));
+
+      const geo = new THREE.BufferGeometry();
+      const pos = new Float32Array(forms[0]);
+      geo.setAttribute("position", new THREE.BufferAttribute(pos, 3));
+      g.add(new THREE.Points(geo, new THREE.PointsMaterial({
+        size: .13, color: A1, transparent: true, opacity: .95,
+        blending: THREE.AdditiveBlending, depthWrite: false })));
+
+      const CYCLE = 4.6, HOLD = .38;   /* HOLD = share of the cycle spent settled */
+      return { group: g, update(t){
+        const k = t / CYCLE, i0 = Math.floor(k) % forms.length, i1 = (i0 + 1) % forms.length;
+        let p = (k % 1 - HOLD) / (1 - HOLD);
+        p = Math.max(0, Math.min(1, p));
+        const e = p < .5 ? 4 * p * p * p : 1 - Math.pow(-2 * p + 2, 3) / 2;
+        const a = forms[i0], b = forms[i1];
+        for (let j = 0; j < pos.length; j++) pos[j] = a[j] + (b[j] - a[j]) * e;
+        geo.attributes.position.needsUpdate = true;
+        g.rotation.y = t * .1;
+      }};
+    },
+
+    flow(){
+      /* Particles running along a path through gates — a pipeline. */
+      const g = new THREE.Group();
+      const curve = new THREE.CatmullRomCurve3([
+        new THREE.Vector3(-9, -3, 2), new THREE.Vector3(-3, 3, -3),
+        new THREE.Vector3(3, -2.5, 3), new THREE.Vector3(9, 3, -2)
+      ]);
+      g.add(new THREE.Mesh(new THREE.TubeGeometry(curve, 140, .05, 8, false),
+        new THREE.MeshBasicMaterial({ color: A1, transparent: true, opacity: .25 })));
+
+      const v = new THREE.Vector3();
+      [.25, .5, .75].forEach(u => {
+        const ring = new THREE.Mesh(new THREE.TorusGeometry(.95, .04, 8, 40), solid(A1, .3));
+        curve.getPointAt(u, v);
+        ring.position.copy(v);
+        ring.lookAt(v.clone().add(curve.getTangentAt(u)));
+        g.add(ring);
+      });
+
+      /* Offsets must be uneven. Evenly spaced particles moving at one speed
+         look like a static dotted line — the gaps are what make the motion
+         visible, so clump them and give each packet its own pace. */
+      const n = 190, geo = new THREE.BufferGeometry(), pos = new Float32Array(n * 3);
+      const drops = [];
+      for (let i = 0; i < n; i++){
+        const packet = Math.floor(i / 24);
+        drops.push({ off: (packet * .17 + Math.random() * .075) % 1, sp: .1 + Math.random() * .05 });
+      }
+      geo.setAttribute("position", new THREE.BufferAttribute(pos, 3));
+      g.add(new THREE.Points(geo, new THREE.PointsMaterial({
+        size: .24, color: A2, transparent: true, opacity: .95,
+        blending: THREE.AdditiveBlending, depthWrite: false })));
+
+      return { group: g, update(t){
+        for (let i = 0; i < n; i++){
+          curve.getPointAt((drops[i].off + t * drops[i].sp) % 1, v);
+          pos[i*3] = v.x; pos[i*3+1] = v.y; pos[i*3+2] = v.z;
+        }
+        geo.attributes.position.needsUpdate = true;
+      }};
+    },
+
+    build(){
+      /* A structure that stacks itself, block by block, on arrival. */
+      const g = new THREE.Group(), blocks = [];
+      let k = 0;
+      for (let lvl = 0; lvl < 4; lvl++){
+        const count = 4 - lvl;
+        for (let i = 0; i < count; i++){
+          const m = new THREE.Mesh(new THREE.BoxGeometry(1.9, 1.1, 1.9),
+            solid(A1.clone().lerp(A2, lvl / 3), .3));
+          const home = new THREE.Vector3((i - (count - 1) / 2) * 2.15, lvl * 1.25 - 2.1, 0);
+          m.position.copy(home);
+          blocks.push({ m, home, d: k * .17 }); k++;
+          g.add(m);
+        }
+      }
+      const floor = new THREE.GridHelper(16, 16, A1, A1);
+      floor.position.y = -2.85; floor.material.transparent = true; floor.material.opacity = .15;
+      g.add(floor);
+
+      return { group: g, update(t, _, local){
+        blocks.forEach(({ m, home, d }) => {
+          const p = Math.max(0, Math.min(1, (local - d) * 1.5));
+          const e = 1 - Math.pow(1 - p, 3);
+          m.position.y = home.y + (1 - e) * 15;
+          m.rotation.y = (1 - e) * 2.4;
+          m.scale.setScalar(Math.max(.001, e));
+        });
+        g.rotation.y = Math.sin(t * .16) * .32;
+      }};
+    },
+
+    orbitals(){
+      /* A core with bodies on tilted orbits — layers, or a system at rest. */
+      const g = new THREE.Group(), bodies = [];
+      const core = new THREE.Mesh(new THREE.IcosahedronGeometry(1.5, 3), solid(A2, .15));
+      g.add(core);
+      g.add(new THREE.Mesh(new THREE.SphereGeometry(2.15, 32, 32),
+        new THREE.MeshBasicMaterial({ color: A2, transparent: true, opacity: .1 })));
+
+      for (let i = 0; i < 4; i++){
+        const R = 3.3 + i * 1.9, tilt = (i - 1.5) * .32;
+        const ring = new THREE.Mesh(new THREE.TorusGeometry(R, .015, 6, 128),
+          new THREE.MeshBasicMaterial({ color: A1, transparent: true, opacity: .28 }));
+        ring.rotation.x = Math.PI / 2 + tilt;
+        g.add(ring);
+        const body = new THREE.Mesh(new THREE.SphereGeometry(.28 + i * .06, 16, 16),
+          solid(A1.clone().lerp(A2, i / 3), .25));
+        g.add(body);
+        bodies.push({ body, R, tilt, sp: .5 - i * .09, ph: i * 1.7 });
+      }
+      return { group: g, update(t){
+        bodies.forEach(({ body, R, tilt, sp, ph }) => {
+          const a = t * sp + ph;
+          body.position.set(Math.cos(a) * R, -Math.sin(a) * R * Math.sin(tilt), Math.sin(a) * R * Math.cos(tilt));
+        });
+        core.rotation.y = t * .3;
+        core.scale.setScalar(1 + Math.sin(t * 1.4) * .05);
+      }};
     }
   };
 
-  /* --- Lay the slides out along a gentle spiral through space ------- */
+  /* --- Lay the slides out along a gentle spiral through space -------
+     Each visual lives inside a pivot. The visual animates itself in local
+     space; the pivot carries the entrance choreography. Keeping the two
+     apart means any `build` works with any `visual`. */
   const stations = slides.map((s, i) => {
     const gen = VISUALS[s.visual] || VISUALS.particles;
     const built = gen();
     const centre = new THREE.Vector3(Math.cos(i * .75) * 11, Math.sin(i * .6) * 4.5, -i * SPACING);
-    built.group.position.copy(centre);
-    scene.add(built.group);
+
+    const pivot = new THREE.Group();
+    pivot.position.copy(centre);
+    pivot.add(built.group);
+    scene.add(pivot);
 
     /* Text sits left on "content"; nudge the camera so the object clears it. */
     const layout = s.layout || "content";
     const shift = layout === "content" ? -7.5 : 0;
     const dist  = layout === "full" ? 15 : layout === "title" ? 21 : 18;
-    if (layout === "content") built.group.scale.setScalar(.88);
+    const scale = layout === "content" ? .88 : 1;
+
+    /* For `build: "assemble"`, remember where every part belongs and give it
+       somewhere to fly in from. */
+    const parts = built.group.children.map((c) => ({
+      c,
+      home: c.position.clone(),
+      away: c.position.clone().add(new THREE.Vector3(
+        (Math.random() - .5) * 34, (Math.random() - .5) * 26, (Math.random() - .5) * 34))
+    }));
 
     const eye = centre.clone().add(new THREE.Vector3(shift, 1.2, dist));
     const dummy = new THREE.Object3D();
     dummy.position.copy(eye);
     dummy.lookAt(centre);
 
-    return { built, centre, eye, quat: dummy.quaternion.clone() };
+    return {
+      built, pivot, parts, centre, eye, scale,
+      quat: dummy.quaternion.clone(),
+      /* `bars` and `build` stage their own arrival — a second entrance on
+         top of that reads as a stutter, so they opt out by default. */
+      build: s.build || (s.visual === "bars" || s.visual === "build" ? "none" : "grow"),
+      motion: s.motion || "static",
+      duration: Math.max(2, s.duration || DECK.slideDuration || 9)
+    };
   });
+
+  /* --- Entrance choreography, driven by time since the camera landed --- */
+  const easeOut = (x) => 1 - Math.pow(1 - x, 3);
+
+  function choreograph(st, local){
+    const p = Math.max(0, Math.min(1, local / 1.5));
+    const e = reduced ? 1 : easeOut(p);
+
+    st.pivot.scale.setScalar(st.scale);
+    st.pivot.rotation.set(0, 0, 0);
+    st.pivot.position.copy(st.centre);
+    st.parts.forEach(({ c, home }) => c.position.copy(home));
+
+    switch (st.build){
+      case "assemble":
+        st.parts.forEach(({ c, home, away }) => c.position.lerpVectors(away, home, e));
+        st.pivot.scale.setScalar(st.scale * (.9 + .1 * e));
+        break;
+      case "rise":
+        st.pivot.position.y = st.centre.y - (1 - e) * 11;
+        st.pivot.scale.setScalar(st.scale * (.85 + .15 * e));
+        break;
+      case "spin":
+        st.pivot.rotation.y = (1 - e) * -1.9;
+        st.pivot.scale.setScalar(st.scale * (.7 + .3 * e));
+        break;
+      case "none":
+        break;
+      case "grow":
+      default:
+        st.pivot.scale.setScalar(st.scale * (.55 + .45 * e));
+    }
+  }
+
+  /* --- Camera movement *within* a slide, on top of the flight ---------- */
+  const camOff = new THREE.Vector3();
+  const toEye = new THREE.Vector3();
+
+  function slideMotion(st, local, out){
+    out.set(0, 0, 0);
+    if (reduced || st.motion === "static") return out;
+    toEye.copy(st.eye).sub(st.centre);
+
+    switch (st.motion){
+      case "orbit": {                      /* swing around the object */
+        const a = Math.sin(local * .16) * .5;
+        const x = toEye.x * Math.cos(a) + toEye.z * Math.sin(a);
+        const z = -toEye.x * Math.sin(a) + toEye.z * Math.cos(a);
+        out.set(x - toEye.x, 0, z - toEye.z);
+        break;
+      }
+      case "dolly":                        /* creep closer, then hold */
+        out.copy(toEye).normalize().multiplyScalar(-Math.min(local * .5, 4.5));
+        break;
+      case "push":                         /* quick approach on arrival */
+        out.copy(toEye).normalize().multiplyScalar(-(1 - Math.exp(-local * 1.6)) * 3.2);
+        break;
+      case "drift":                        /* slow lateral slide */
+        out.set(Math.sin(local * .22) * 3.4, Math.cos(local * .17) * 1.2, 0);
+        break;
+    }
+    return out;
+  }
 
   /* --- Camera flight: bezier arc + slerp, eased ---------------------- */
   const DUR = reduced ? 0.01 : 1.35;
@@ -774,6 +1060,9 @@ try {
       if (flight.t >= 1){ basePos.copy(flight.to); baseQuat.copy(flight.qTo); flight = null; }
     }
 
+    /* Once the flight has landed, the camera keeps moving within the slide. */
+    if (!flight) basePos.copy(stations[cur].eye).add(slideMotion(stations[cur], localT, camOff));
+
     /* Parallax + idle drift, applied in camera space so it always reads. */
     pointer.x += (pointer.tx - pointer.x) * .05;
     pointer.y += (pointer.ty - pointer.y) * .05;
@@ -791,9 +1080,19 @@ try {
        smooth, and keeps the neighbouring slide's object out of the frame. */
     stations.forEach((st, i) => {
       const near = Math.abs(i - cur) <= 1;
-      st.built.group.visible = near;
-      if (near) st.built.update(t, dt, i === cur ? localT : 0);
+      st.pivot.visible = near;
+      if (!near) return;
+      const local = i === cur ? localT : 0;
+      choreograph(st, local);
+      st.built.update(t, dt, local);
     });
+
+    /* Cinematic mode: hold each slide for its own beat, then fly on. */
+    if (playing && !flight && localT > stations[cur].duration){
+      if (cur < N - 1) next();
+      else if (DECK.loop) go(0);
+      else setPlaying(false);
+    }
 
     renderer.render(scene, camera);
   });
@@ -810,6 +1109,7 @@ try {
 const fromHash = () => Math.max(0, Math.min(N - 1, (parseInt(location.hash.slice(1), 10) || 1) - 1));
 addEventListener("hashchange", () => { if (fromHash() !== cur) go(fromHash()); });
 go(fromHash());
+setPlaying(!!DECK.autoplay);
 </script>
 </body>
 </html>

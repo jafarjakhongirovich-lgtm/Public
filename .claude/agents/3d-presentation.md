@@ -48,8 +48,12 @@ deliberately and say what you changed and why.
 ```js
 const DECK = {
   brand: "Shown small in the top-left corner on every slide",
+  autoplay: false,     // the deck plays itself, like a film
+  loop: false,         // restart at the end instead of stopping
+  slideDuration: 9,    // default seconds per slide in autoplay
   theme: { bg, ink, muted, accent, accent2, font, fontHead },  // all optional
-  slides: [ { layout, eyebrow, title, lead, bullets, kpis, quote, cite, visual, notes } ]
+  slides: [ { layout, eyebrow, title, lead, bullets, kpis, quote, cite,
+              visual, build, motion, duration, notes } ]
 };
 ```
 
@@ -66,6 +70,9 @@ Per slide, every field is optional — include only what that slide needs.
 | `quote` | string | quote marks are added by the engine — don't type them |
 | `cite` | string | attribution under a quote |
 | `visual` | see below | the 3D object for this slide |
+| `build` | see Animation | how the object arrives; default `grow` |
+| `motion` | see Animation | how the camera moves while here; default `static` |
+| `duration` | number | seconds this slide holds in autoplay |
 | `notes` | string | speaker notes, shown on <kbd>N</kbd>, never on screen |
 
 **Layouts.** `title` — centred, oversized, for the opener and the closer.
@@ -90,10 +97,64 @@ Set `visual` to one of these. Pick by meaning, not by looks:
 | `grid` | retro horizon grid rushing past | speed, roadmap, momentum |
 | `cubes` | drifting cube cluster | components, modules, inventory |
 | `rings` | concentric orbiting rings | layers, architecture, orbit |
+| `morph` | a point cloud re-forming into a new solid every few seconds | transformation, "before → after", change |
+| `flow` | particles running a path through gates | pipelines, funnels, stages, throughput |
+| `build` | a structure stacking itself block by block | foundations, architecture, "how we got here" |
+| `orbitals` | a core with bodies on tilted orbits | ecosystems, layers, a system at rest |
 
 Vary them across the deck — the same object twice in a row kills the sense of
-travel. `bars` animates its growth from the moment its slide lands, so give it
-a slide where the audience is looking at it.
+travel.
+
+The last four are choreographed: the motion carries the meaning rather than
+decorating it. `bars` and `build` stage their own arrival from the moment the
+camera lands, so put them where the audience is already looking. `morph` needs
+room to run — give it `duration: 14` or more in autoplay, or the audience sees
+one shape change and no more.
+
+## Animation
+
+Three layers stack, and they are independent — any `build` works with any
+`visual`, under any `motion`.
+
+**`build` — how the object arrives**, timed from the moment the camera lands.
+
+| `build` | Effect | Suits |
+|---|---|---|
+| `grow` | scales up from small (default) | anything |
+| `assemble` | parts fly in from all directions and lock into place | multi-part scenes: `network`, `cubes`, `rings`, `orbitals`, `build` |
+| `rise` | lifts up from below | foundations, results, reveals |
+| `spin` | swings into view while scaling up | energetic openers |
+| `none` | already in place | `bars` and `build`, which stage themselves |
+
+`assemble` needs a scene made of many separate parts. On `particles`, `morph`,
+`flow` or `waves` — single point clouds — the whole cloud slides in as one
+piece, which is weaker than `grow`.
+
+**`motion` — how the camera behaves once it has landed.**
+
+| `motion` | Effect |
+|---|---|
+| `static` | holds still, with a slight idle drift (default) |
+| `orbit` | swings slowly around the object — best for showing a shape |
+| `dolly` | creeps steadily closer, then settles |
+| `push` | quick approach on arrival, then holds — good for a punchline |
+| `drift` | slow lateral glide, cinematic and calm |
+
+Do not put `orbit` on every slide. Constant camera movement is as numbing as
+none at all; alternate moving slides with still ones.
+
+**Cinematic mode.** Set `autoplay: true` and the deck plays by itself, each
+slide held for its `duration` (or `slideDuration`, default 9s), flying on
+automatically. <kbd>P</kbd> or the button in the bottom bar toggles play/pause,
+and any manual navigation still works while it plays. Use it for a deck that
+runs unattended — a screen at a stand, a looping intro with `loop: true`. For a
+talk with a live speaker, leave it off.
+
+Give slides durations that match their content: a title card needs 6–8s, a
+slide with four bullets needs 12–15s, and `morph` wants 14s or more.
+
+Everything here respects `prefers-reduced-motion`: entrances resolve instantly
+and the camera stops moving within slides for viewers who asked for that.
 
 ## Themes
 
@@ -167,7 +228,7 @@ implying it was checked.
   or ship the `.js` next to the HTML and point the import map at `./three.module.js`.
   The inlined file lands around 1.3 MB.
 - Controls, worth repeating to the user: <kbd>←</kbd>/<kbd>→</kbd> or click or
-  scroll or swipe to move, <kbd>N</kbd> for speaker notes, <kbd>F</kbd> for
-  fullscreen, <kbd>Home</kbd>/<kbd>End</kbd> to jump, and `#3` in the URL to
-  deep-link a slide.
+  scroll or swipe to move, <kbd>P</kbd> for autoplay, <kbd>N</kbd> for speaker
+  notes, <kbd>F</kbd> for fullscreen, <kbd>Home</kbd>/<kbd>End</kbd> to jump,
+  and `#3` in the URL to deep-link a slide.
 - Printing gives a flat text version of every slide, one per page.
