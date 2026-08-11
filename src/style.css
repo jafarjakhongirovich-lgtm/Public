@@ -1,0 +1,492 @@
+/* ==========================================================================
+   Porsche 911 GT3 RS — 3D-презентация. Тёмная сцена «шоурум».
+   ========================================================================== */
+:root {
+  color-scheme: dark;   /* презентация намеренно выполнена только в тёмной теме */
+  --bg: #0b0d0f;
+  --bg-2: #12151a;
+  --ink: #eef1f3;
+  --ink-dim: #9aa3ac;
+  --ink-faint: #67707a;
+  --accent: #a6c03c;
+  --accent-2: #d7ea6a;
+  --line: rgba(255, 255, 255, 0.10);
+  --panel: rgba(14, 17, 20, 0.66);
+  --panel-solid: #14171b;
+  --red: #d8483c;
+  --radius: 14px;
+  --mono: ui-monospace, "SF Mono", "Cascadia Mono", Menlo, Consolas, monospace;
+  --sans: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--ink);
+  font-family: var(--sans);
+  -webkit-font-smoothing: antialiased;
+  overflow: hidden;
+}
+
+/* --- фон и сцена --------------------------------------------------------- */
+#backdrop {
+  position: fixed;
+  inset: 0;
+  background:
+    radial-gradient(120% 80% at 50% 8%, #232a33 0%, #14181d 42%, #0b0d0f 78%),
+    var(--bg);
+  z-index: 0;
+}
+#backdrop::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background:
+    repeating-linear-gradient(90deg, rgba(255,255,255,.028) 0 1px, transparent 1px 88px),
+    repeating-linear-gradient(0deg, rgba(255,255,255,.02) 0 1px, transparent 1px 88px);
+  mask-image: radial-gradient(70% 60% at 50% 60%, #000 0%, transparent 100%);
+  -webkit-mask-image: radial-gradient(70% 60% at 50% 60%, #000 0%, transparent 100%);
+}
+#floor {
+  position: fixed;
+  left: 0; right: 0; bottom: 0;
+  height: 46%;
+  z-index: 0;
+  background: linear-gradient(180deg, rgba(0,0,0,0) 0%, rgba(0,0,0,.45) 45%, rgba(0,0,0,.8) 100%);
+  pointer-events: none;
+}
+#scene {
+  position: fixed;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 1;
+  display: block;
+}
+
+/* --- палуба слайдов ------------------------------------------------------ */
+#deck {
+  position: fixed;
+  inset: 0;
+  z-index: 2;
+  overflow-y: scroll;
+  scroll-snap-type: y mandatory;
+  scroll-behavior: smooth;
+  scrollbar-width: none;
+}
+#deck::-webkit-scrollbar { display: none; }
+
+.slide {
+  min-height: 100vh;
+  min-height: 100dvh;
+  scroll-snap-align: start;
+  display: flex;
+  align-items: center;
+  padding: 4vh clamp(18px, 5vw, 76px) 92px;
+  pointer-events: none;
+}
+.slide > * { pointer-events: auto; }
+
+.panel {
+  width: min(100%, 500px);
+  max-height: calc(100vh - 150px);
+  max-height: calc(100dvh - 150px);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  background: var(--panel);
+  backdrop-filter: blur(18px) saturate(140%);
+  -webkit-backdrop-filter: blur(18px) saturate(140%);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: clamp(18px, 2.2vw, 30px);
+  box-shadow: 0 24px 70px rgba(0, 0, 0, .55);
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255,255,255,.2) transparent;
+  opacity: 0;
+  transform: translateY(28px);
+  transition: opacity .7s cubic-bezier(.2,.7,.2,1), transform .7s cubic-bezier(.2,.7,.2,1);
+}
+.slide.on .panel { opacity: 1; transform: none; }
+
+.panel.wide { width: min(100%, 880px); }
+.slide.center { justify-content: center; text-align: left; }
+.slide.right { justify-content: flex-end; }
+
+/* --- типографика --------------------------------------------------------- */
+.kicker {
+  font: 600 11px/1 var(--mono);
+  letter-spacing: .22em;
+  text-transform: uppercase;
+  color: var(--accent);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 14px;
+}
+.kicker::before {
+  content: "";
+  width: 26px; height: 1px;
+  background: var(--accent);
+}
+h1 {
+  font-size: clamp(38px, 5.4vw, 62px);
+  line-height: .95;
+  margin: 0 0 6px;
+  letter-spacing: -.035em;
+  font-weight: 800;
+  white-space: nowrap;
+}
+h1 .thin {
+  display: block;
+  white-space: normal;
+  font-size: clamp(15px, 1.5vw, 19px);
+  font-weight: 300;
+  line-height: 1.34;
+  letter-spacing: 0;
+  color: var(--ink-dim);
+  margin-top: 14px;
+  max-width: 22em;
+}
+h2 {
+  font-size: clamp(24px, 2.9vw, 34px);
+  line-height: 1.08;
+  margin: 0 0 12px;
+  letter-spacing: -.024em;
+  font-weight: 700;
+}
+p.lead {
+  color: var(--ink-dim);
+  font-size: clamp(13.5px, 1.15vw, 15px);
+  line-height: 1.6;
+  margin: 0 0 18px;
+}
+.hi { color: var(--accent); font-weight: 600; }
+
+/* --- сетка характеристик ------------------------------------------------- */
+.specs {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(102px, 1fr));
+  gap: 1px;
+  background: var(--line);
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  overflow: hidden;
+  margin-top: 18px;
+}
+.specs .cell {
+  background: rgba(10, 12, 14, .72);
+  padding: 13px 13px;
+}
+.specs .val {
+  font: 700 clamp(17px, 1.8vw, 23px)/1 var(--sans);
+  letter-spacing: -.025em;
+  display: flex;
+  align-items: baseline;
+  gap: 3px;
+  white-space: nowrap;
+}
+.specs .val .u {
+  font-size: 10.5px;
+  font-weight: 600;
+  color: var(--ink-faint);
+  letter-spacing: 0;
+  white-space: nowrap;
+}
+.specs .lbl {
+  margin-top: 7px;
+  font: 500 10.5px/1.3 var(--mono);
+  letter-spacing: .12em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+}
+
+/* --- таблица ------------------------------------------------------------- */
+.rows { margin-top: 16px; }
+.row {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  align-items: baseline;
+  padding: 9px 0;
+  border-bottom: 1px solid var(--line);
+  font-size: 14px;
+}
+.row:last-child { border-bottom: 0; }
+.row .k { color: var(--ink-dim); }
+.row .v { font-weight: 650; text-align: right; letter-spacing: -.01em; }
+.row .v small { color: var(--ink-faint); font-weight: 500; }
+
+/* --- список преимуществ -------------------------------------------------- */
+ul.ticks { list-style: none; margin: 16px 0 0; padding: 0; }
+ul.ticks li {
+  position: relative;
+  padding-left: 26px;
+  margin-bottom: 11px;
+  color: var(--ink-dim);
+  font-size: 14px;
+  line-height: 1.5;
+}
+ul.ticks li::before {
+  content: "";
+  position: absolute;
+  left: 4px; top: 7px;
+  width: 7px; height: 7px;
+  border-radius: 2px;
+  background: var(--accent);
+  transform: rotate(45deg);
+}
+ul.ticks li b { color: var(--ink); font-weight: 650; }
+
+/* --- полосы / диаграммы -------------------------------------------------- */
+.bars { margin-top: 18px; display: grid; gap: 13px; }
+.bar .top {
+  display: flex; justify-content: space-between;
+  font-size: 12.5px; margin-bottom: 6px;
+}
+.bar .top .n { color: var(--ink-dim); }
+.bar .top .t { font-weight: 700; font-variant-numeric: tabular-nums; }
+.bar .track {
+  height: 8px;
+  background: rgba(255,255,255,.07);
+  border-radius: 99px;
+  overflow: hidden;
+}
+.bar .fill {
+  height: 100%;
+  width: 0;
+  border-radius: 99px;
+  background: linear-gradient(90deg, #6d8420, var(--accent));
+  transition: width 1.2s cubic-bezier(.2,.8,.2,1);
+}
+.bar.muted .fill { background: linear-gradient(90deg, #3b4148, #6a737c); }
+.bar.hero .fill { background: linear-gradient(90deg, var(--accent), var(--accent-2)); }
+
+/* --- тахометр ------------------------------------------------------------ */
+.gauge { display: flex; align-items: center; gap: 20px; margin-top: 20px; flex-wrap: wrap; }
+.gauge svg { flex: 0 0 auto; }
+.gauge .read { font-variant-numeric: tabular-nums; }
+.gauge .read .big {
+  font-size: clamp(30px, 3.6vw, 44px);
+  font-weight: 800;
+  letter-spacing: -.03em;
+  line-height: 1;
+}
+.gauge .read .sub {
+  font: 500 10.5px/1.4 var(--mono);
+  letter-spacing: .12em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+  margin-top: 8px;
+}
+.needle { transition: none; }
+
+/* --- элементы управления ------------------------------------------------- */
+.controls {
+  position: fixed;
+  left: 50%;
+  bottom: 18px;
+  transform: translateX(-50%);
+  z-index: 6;
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  padding: 7px;
+  border-radius: 99px;
+  background: rgba(12, 14, 17, .78);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  border: 1px solid var(--line);
+  box-shadow: 0 12px 40px rgba(0,0,0,.5);
+}
+.btn {
+  border: 0;
+  background: transparent;
+  color: var(--ink-dim);
+  font: 600 11px/1 var(--mono);
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  padding: 9px 13px;
+  border-radius: 99px;
+  cursor: pointer;
+  transition: background .2s, color .2s;
+  white-space: nowrap;
+}
+.btn:hover { background: rgba(255,255,255,.08); color: var(--ink); }
+.btn.active { background: var(--accent); color: #10130a; }
+.sep { width: 1px; height: 20px; background: var(--line); }
+
+.swatches { display: flex; gap: 6px; padding: 0 4px; }
+.sw {
+  width: 22px; height: 22px;
+  border-radius: 50%;
+  border: 2px solid rgba(255,255,255,.18);
+  cursor: pointer;
+  padding: 0;
+  transition: transform .18s, border-color .18s;
+}
+.sw:hover { transform: scale(1.14); }
+.sw.on { border-color: var(--ink); transform: scale(1.14); }
+
+/* --- навигация точками --------------------------------------------------- */
+#dots {
+  position: fixed;
+  right: clamp(10px, 1.6vw, 24px);
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 6;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+#dots button {
+  width: 30px; height: 22px;
+  border: 0; background: transparent;
+  cursor: pointer;
+  display: flex; align-items: center; justify-content: flex-end;
+  padding: 0;
+}
+#dots button i {
+  display: block;
+  width: 16px; height: 2px;
+  background: rgba(255,255,255,.26);
+  border-radius: 2px;
+  transition: width .28s, background .28s;
+}
+#dots button.on i { width: 30px; background: var(--accent); }
+
+#progress {
+  position: fixed;
+  top: 0; left: 0;
+  height: 2px;
+  width: 0;
+  background: var(--accent);
+  z-index: 7;
+  transition: width .18s linear;
+}
+
+/* --- шапка --------------------------------------------------------------- */
+#brand {
+  position: fixed;
+  top: 18px;
+  left: clamp(18px, 5vw, 76px);
+  z-index: 6;
+  font: 700 12px/1 var(--mono);
+  letter-spacing: .3em;
+  color: var(--ink-dim);
+  text-transform: uppercase;
+  pointer-events: none;
+}
+#brand span { color: var(--accent); }
+
+/* --- подсказка прокрутки ------------------------------------------------- */
+.scroll-hint {
+  margin-top: 26px;
+  font: 500 10.5px/1 var(--mono);
+  letter-spacing: .18em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+  display: flex; align-items: center; gap: 10px;
+}
+.scroll-hint i {
+  width: 1px; height: 26px;
+  background: linear-gradient(180deg, var(--accent), transparent);
+  animation: drop 1.7s infinite;
+}
+@keyframes drop {
+  0% { opacity: 0; transform: translateY(-8px); }
+  40% { opacity: 1; }
+  100% { opacity: 0; transform: translateY(10px); }
+}
+
+/* --- габаритные выноски -------------------------------------------------- */
+#dimlayer {
+  position: fixed;
+  inset: 0;
+  z-index: 3;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity .5s;
+}
+#dimlayer.on { opacity: 1; }
+#dimlayer text {
+  font: 600 12px var(--mono);
+  fill: var(--accent-2);
+  letter-spacing: .06em;
+}
+#dimlayer line { stroke: var(--accent); stroke-width: 1; opacity: .8; }
+#dimlayer line.tick { stroke-width: 1.4; }
+
+/* --- DRS индикатор ------------------------------------------------------- */
+.drs-flag {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 16px;
+  padding: 8px 14px;
+  border-radius: 99px;
+  border: 1px solid var(--line);
+  font: 700 11px/1 var(--mono);
+  letter-spacing: .16em;
+  color: var(--ink-faint);
+  background: rgba(0,0,0,.3);
+  transition: color .3s, border-color .3s, background .3s;
+}
+.drs-flag i {
+  width: 8px; height: 8px; border-radius: 50%;
+  background: currentColor;
+  box-shadow: 0 0 0 0 currentColor;
+}
+.drs-flag.open {
+  color: var(--accent);
+  border-color: rgba(166,192,60,.5);
+  background: rgba(166,192,60,.10);
+}
+.drs-flag.open i { animation: pulse 1.2s infinite; }
+@keyframes pulse {
+  0% { box-shadow: 0 0 0 0 rgba(166,192,60,.6); }
+  100% { box-shadow: 0 0 0 10px rgba(166,192,60,0); }
+}
+
+/* --- таблица итогов ------------------------------------------------------ */
+.grid2 {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 0 32px;
+}
+.note {
+  margin-top: 20px;
+  padding-top: 14px;
+  border-top: 1px solid var(--line);
+  font-size: 11.5px;
+  line-height: 1.6;
+  color: var(--ink-faint);
+}
+
+/* --- адаптив ------------------------------------------------------------- */
+@media (max-width: 880px) {
+  .slide {
+    align-items: flex-end;
+    padding: 0 14px 92px;
+    justify-content: center !important;
+  }
+  .panel, .panel.wide { width: 100%; max-height: 62vh; overflow-y: auto; }
+  .specs { grid-template-columns: repeat(2, 1fr); }
+  .specs .lbl { letter-spacing: .05em; font-size: 9.5px; }
+  .grid2 { gap: 0; }
+  #dots { display: none; }
+  #brand { font-size: 10px; letter-spacing: .22em; }
+  .controls {
+    bottom: 10px;
+    max-width: calc(100vw - 16px);
+    overflow-x: auto;
+    justify-content: flex-start;
+  }
+  h1 { font-size: clamp(32px, 11vw, 52px); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  #deck { scroll-behavior: auto; }
+  .panel { transition: none; opacity: 1; transform: none; }
+}

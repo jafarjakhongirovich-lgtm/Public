@@ -1,0 +1,302 @@
+<div id="backdrop"></div>
+<canvas id="scene"></canvas>
+<div id="floor"></div>
+<svg id="dimlayer" aria-hidden="true"></svg>
+
+<div id="progress"></div>
+<div id="brand">PORSCHE <span>911 GT3 RS</span> · 992</div>
+
+<div id="deck">
+
+  <!-- 1 — ТИТУЛ -->
+  <section class="slide" data-cam="hero">
+    <div class="panel">
+      <div class="kicker">Поколение 992 · с 2022 года</div>
+      <h1>911 GT3 RS<span class="thin">Гоночный автомобиль<br>с дорожными номерами</span></h1>
+      <p class="lead">
+        Самая радикальная версия 911: атмосферный оппозитный мотор с отсечкой
+        <span class="hi">9000 об/мин</span>, аэродинамика, перенесённая прямо из гонок,
+        и настройка подвески, которую можно менять <span class="hi">на ходу с руля</span>.
+      </p>
+      <div class="specs">
+        <div class="cell"><div class="val"><span data-count="525">0</span><span class="u">л.с.</span></div><div class="lbl">Мощность</div></div>
+        <div class="cell"><div class="val"><span data-count="3.2" data-dec="1">0</span><span class="u">с</span></div><div class="lbl">0–100 км/ч</div></div>
+        <div class="cell"><div class="val"><span data-count="296">0</span><span class="u">км/ч</span></div><div class="lbl">Максимум</div></div>
+        <div class="cell"><div class="val">6:49<span class="u">.328</span></div><div class="lbl">Нюрбургринг</div></div>
+      </div>
+      <div class="scroll-hint"><i></i> Листайте вниз · 10 разделов</div>
+    </div>
+  </section>
+
+  <!-- 2 — ДВИГАТЕЛЬ -->
+  <section class="slide" data-cam="engine">
+    <div class="panel">
+      <div class="kicker">01 · Силовой агрегат</div>
+      <h2>4,0 литра. Атмосферный.<br>Шесть цилиндров оппозитно.</h2>
+      <p class="lead">
+        Двигатель серии <b>GT</b> без наддува, с сухим картером и индивидуальными
+        дроссельными заслонками. Жёсткие коромысла клапанов — решение из гоночного
+        911&nbsp;RSR — позволяют раскручивать мотор до 9000&nbsp;об/мин.
+      </p>
+      <div class="gauge">
+        <svg width="132" height="132" viewBox="0 0 132 132">
+          <circle cx="66" cy="66" r="56" fill="none" stroke="rgba(255,255,255,.08)" stroke-width="9"/>
+          <path id="rpmArc" d="" fill="none" stroke="#a6c03c" stroke-width="9" stroke-linecap="round"/>
+          <path d="M 66 66 L 66 18" id="rpmNeedle" class="needle" stroke="#eef1f3" stroke-width="2.4" stroke-linecap="round"/>
+          <circle cx="66" cy="66" r="5" fill="#eef1f3"/>
+          <text x="66" y="112" text-anchor="middle" fill="#67707a" font-family="ui-monospace,monospace" font-size="9" letter-spacing="1.6">RPM ×1000</text>
+        </svg>
+        <div class="read">
+          <div class="big"><span id="rpmVal">0</span></div>
+          <div class="sub">Отсечка 9000 об/мин</div>
+        </div>
+      </div>
+      <div class="rows">
+        <div class="row"><span class="k">Тип</span><span class="v">Оппозитный 6-цилиндровый, атмосферный</span></div>
+        <div class="row"><span class="k">Рабочий объём</span><span class="v">3996 см³</span></div>
+        <div class="row"><span class="k">Мощность</span><span class="v">525 л.с. (386 кВт) <small>при 8500 об/мин</small></span></div>
+        <div class="row"><span class="k">Крутящий момент</span><span class="v">465 Н·м <small>при 6300 об/мин</small></span></div>
+        <div class="row"><span class="k">Диаметр × ход поршня</span><span class="v">102,0 × 81,5 мм</span></div>
+        <div class="row"><span class="k">Степень сжатия</span><span class="v">13,3 : 1</span></div>
+        <div class="row"><span class="k">Удельная мощность</span><span class="v">131 л.с. на литр</span></div>
+        <div class="row"><span class="k">Газораспределение</span><span class="v">DOHC, 4 клапана на цилиндр, VarioCam</span></div>
+        <div class="row"><span class="k">Смазка</span><span class="v">Сухой картер</span></div>
+        <div class="row"><span class="k">Коробка передач</span><span class="v">7-ст. PDK, укороченные ряды</span></div>
+        <div class="row"><span class="k">Привод</span><span class="v">Задний</span></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 3 — ДИНАМИКА -->
+  <section class="slide" data-cam="perf">
+    <div class="panel">
+      <div class="kicker">02 · Динамика</div>
+      <h2>3,2 секунды до сотни.<br>И это не главное.</h2>
+      <p class="lead">
+        RS проектировали не ради разгона по прямой, а ради скорости в повороте.
+        Но цифры в разгоне всё равно на уровне суперкаров.
+      </p>
+      <div class="specs">
+        <div class="cell"><div class="val"><span data-count="3.2" data-dec="1">0</span><span class="u">с</span></div><div class="lbl">0–100 км/ч</div></div>
+        <div class="cell"><div class="val"><span data-count="10.6" data-dec="1">0</span><span class="u">с</span></div><div class="lbl">0–200 км/ч</div></div>
+        <div class="cell"><div class="val"><span data-count="296">0</span><span class="u">км/ч</span></div><div class="lbl">Максимальная</div></div>
+        <div class="cell"><div class="val"><span data-count="2.76" data-dec="2">0</span><span class="u">кг/лс</span></div><div class="lbl">Удельная масса</div></div>
+      </div>
+      <div class="bars" data-bars>
+        <div class="bar hero"><div class="top"><span class="n">0–100 км/ч</span><span class="t">3,2 с</span></div><div class="track"><div class="fill" data-w="30"></div></div></div>
+        <div class="bar"><div class="top"><span class="n">0–200 км/ч</span><span class="t">10,6 с</span></div><div class="track"><div class="fill" data-w="100"></div></div></div>
+        <div class="bar muted"><div class="top"><span class="n">Максимальная скорость</span><span class="t">296 км/ч</span></div><div class="track"><div class="fill" data-w="84"></div></div></div>
+      </div>
+      <div class="rows">
+        <div class="row"><span class="k">Снаряжённая масса (DIN)</span><span class="v">1450 кг</span></div>
+        <div class="row"><span class="k">Расход, комбинированный (WLTP)</span><span class="v">13,2 л/100 км</span></div>
+        <div class="row"><span class="k">Выбросы CO₂ (WLTP)</span><span class="v">299 г/км</span></div>
+        <div class="row"><span class="k">Топливный бак</span><span class="v">64 л</span></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 4 — АЭРОДИНАМИКА -->
+  <section class="slide" data-cam="aero">
+    <div class="panel">
+      <div class="kicker">03 · Аэродинамика</div>
+      <h2>860 кг прижимной силы.<br>Крыло выше крыши.</h2>
+      <p class="lead">
+        Впервые в истории серийных Porsche верхняя кромка антикрыла поднята
+        <b>выше линии крыши</b>. Подвес «лебединая шея» держит крыло сверху,
+        чтобы не рвать поток под ним — там рождается основная прижимная сила.
+      </p>
+      <div class="specs">
+        <div class="cell"><div class="val"><span data-count="409">0</span><span class="u">кг</span></div><div class="lbl">Прижим на 200 км/ч</div></div>
+        <div class="cell"><div class="val"><span data-count="860">0</span><span class="u">кг</span></div><div class="lbl">Прижим на 285 км/ч</div></div>
+      </div>
+      <div class="bars">
+        <div class="bar hero"><div class="top"><span class="n">911 GT3 RS (992)</span><span class="t">860 кг</span></div><div class="track"><div class="fill" data-w="100"></div></div></div>
+        <div class="bar muted"><div class="top"><span class="n">911 GT3 RS (991.2) — вдвое меньше</span><span class="t">≈ 430 кг</span></div><div class="track"><div class="fill" data-w="50"></div></div></div>
+        <div class="bar muted"><div class="top"><span class="n">911 GT3 (992) — втрое меньше</span><span class="t">≈ 287 кг</span></div><div class="track"><div class="fill" data-w="33"></div></div></div>
+      </div>
+      <ul class="ticks">
+        <li><b>DRS</b> — первая система снижения сопротивления на серийном Porsche: кнопка на руле раскрывает крыло на скорости выше 100 км/ч и автоматически захлопывает его при торможении.</li>
+        <li><b>Центральный радиатор</b> по схеме 911 RSR: единственный радиатор наклонён в носу, а освободившиеся боковины отданы под активные аэроэлементы.</li>
+        <li><b>Двойные поперечные рычаги</b> передней подвески сделаны каплевидного профиля и сами дают около 40 кг дополнительного прижима на 285 км/ч.</li>
+        <li>Управляемые заслонки спереди и в крыле, сплиттер, дайв-планы, воздуховоды арок, диффузор — <b>около 30 аэродинамических элементов</b>.</li>
+      </ul>
+      <div class="drs-flag" id="drsFlag"><i></i> <span>DRS ЗАКРЫТ</span></div>
+      <div style="margin-top:14px"><button class="btn active" id="drsBtn" style="border:1px solid var(--line)">Нажать DRS</button></div>
+    </div>
+  </section>
+
+  <!-- 5 — ШАССИ -->
+  <section class="slide" data-cam="chassis">
+    <div class="panel">
+      <div class="kicker">04 · Шасси и тормоза</div>
+      <h2>Подвеска, которую<br>настраивают с руля.</h2>
+      <p class="lead">
+        У GT3 RS впервые для дорожного 911 спереди стоят <b>двойные поперечные рычаги</b>.
+        Четыре барабанных переключателя на руле меняют сжатие и отбой амортизаторов
+        спереди и сзади, а пятый — карту дифференциала. Прямо по ходу круга.
+      </p>
+      <div class="rows">
+        <div class="row"><span class="k">Передняя подвеска</span><span class="v">Двойные поперечные рычаги</span></div>
+        <div class="row"><span class="k">Задняя подвеска</span><span class="v">Многорычажная, подруливающая задняя ось</span></div>
+        <div class="row"><span class="k">Регулировки на ходу</span><span class="v">Сжатие / отбой спереди и сзади, карта дифференциала, DRS</span></div>
+        <div class="row"><span class="k">Дифференциал</span><span class="v">PTV Plus, электронно-управляемая блокировка</span></div>
+        <div class="row"><span class="k">Тормоза, сталь</span><span class="v">408 мм спереди / 380 мм сзади</span></div>
+        <div class="row"><span class="k">Суппорты</span><span class="v">6-поршневые моноблочные алюминиевые / 4-поршневые</span></div>
+        <div class="row"><span class="k">Керамика PCCB (опция)</span><span class="v">410 мм спереди / 390 мм сзади</span></div>
+        <div class="row"><span class="k">Диски</span><span class="v">20″ спереди / 21″ сзади, кованые</span></div>
+        <div class="row"><span class="k">Шины</span><span class="v">275/35 ZR20 · 335/30 ZR21</span></div>
+        <div class="row"><span class="k">Резина</span><span class="v">Michelin Pilot Sport Cup 2 / Cup 2 R (опция)</span></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 6 — МАССА -->
+  <section class="slide" data-cam="mass">
+    <div class="panel">
+      <div class="kicker">05 · Масса и материалы</div>
+      <h2>1450 кг.<br>Каждый грамм посчитан.</h2>
+      <p class="lead">
+        Двери, передние крылья, крыша и передний капот — из углепластика (CFRP).
+        Пакет Weissach заменяет карбоном даже стабилизаторы поперечной устойчивости
+        и тяги подвески.
+      </p>
+      <div class="specs">
+        <div class="cell"><div class="val"><span data-count="1450">0</span><span class="u">кг</span></div><div class="lbl">Масса DIN</div></div>
+        <div class="cell"><div class="val"><span data-count="2.76" data-dec="2">0</span><span class="u">кг/лс</span></div><div class="lbl">На одну силу</div></div>
+      </div>
+      <div class="bars">
+        <div class="bar hero"><div class="top"><span class="n">Магниевые кованые диски (Weissach)</span><span class="t">−8 кг</span></div><div class="track"><div class="fill" data-w="100"></div></div></div>
+        <div class="bar"><div class="top"><span class="n">Карбоновые дуги безопасности</span><span class="t">−6 кг</span></div><div class="track"><div class="fill" data-w="75"></div></div></div>
+      </div>
+      <ul class="ticks">
+        <li><b>Углепластик:</b> двери, передние крылья, крыша, передний капот.</li>
+        <li><b>Пакет Weissach:</b> карбоновые стабилизаторы спереди и сзади, карбоновые тяги, карбоновая крыша с открытым плетением, карбоновые элементы капота, рычаг PDK из карбона.</li>
+        <li><b>Салон:</b> два ковшеобразных сиденья, задних мест нет; ремни и каркас — по программе Clubsport.</li>
+        <li><b>Багажник</b> спереди — 132 л.</li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- 7 — ГАБАРИТЫ -->
+  <section class="slide" data-cam="dims">
+    <div class="panel">
+      <div class="kicker">06 · Габариты</div>
+      <h2>4572 × 1900 × 1322</h2>
+      <p class="lead">
+        Кузов шире и ниже обычного 911, с колеёй, раздвинутой под шины
+        шириной 335 мм сзади.
+      </p>
+      <div class="specs">
+        <div class="cell"><div class="val"><span data-count="4572">0</span><span class="u">мм</span></div><div class="lbl">Длина</div></div>
+        <div class="cell"><div class="val"><span data-count="1900">0</span><span class="u">мм</span></div><div class="lbl">Ширина</div></div>
+        <div class="cell"><div class="val"><span data-count="1322">0</span><span class="u">мм</span></div><div class="lbl">Высота</div></div>
+        <div class="cell"><div class="val"><span data-count="2457">0</span><span class="u">мм</span></div><div class="lbl">Колёсная база</div></div>
+      </div>
+      <div class="rows">
+        <div class="row"><span class="k">Тип кузова</span><span class="v">Купе, 2 места</span></div>
+        <div class="row"><span class="k">Объём багажника</span><span class="v">132 л</span></div>
+        <div class="row"><span class="k">Топливный бак</span><span class="v">64 л</span></div>
+        <div class="row"><span class="k">Ширина указана</span><span class="v">без наружных зеркал</span></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 8 — НЮРБУРГРИНГ -->
+  <section class="slide" data-cam="ring">
+    <div class="panel">
+      <div class="kicker">07 · Нордшляйфе</div>
+      <h2>6:49.328</h2>
+      <p class="lead">
+        Круг по полной 20,832-километровой конфигурации Нюрбургринга.
+        За рулём — <b>Йорг Бергмайстер</b>, 2022 год.
+        На <span class="hi">10,6 секунды</span> быстрее предыдущего GT3 RS поколения 991.2.
+      </p>
+      <div class="bars">
+        <div class="bar hero"><div class="top"><span class="n">911 GT3 RS (992)</span><span class="t">6:49.328</span></div><div class="track"><div class="fill" data-w="97"></div></div></div>
+        <div class="bar muted"><div class="top"><span class="n">911 GT3 (992)</span><span class="t">6:59.927</span></div><div class="track"><div class="fill" data-w="100"></div></div></div>
+        <div class="bar muted"><div class="top"><span class="n">911 GT3 RS (991.2) — по расчёту −10,6 с</span><span class="t">≈ 6:59.9</span></div><div class="track"><div class="fill" data-w="100"></div></div></div>
+      </div>
+      <div class="rows">
+        <div class="row"><span class="k">Длина круга</span><span class="v">20,832 км</span></div>
+        <div class="row"><span class="k">Средняя скорость на круге</span><span class="v">≈ 183 км/ч</span></div>
+        <div class="row"><span class="k">Пилот</span><span class="v">Йорг Бергмайстер</span></div>
+      </div>
+      <p class="note">Длина полной конфигурации — 20,832 км; для сравнения приведены заводские замеры Porsche на этой же трассе.</p>
+    </div>
+  </section>
+
+  <!-- 9 — WEISSACH -->
+  <section class="slide" data-cam="weissach">
+    <div class="panel">
+      <div class="kicker">08 · Комплектации и цена</div>
+      <h2>Пакет Weissach —<br>ещё ближе к гонке.</h2>
+      <p class="lead">
+        Названный в честь исследовательского центра Porsche, пакет добавляет карбон
+        там, где его обычно не бывает, и открывает опцию кованых магниевых дисков.
+      </p>
+      <ul class="ticks">
+        <li>Карбоновые стабилизаторы поперечной устойчивости спереди и сзади, карбоновые тяги.</li>
+        <li>Карбоновая крыша и элементы капота с видимым открытым плетением.</li>
+        <li>Карбоновый рычаг селектора PDK и карбоновые дуги безопасности.</li>
+        <li>Опция: кованые <b>магниевые</b> диски — минус 8 кг неподрессоренной массы.</li>
+      </ul>
+      <div class="rows">
+        <div class="row"><span class="k">Премьера</span><span class="v">17 августа 2022</span></div>
+        <div class="row"><span class="k">Производство</span><span class="v">Цуффенхаузен, Штутгарт</span></div>
+        <div class="row"><span class="k">Цена в Германии</span><span class="v">от 229 517 € <small>с НДС, на момент премьеры</small></span></div>
+        <div class="row"><span class="k">Цена в США</span><span class="v">от $241 300 <small>2023 м.г., без доставки</small></span></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 10 — ИТОГ -->
+  <section class="slide center" data-cam="finale">
+    <div class="panel wide">
+      <div class="kicker">09 · Сводная таблица</div>
+      <h2>Porsche 911 GT3 RS (992)</h2>
+      <div class="grid2">
+        <div class="rows">
+          <div class="row"><span class="k">Двигатель</span><span class="v">4,0 л, оппозитный 6, атмосферный</span></div>
+          <div class="row"><span class="k">Мощность</span><span class="v">525 л.с. при 8500 об/мин</span></div>
+          <div class="row"><span class="k">Момент</span><span class="v">465 Н·м при 6300 об/мин</span></div>
+          <div class="row"><span class="k">Отсечка</span><span class="v">9000 об/мин</span></div>
+          <div class="row"><span class="k">Коробка</span><span class="v">7-ст. PDK</span></div>
+          <div class="row"><span class="k">Привод</span><span class="v">Задний</span></div>
+          <div class="row"><span class="k">0–100 км/ч</span><span class="v">3,2 с</span></div>
+          <div class="row"><span class="k">0–200 км/ч</span><span class="v">10,6 с</span></div>
+          <div class="row"><span class="k">Максимальная скорость</span><span class="v">296 км/ч</span></div>
+        </div>
+        <div class="rows">
+          <div class="row"><span class="k">Масса DIN</span><span class="v">1450 кг</span></div>
+          <div class="row"><span class="k">Прижимная сила</span><span class="v">409 кг / 200 км/ч · 860 кг / 285 км/ч</span></div>
+          <div class="row"><span class="k">Тормоза</span><span class="v">408 / 380 мм (PCCB 410 / 390 мм)</span></div>
+          <div class="row"><span class="k">Шины</span><span class="v">275/35 ZR20 · 335/30 ZR21</span></div>
+          <div class="row"><span class="k">Габариты</span><span class="v">4572 × 1900 × 1322 мм</span></div>
+          <div class="row"><span class="k">Колёсная база</span><span class="v">2457 мм</span></div>
+          <div class="row"><span class="k">Расход / CO₂</span><span class="v">13,2 л/100 км · 299 г/км</span></div>
+          <div class="row"><span class="k">Нюрбургринг</span><span class="v">6:49.328</span></div>
+          <div class="row"><span class="k">Цена</span><span class="v">от 229 517 € / $241 300</span></div>
+        </div>
+      </div>
+      <p class="note">
+        Данные приведены по заводским характеристикам Porsche для модели 992 GT3 RS (2022–2023).
+        Значения расхода и выбросов — по циклу WLTP; цены указаны на момент премьеры и различаются
+        по рынкам и комплектациям. 3D-модель в презентации — стилизованная реконструкция пропорций
+        кузова по заводским габаритам, а не точная копия геометрии автомобиля.
+      </p>
+    </div>
+  </section>
+</div>
+
+<nav id="dots" aria-label="Навигация по слайдам"></nav>
+
+<div class="controls">
+  <button class="btn" id="rotBtn">Вращение</button>
+  <button class="btn" id="spinBtn">Колёса</button>
+  <div class="sep"></div>
+  <div class="swatches" id="swatches"></div>
+  <div class="sep"></div>
+  <button class="btn" id="prevBtn">◀</button>
+  <button class="btn" id="nextBtn">▶</button>
+</div>

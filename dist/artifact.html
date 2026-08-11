@@ -1,0 +1,2009 @@
+<title>Porsche 911 GT3 RS (992) — 3D-презентация</title>
+<style>
+/* ==========================================================================
+   Porsche 911 GT3 RS — 3D-презентация. Тёмная сцена «шоурум».
+   ========================================================================== */
+:root {
+  color-scheme: dark;   /* презентация намеренно выполнена только в тёмной теме */
+  --bg: #0b0d0f;
+  --bg-2: #12151a;
+  --ink: #eef1f3;
+  --ink-dim: #9aa3ac;
+  --ink-faint: #67707a;
+  --accent: #a6c03c;
+  --accent-2: #d7ea6a;
+  --line: rgba(255, 255, 255, 0.10);
+  --panel: rgba(14, 17, 20, 0.66);
+  --panel-solid: #14171b;
+  --red: #d8483c;
+  --radius: 14px;
+  --mono: ui-monospace, "SF Mono", "Cascadia Mono", Menlo, Consolas, monospace;
+  --sans: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+}
+
+* { box-sizing: border-box; }
+
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--ink);
+  font-family: var(--sans);
+  -webkit-font-smoothing: antialiased;
+  overflow: hidden;
+}
+
+/* --- фон и сцена --------------------------------------------------------- */
+#backdrop {
+  position: fixed;
+  inset: 0;
+  background:
+    radial-gradient(120% 80% at 50% 8%, #232a33 0%, #14181d 42%, #0b0d0f 78%),
+    var(--bg);
+  z-index: 0;
+}
+#backdrop::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background:
+    repeating-linear-gradient(90deg, rgba(255,255,255,.028) 0 1px, transparent 1px 88px),
+    repeating-linear-gradient(0deg, rgba(255,255,255,.02) 0 1px, transparent 1px 88px);
+  mask-image: radial-gradient(70% 60% at 50% 60%, #000 0%, transparent 100%);
+  -webkit-mask-image: radial-gradient(70% 60% at 50% 60%, #000 0%, transparent 100%);
+}
+#floor {
+  position: fixed;
+  left: 0; right: 0; bottom: 0;
+  height: 46%;
+  z-index: 0;
+  background: linear-gradient(180deg, rgba(0,0,0,0) 0%, rgba(0,0,0,.45) 45%, rgba(0,0,0,.8) 100%);
+  pointer-events: none;
+}
+#scene {
+  position: fixed;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 1;
+  display: block;
+}
+
+/* --- палуба слайдов ------------------------------------------------------ */
+#deck {
+  position: fixed;
+  inset: 0;
+  z-index: 2;
+  overflow-y: scroll;
+  scroll-snap-type: y mandatory;
+  scroll-behavior: smooth;
+  scrollbar-width: none;
+}
+#deck::-webkit-scrollbar { display: none; }
+
+.slide {
+  min-height: 100vh;
+  min-height: 100dvh;
+  scroll-snap-align: start;
+  display: flex;
+  align-items: center;
+  padding: 4vh clamp(18px, 5vw, 76px) 92px;
+  pointer-events: none;
+}
+.slide > * { pointer-events: auto; }
+
+.panel {
+  width: min(100%, 500px);
+  max-height: calc(100vh - 150px);
+  max-height: calc(100dvh - 150px);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  background: var(--panel);
+  backdrop-filter: blur(18px) saturate(140%);
+  -webkit-backdrop-filter: blur(18px) saturate(140%);
+  border: 1px solid var(--line);
+  border-radius: var(--radius);
+  padding: clamp(18px, 2.2vw, 30px);
+  box-shadow: 0 24px 70px rgba(0, 0, 0, .55);
+  scrollbar-width: thin;
+  scrollbar-color: rgba(255,255,255,.2) transparent;
+  opacity: 0;
+  transform: translateY(28px);
+  transition: opacity .7s cubic-bezier(.2,.7,.2,1), transform .7s cubic-bezier(.2,.7,.2,1);
+}
+.slide.on .panel { opacity: 1; transform: none; }
+
+.panel.wide { width: min(100%, 880px); }
+.slide.center { justify-content: center; text-align: left; }
+.slide.right { justify-content: flex-end; }
+
+/* --- типографика --------------------------------------------------------- */
+.kicker {
+  font: 600 11px/1 var(--mono);
+  letter-spacing: .22em;
+  text-transform: uppercase;
+  color: var(--accent);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 14px;
+}
+.kicker::before {
+  content: "";
+  width: 26px; height: 1px;
+  background: var(--accent);
+}
+h1 {
+  font-size: clamp(38px, 5.4vw, 62px);
+  line-height: .95;
+  margin: 0 0 6px;
+  letter-spacing: -.035em;
+  font-weight: 800;
+  white-space: nowrap;
+}
+h1 .thin {
+  display: block;
+  white-space: normal;
+  font-size: clamp(15px, 1.5vw, 19px);
+  font-weight: 300;
+  line-height: 1.34;
+  letter-spacing: 0;
+  color: var(--ink-dim);
+  margin-top: 14px;
+  max-width: 22em;
+}
+h2 {
+  font-size: clamp(24px, 2.9vw, 34px);
+  line-height: 1.08;
+  margin: 0 0 12px;
+  letter-spacing: -.024em;
+  font-weight: 700;
+}
+p.lead {
+  color: var(--ink-dim);
+  font-size: clamp(13.5px, 1.15vw, 15px);
+  line-height: 1.6;
+  margin: 0 0 18px;
+}
+.hi { color: var(--accent); font-weight: 600; }
+
+/* --- сетка характеристик ------------------------------------------------- */
+.specs {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(102px, 1fr));
+  gap: 1px;
+  background: var(--line);
+  border: 1px solid var(--line);
+  border-radius: 10px;
+  overflow: hidden;
+  margin-top: 18px;
+}
+.specs .cell {
+  background: rgba(10, 12, 14, .72);
+  padding: 13px 13px;
+}
+.specs .val {
+  font: 700 clamp(17px, 1.8vw, 23px)/1 var(--sans);
+  letter-spacing: -.025em;
+  display: flex;
+  align-items: baseline;
+  gap: 3px;
+  white-space: nowrap;
+}
+.specs .val .u {
+  font-size: 10.5px;
+  font-weight: 600;
+  color: var(--ink-faint);
+  letter-spacing: 0;
+  white-space: nowrap;
+}
+.specs .lbl {
+  margin-top: 7px;
+  font: 500 10.5px/1.3 var(--mono);
+  letter-spacing: .12em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+}
+
+/* --- таблица ------------------------------------------------------------- */
+.rows { margin-top: 16px; }
+.row {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  align-items: baseline;
+  padding: 9px 0;
+  border-bottom: 1px solid var(--line);
+  font-size: 14px;
+}
+.row:last-child { border-bottom: 0; }
+.row .k { color: var(--ink-dim); }
+.row .v { font-weight: 650; text-align: right; letter-spacing: -.01em; }
+.row .v small { color: var(--ink-faint); font-weight: 500; }
+
+/* --- список преимуществ -------------------------------------------------- */
+ul.ticks { list-style: none; margin: 16px 0 0; padding: 0; }
+ul.ticks li {
+  position: relative;
+  padding-left: 26px;
+  margin-bottom: 11px;
+  color: var(--ink-dim);
+  font-size: 14px;
+  line-height: 1.5;
+}
+ul.ticks li::before {
+  content: "";
+  position: absolute;
+  left: 4px; top: 7px;
+  width: 7px; height: 7px;
+  border-radius: 2px;
+  background: var(--accent);
+  transform: rotate(45deg);
+}
+ul.ticks li b { color: var(--ink); font-weight: 650; }
+
+/* --- полосы / диаграммы -------------------------------------------------- */
+.bars { margin-top: 18px; display: grid; gap: 13px; }
+.bar .top {
+  display: flex; justify-content: space-between;
+  font-size: 12.5px; margin-bottom: 6px;
+}
+.bar .top .n { color: var(--ink-dim); }
+.bar .top .t { font-weight: 700; font-variant-numeric: tabular-nums; }
+.bar .track {
+  height: 8px;
+  background: rgba(255,255,255,.07);
+  border-radius: 99px;
+  overflow: hidden;
+}
+.bar .fill {
+  height: 100%;
+  width: 0;
+  border-radius: 99px;
+  background: linear-gradient(90deg, #6d8420, var(--accent));
+  transition: width 1.2s cubic-bezier(.2,.8,.2,1);
+}
+.bar.muted .fill { background: linear-gradient(90deg, #3b4148, #6a737c); }
+.bar.hero .fill { background: linear-gradient(90deg, var(--accent), var(--accent-2)); }
+
+/* --- тахометр ------------------------------------------------------------ */
+.gauge { display: flex; align-items: center; gap: 20px; margin-top: 20px; flex-wrap: wrap; }
+.gauge svg { flex: 0 0 auto; }
+.gauge .read { font-variant-numeric: tabular-nums; }
+.gauge .read .big {
+  font-size: clamp(30px, 3.6vw, 44px);
+  font-weight: 800;
+  letter-spacing: -.03em;
+  line-height: 1;
+}
+.gauge .read .sub {
+  font: 500 10.5px/1.4 var(--mono);
+  letter-spacing: .12em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+  margin-top: 8px;
+}
+.needle { transition: none; }
+
+/* --- элементы управления ------------------------------------------------- */
+.controls {
+  position: fixed;
+  left: 50%;
+  bottom: 18px;
+  transform: translateX(-50%);
+  z-index: 6;
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  padding: 7px;
+  border-radius: 99px;
+  background: rgba(12, 14, 17, .78);
+  backdrop-filter: blur(14px);
+  -webkit-backdrop-filter: blur(14px);
+  border: 1px solid var(--line);
+  box-shadow: 0 12px 40px rgba(0,0,0,.5);
+}
+.btn {
+  border: 0;
+  background: transparent;
+  color: var(--ink-dim);
+  font: 600 11px/1 var(--mono);
+  letter-spacing: .1em;
+  text-transform: uppercase;
+  padding: 9px 13px;
+  border-radius: 99px;
+  cursor: pointer;
+  transition: background .2s, color .2s;
+  white-space: nowrap;
+}
+.btn:hover { background: rgba(255,255,255,.08); color: var(--ink); }
+.btn.active { background: var(--accent); color: #10130a; }
+.sep { width: 1px; height: 20px; background: var(--line); }
+
+.swatches { display: flex; gap: 6px; padding: 0 4px; }
+.sw {
+  width: 22px; height: 22px;
+  border-radius: 50%;
+  border: 2px solid rgba(255,255,255,.18);
+  cursor: pointer;
+  padding: 0;
+  transition: transform .18s, border-color .18s;
+}
+.sw:hover { transform: scale(1.14); }
+.sw.on { border-color: var(--ink); transform: scale(1.14); }
+
+/* --- навигация точками --------------------------------------------------- */
+#dots {
+  position: fixed;
+  right: clamp(10px, 1.6vw, 24px);
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 6;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+#dots button {
+  width: 30px; height: 22px;
+  border: 0; background: transparent;
+  cursor: pointer;
+  display: flex; align-items: center; justify-content: flex-end;
+  padding: 0;
+}
+#dots button i {
+  display: block;
+  width: 16px; height: 2px;
+  background: rgba(255,255,255,.26);
+  border-radius: 2px;
+  transition: width .28s, background .28s;
+}
+#dots button.on i { width: 30px; background: var(--accent); }
+
+#progress {
+  position: fixed;
+  top: 0; left: 0;
+  height: 2px;
+  width: 0;
+  background: var(--accent);
+  z-index: 7;
+  transition: width .18s linear;
+}
+
+/* --- шапка --------------------------------------------------------------- */
+#brand {
+  position: fixed;
+  top: 18px;
+  left: clamp(18px, 5vw, 76px);
+  z-index: 6;
+  font: 700 12px/1 var(--mono);
+  letter-spacing: .3em;
+  color: var(--ink-dim);
+  text-transform: uppercase;
+  pointer-events: none;
+}
+#brand span { color: var(--accent); }
+
+/* --- подсказка прокрутки ------------------------------------------------- */
+.scroll-hint {
+  margin-top: 26px;
+  font: 500 10.5px/1 var(--mono);
+  letter-spacing: .18em;
+  text-transform: uppercase;
+  color: var(--ink-faint);
+  display: flex; align-items: center; gap: 10px;
+}
+.scroll-hint i {
+  width: 1px; height: 26px;
+  background: linear-gradient(180deg, var(--accent), transparent);
+  animation: drop 1.7s infinite;
+}
+@keyframes drop {
+  0% { opacity: 0; transform: translateY(-8px); }
+  40% { opacity: 1; }
+  100% { opacity: 0; transform: translateY(10px); }
+}
+
+/* --- габаритные выноски -------------------------------------------------- */
+#dimlayer {
+  position: fixed;
+  inset: 0;
+  z-index: 3;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity .5s;
+}
+#dimlayer.on { opacity: 1; }
+#dimlayer text {
+  font: 600 12px var(--mono);
+  fill: var(--accent-2);
+  letter-spacing: .06em;
+}
+#dimlayer line { stroke: var(--accent); stroke-width: 1; opacity: .8; }
+#dimlayer line.tick { stroke-width: 1.4; }
+
+/* --- DRS индикатор ------------------------------------------------------- */
+.drs-flag {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin-top: 16px;
+  padding: 8px 14px;
+  border-radius: 99px;
+  border: 1px solid var(--line);
+  font: 700 11px/1 var(--mono);
+  letter-spacing: .16em;
+  color: var(--ink-faint);
+  background: rgba(0,0,0,.3);
+  transition: color .3s, border-color .3s, background .3s;
+}
+.drs-flag i {
+  width: 8px; height: 8px; border-radius: 50%;
+  background: currentColor;
+  box-shadow: 0 0 0 0 currentColor;
+}
+.drs-flag.open {
+  color: var(--accent);
+  border-color: rgba(166,192,60,.5);
+  background: rgba(166,192,60,.10);
+}
+.drs-flag.open i { animation: pulse 1.2s infinite; }
+@keyframes pulse {
+  0% { box-shadow: 0 0 0 0 rgba(166,192,60,.6); }
+  100% { box-shadow: 0 0 0 10px rgba(166,192,60,0); }
+}
+
+/* --- таблица итогов ------------------------------------------------------ */
+.grid2 {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 0 32px;
+}
+.note {
+  margin-top: 20px;
+  padding-top: 14px;
+  border-top: 1px solid var(--line);
+  font-size: 11.5px;
+  line-height: 1.6;
+  color: var(--ink-faint);
+}
+
+/* --- адаптив ------------------------------------------------------------- */
+@media (max-width: 880px) {
+  .slide {
+    align-items: flex-end;
+    padding: 0 14px 92px;
+    justify-content: center !important;
+  }
+  .panel, .panel.wide { width: 100%; max-height: 62vh; overflow-y: auto; }
+  .specs { grid-template-columns: repeat(2, 1fr); }
+  .specs .lbl { letter-spacing: .05em; font-size: 9.5px; }
+  .grid2 { gap: 0; }
+  #dots { display: none; }
+  #brand { font-size: 10px; letter-spacing: .22em; }
+  .controls {
+    bottom: 10px;
+    max-width: calc(100vw - 16px);
+    overflow-x: auto;
+    justify-content: flex-start;
+  }
+  h1 { font-size: clamp(32px, 11vw, 52px); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  #deck { scroll-behavior: auto; }
+  .panel { transition: none; opacity: 1; transform: none; }
+}
+
+</style>
+<div id="backdrop"></div>
+<canvas id="scene"></canvas>
+<div id="floor"></div>
+<svg id="dimlayer" aria-hidden="true"></svg>
+
+<div id="progress"></div>
+<div id="brand">PORSCHE <span>911 GT3 RS</span> · 992</div>
+
+<div id="deck">
+
+  <!-- 1 — ТИТУЛ -->
+  <section class="slide" data-cam="hero">
+    <div class="panel">
+      <div class="kicker">Поколение 992 · с 2022 года</div>
+      <h1>911 GT3 RS<span class="thin">Гоночный автомобиль<br>с дорожными номерами</span></h1>
+      <p class="lead">
+        Самая радикальная версия 911: атмосферный оппозитный мотор с отсечкой
+        <span class="hi">9000 об/мин</span>, аэродинамика, перенесённая прямо из гонок,
+        и настройка подвески, которую можно менять <span class="hi">на ходу с руля</span>.
+      </p>
+      <div class="specs">
+        <div class="cell"><div class="val"><span data-count="525">0</span><span class="u">л.с.</span></div><div class="lbl">Мощность</div></div>
+        <div class="cell"><div class="val"><span data-count="3.2" data-dec="1">0</span><span class="u">с</span></div><div class="lbl">0–100 км/ч</div></div>
+        <div class="cell"><div class="val"><span data-count="296">0</span><span class="u">км/ч</span></div><div class="lbl">Максимум</div></div>
+        <div class="cell"><div class="val">6:49<span class="u">.328</span></div><div class="lbl">Нюрбургринг</div></div>
+      </div>
+      <div class="scroll-hint"><i></i> Листайте вниз · 10 разделов</div>
+    </div>
+  </section>
+
+  <!-- 2 — ДВИГАТЕЛЬ -->
+  <section class="slide" data-cam="engine">
+    <div class="panel">
+      <div class="kicker">01 · Силовой агрегат</div>
+      <h2>4,0 литра. Атмосферный.<br>Шесть цилиндров оппозитно.</h2>
+      <p class="lead">
+        Двигатель серии <b>GT</b> без наддува, с сухим картером и индивидуальными
+        дроссельными заслонками. Жёсткие коромысла клапанов — решение из гоночного
+        911&nbsp;RSR — позволяют раскручивать мотор до 9000&nbsp;об/мин.
+      </p>
+      <div class="gauge">
+        <svg width="132" height="132" viewBox="0 0 132 132">
+          <circle cx="66" cy="66" r="56" fill="none" stroke="rgba(255,255,255,.08)" stroke-width="9"/>
+          <path id="rpmArc" d="" fill="none" stroke="#a6c03c" stroke-width="9" stroke-linecap="round"/>
+          <path d="M 66 66 L 66 18" id="rpmNeedle" class="needle" stroke="#eef1f3" stroke-width="2.4" stroke-linecap="round"/>
+          <circle cx="66" cy="66" r="5" fill="#eef1f3"/>
+          <text x="66" y="112" text-anchor="middle" fill="#67707a" font-family="ui-monospace,monospace" font-size="9" letter-spacing="1.6">RPM ×1000</text>
+        </svg>
+        <div class="read">
+          <div class="big"><span id="rpmVal">0</span></div>
+          <div class="sub">Отсечка 9000 об/мин</div>
+        </div>
+      </div>
+      <div class="rows">
+        <div class="row"><span class="k">Тип</span><span class="v">Оппозитный 6-цилиндровый, атмосферный</span></div>
+        <div class="row"><span class="k">Рабочий объём</span><span class="v">3996 см³</span></div>
+        <div class="row"><span class="k">Мощность</span><span class="v">525 л.с. (386 кВт) <small>при 8500 об/мин</small></span></div>
+        <div class="row"><span class="k">Крутящий момент</span><span class="v">465 Н·м <small>при 6300 об/мин</small></span></div>
+        <div class="row"><span class="k">Диаметр × ход поршня</span><span class="v">102,0 × 81,5 мм</span></div>
+        <div class="row"><span class="k">Степень сжатия</span><span class="v">13,3 : 1</span></div>
+        <div class="row"><span class="k">Удельная мощность</span><span class="v">131 л.с. на литр</span></div>
+        <div class="row"><span class="k">Газораспределение</span><span class="v">DOHC, 4 клапана на цилиндр, VarioCam</span></div>
+        <div class="row"><span class="k">Смазка</span><span class="v">Сухой картер</span></div>
+        <div class="row"><span class="k">Коробка передач</span><span class="v">7-ст. PDK, укороченные ряды</span></div>
+        <div class="row"><span class="k">Привод</span><span class="v">Задний</span></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 3 — ДИНАМИКА -->
+  <section class="slide" data-cam="perf">
+    <div class="panel">
+      <div class="kicker">02 · Динамика</div>
+      <h2>3,2 секунды до сотни.<br>И это не главное.</h2>
+      <p class="lead">
+        RS проектировали не ради разгона по прямой, а ради скорости в повороте.
+        Но цифры в разгоне всё равно на уровне суперкаров.
+      </p>
+      <div class="specs">
+        <div class="cell"><div class="val"><span data-count="3.2" data-dec="1">0</span><span class="u">с</span></div><div class="lbl">0–100 км/ч</div></div>
+        <div class="cell"><div class="val"><span data-count="10.6" data-dec="1">0</span><span class="u">с</span></div><div class="lbl">0–200 км/ч</div></div>
+        <div class="cell"><div class="val"><span data-count="296">0</span><span class="u">км/ч</span></div><div class="lbl">Максимальная</div></div>
+        <div class="cell"><div class="val"><span data-count="2.76" data-dec="2">0</span><span class="u">кг/лс</span></div><div class="lbl">Удельная масса</div></div>
+      </div>
+      <div class="bars" data-bars>
+        <div class="bar hero"><div class="top"><span class="n">0–100 км/ч</span><span class="t">3,2 с</span></div><div class="track"><div class="fill" data-w="30"></div></div></div>
+        <div class="bar"><div class="top"><span class="n">0–200 км/ч</span><span class="t">10,6 с</span></div><div class="track"><div class="fill" data-w="100"></div></div></div>
+        <div class="bar muted"><div class="top"><span class="n">Максимальная скорость</span><span class="t">296 км/ч</span></div><div class="track"><div class="fill" data-w="84"></div></div></div>
+      </div>
+      <div class="rows">
+        <div class="row"><span class="k">Снаряжённая масса (DIN)</span><span class="v">1450 кг</span></div>
+        <div class="row"><span class="k">Расход, комбинированный (WLTP)</span><span class="v">13,2 л/100 км</span></div>
+        <div class="row"><span class="k">Выбросы CO₂ (WLTP)</span><span class="v">299 г/км</span></div>
+        <div class="row"><span class="k">Топливный бак</span><span class="v">64 л</span></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 4 — АЭРОДИНАМИКА -->
+  <section class="slide" data-cam="aero">
+    <div class="panel">
+      <div class="kicker">03 · Аэродинамика</div>
+      <h2>860 кг прижимной силы.<br>Крыло выше крыши.</h2>
+      <p class="lead">
+        Впервые в истории серийных Porsche верхняя кромка антикрыла поднята
+        <b>выше линии крыши</b>. Подвес «лебединая шея» держит крыло сверху,
+        чтобы не рвать поток под ним — там рождается основная прижимная сила.
+      </p>
+      <div class="specs">
+        <div class="cell"><div class="val"><span data-count="409">0</span><span class="u">кг</span></div><div class="lbl">Прижим на 200 км/ч</div></div>
+        <div class="cell"><div class="val"><span data-count="860">0</span><span class="u">кг</span></div><div class="lbl">Прижим на 285 км/ч</div></div>
+      </div>
+      <div class="bars">
+        <div class="bar hero"><div class="top"><span class="n">911 GT3 RS (992)</span><span class="t">860 кг</span></div><div class="track"><div class="fill" data-w="100"></div></div></div>
+        <div class="bar muted"><div class="top"><span class="n">911 GT3 RS (991.2) — вдвое меньше</span><span class="t">≈ 430 кг</span></div><div class="track"><div class="fill" data-w="50"></div></div></div>
+        <div class="bar muted"><div class="top"><span class="n">911 GT3 (992) — втрое меньше</span><span class="t">≈ 287 кг</span></div><div class="track"><div class="fill" data-w="33"></div></div></div>
+      </div>
+      <ul class="ticks">
+        <li><b>DRS</b> — первая система снижения сопротивления на серийном Porsche: кнопка на руле раскрывает крыло на скорости выше 100 км/ч и автоматически захлопывает его при торможении.</li>
+        <li><b>Центральный радиатор</b> по схеме 911 RSR: единственный радиатор наклонён в носу, а освободившиеся боковины отданы под активные аэроэлементы.</li>
+        <li><b>Двойные поперечные рычаги</b> передней подвески сделаны каплевидного профиля и сами дают около 40 кг дополнительного прижима на 285 км/ч.</li>
+        <li>Управляемые заслонки спереди и в крыле, сплиттер, дайв-планы, воздуховоды арок, диффузор — <b>около 30 аэродинамических элементов</b>.</li>
+      </ul>
+      <div class="drs-flag" id="drsFlag"><i></i> <span>DRS ЗАКРЫТ</span></div>
+      <div style="margin-top:14px"><button class="btn active" id="drsBtn" style="border:1px solid var(--line)">Нажать DRS</button></div>
+    </div>
+  </section>
+
+  <!-- 5 — ШАССИ -->
+  <section class="slide" data-cam="chassis">
+    <div class="panel">
+      <div class="kicker">04 · Шасси и тормоза</div>
+      <h2>Подвеска, которую<br>настраивают с руля.</h2>
+      <p class="lead">
+        У GT3 RS впервые для дорожного 911 спереди стоят <b>двойные поперечные рычаги</b>.
+        Четыре барабанных переключателя на руле меняют сжатие и отбой амортизаторов
+        спереди и сзади, а пятый — карту дифференциала. Прямо по ходу круга.
+      </p>
+      <div class="rows">
+        <div class="row"><span class="k">Передняя подвеска</span><span class="v">Двойные поперечные рычаги</span></div>
+        <div class="row"><span class="k">Задняя подвеска</span><span class="v">Многорычажная, подруливающая задняя ось</span></div>
+        <div class="row"><span class="k">Регулировки на ходу</span><span class="v">Сжатие / отбой спереди и сзади, карта дифференциала, DRS</span></div>
+        <div class="row"><span class="k">Дифференциал</span><span class="v">PTV Plus, электронно-управляемая блокировка</span></div>
+        <div class="row"><span class="k">Тормоза, сталь</span><span class="v">408 мм спереди / 380 мм сзади</span></div>
+        <div class="row"><span class="k">Суппорты</span><span class="v">6-поршневые моноблочные алюминиевые / 4-поршневые</span></div>
+        <div class="row"><span class="k">Керамика PCCB (опция)</span><span class="v">410 мм спереди / 390 мм сзади</span></div>
+        <div class="row"><span class="k">Диски</span><span class="v">20″ спереди / 21″ сзади, кованые</span></div>
+        <div class="row"><span class="k">Шины</span><span class="v">275/35 ZR20 · 335/30 ZR21</span></div>
+        <div class="row"><span class="k">Резина</span><span class="v">Michelin Pilot Sport Cup 2 / Cup 2 R (опция)</span></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 6 — МАССА -->
+  <section class="slide" data-cam="mass">
+    <div class="panel">
+      <div class="kicker">05 · Масса и материалы</div>
+      <h2>1450 кг.<br>Каждый грамм посчитан.</h2>
+      <p class="lead">
+        Двери, передние крылья, крыша и передний капот — из углепластика (CFRP).
+        Пакет Weissach заменяет карбоном даже стабилизаторы поперечной устойчивости
+        и тяги подвески.
+      </p>
+      <div class="specs">
+        <div class="cell"><div class="val"><span data-count="1450">0</span><span class="u">кг</span></div><div class="lbl">Масса DIN</div></div>
+        <div class="cell"><div class="val"><span data-count="2.76" data-dec="2">0</span><span class="u">кг/лс</span></div><div class="lbl">На одну силу</div></div>
+      </div>
+      <div class="bars">
+        <div class="bar hero"><div class="top"><span class="n">Магниевые кованые диски (Weissach)</span><span class="t">−8 кг</span></div><div class="track"><div class="fill" data-w="100"></div></div></div>
+        <div class="bar"><div class="top"><span class="n">Карбоновые дуги безопасности</span><span class="t">−6 кг</span></div><div class="track"><div class="fill" data-w="75"></div></div></div>
+      </div>
+      <ul class="ticks">
+        <li><b>Углепластик:</b> двери, передние крылья, крыша, передний капот.</li>
+        <li><b>Пакет Weissach:</b> карбоновые стабилизаторы спереди и сзади, карбоновые тяги, карбоновая крыша с открытым плетением, карбоновые элементы капота, рычаг PDK из карбона.</li>
+        <li><b>Салон:</b> два ковшеобразных сиденья, задних мест нет; ремни и каркас — по программе Clubsport.</li>
+        <li><b>Багажник</b> спереди — 132 л.</li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- 7 — ГАБАРИТЫ -->
+  <section class="slide" data-cam="dims">
+    <div class="panel">
+      <div class="kicker">06 · Габариты</div>
+      <h2>4572 × 1900 × 1322</h2>
+      <p class="lead">
+        Кузов шире и ниже обычного 911, с колеёй, раздвинутой под шины
+        шириной 335 мм сзади.
+      </p>
+      <div class="specs">
+        <div class="cell"><div class="val"><span data-count="4572">0</span><span class="u">мм</span></div><div class="lbl">Длина</div></div>
+        <div class="cell"><div class="val"><span data-count="1900">0</span><span class="u">мм</span></div><div class="lbl">Ширина</div></div>
+        <div class="cell"><div class="val"><span data-count="1322">0</span><span class="u">мм</span></div><div class="lbl">Высота</div></div>
+        <div class="cell"><div class="val"><span data-count="2457">0</span><span class="u">мм</span></div><div class="lbl">Колёсная база</div></div>
+      </div>
+      <div class="rows">
+        <div class="row"><span class="k">Тип кузова</span><span class="v">Купе, 2 места</span></div>
+        <div class="row"><span class="k">Объём багажника</span><span class="v">132 л</span></div>
+        <div class="row"><span class="k">Топливный бак</span><span class="v">64 л</span></div>
+        <div class="row"><span class="k">Ширина указана</span><span class="v">без наружных зеркал</span></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 8 — НЮРБУРГРИНГ -->
+  <section class="slide" data-cam="ring">
+    <div class="panel">
+      <div class="kicker">07 · Нордшляйфе</div>
+      <h2>6:49.328</h2>
+      <p class="lead">
+        Круг по полной 20,832-километровой конфигурации Нюрбургринга.
+        За рулём — <b>Йорг Бергмайстер</b>, 2022 год.
+        На <span class="hi">10,6 секунды</span> быстрее предыдущего GT3 RS поколения 991.2.
+      </p>
+      <div class="bars">
+        <div class="bar hero"><div class="top"><span class="n">911 GT3 RS (992)</span><span class="t">6:49.328</span></div><div class="track"><div class="fill" data-w="97"></div></div></div>
+        <div class="bar muted"><div class="top"><span class="n">911 GT3 (992)</span><span class="t">6:59.927</span></div><div class="track"><div class="fill" data-w="100"></div></div></div>
+        <div class="bar muted"><div class="top"><span class="n">911 GT3 RS (991.2) — по расчёту −10,6 с</span><span class="t">≈ 6:59.9</span></div><div class="track"><div class="fill" data-w="100"></div></div></div>
+      </div>
+      <div class="rows">
+        <div class="row"><span class="k">Длина круга</span><span class="v">20,832 км</span></div>
+        <div class="row"><span class="k">Средняя скорость на круге</span><span class="v">≈ 183 км/ч</span></div>
+        <div class="row"><span class="k">Пилот</span><span class="v">Йорг Бергмайстер</span></div>
+      </div>
+      <p class="note">Длина полной конфигурации — 20,832 км; для сравнения приведены заводские замеры Porsche на этой же трассе.</p>
+    </div>
+  </section>
+
+  <!-- 9 — WEISSACH -->
+  <section class="slide" data-cam="weissach">
+    <div class="panel">
+      <div class="kicker">08 · Комплектации и цена</div>
+      <h2>Пакет Weissach —<br>ещё ближе к гонке.</h2>
+      <p class="lead">
+        Названный в честь исследовательского центра Porsche, пакет добавляет карбон
+        там, где его обычно не бывает, и открывает опцию кованых магниевых дисков.
+      </p>
+      <ul class="ticks">
+        <li>Карбоновые стабилизаторы поперечной устойчивости спереди и сзади, карбоновые тяги.</li>
+        <li>Карбоновая крыша и элементы капота с видимым открытым плетением.</li>
+        <li>Карбоновый рычаг селектора PDK и карбоновые дуги безопасности.</li>
+        <li>Опция: кованые <b>магниевые</b> диски — минус 8 кг неподрессоренной массы.</li>
+      </ul>
+      <div class="rows">
+        <div class="row"><span class="k">Премьера</span><span class="v">17 августа 2022</span></div>
+        <div class="row"><span class="k">Производство</span><span class="v">Цуффенхаузен, Штутгарт</span></div>
+        <div class="row"><span class="k">Цена в Германии</span><span class="v">от 229 517 € <small>с НДС, на момент премьеры</small></span></div>
+        <div class="row"><span class="k">Цена в США</span><span class="v">от $241 300 <small>2023 м.г., без доставки</small></span></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 10 — ИТОГ -->
+  <section class="slide center" data-cam="finale">
+    <div class="panel wide">
+      <div class="kicker">09 · Сводная таблица</div>
+      <h2>Porsche 911 GT3 RS (992)</h2>
+      <div class="grid2">
+        <div class="rows">
+          <div class="row"><span class="k">Двигатель</span><span class="v">4,0 л, оппозитный 6, атмосферный</span></div>
+          <div class="row"><span class="k">Мощность</span><span class="v">525 л.с. при 8500 об/мин</span></div>
+          <div class="row"><span class="k">Момент</span><span class="v">465 Н·м при 6300 об/мин</span></div>
+          <div class="row"><span class="k">Отсечка</span><span class="v">9000 об/мин</span></div>
+          <div class="row"><span class="k">Коробка</span><span class="v">7-ст. PDK</span></div>
+          <div class="row"><span class="k">Привод</span><span class="v">Задний</span></div>
+          <div class="row"><span class="k">0–100 км/ч</span><span class="v">3,2 с</span></div>
+          <div class="row"><span class="k">0–200 км/ч</span><span class="v">10,6 с</span></div>
+          <div class="row"><span class="k">Максимальная скорость</span><span class="v">296 км/ч</span></div>
+        </div>
+        <div class="rows">
+          <div class="row"><span class="k">Масса DIN</span><span class="v">1450 кг</span></div>
+          <div class="row"><span class="k">Прижимная сила</span><span class="v">409 кг / 200 км/ч · 860 кг / 285 км/ч</span></div>
+          <div class="row"><span class="k">Тормоза</span><span class="v">408 / 380 мм (PCCB 410 / 390 мм)</span></div>
+          <div class="row"><span class="k">Шины</span><span class="v">275/35 ZR20 · 335/30 ZR21</span></div>
+          <div class="row"><span class="k">Габариты</span><span class="v">4572 × 1900 × 1322 мм</span></div>
+          <div class="row"><span class="k">Колёсная база</span><span class="v">2457 мм</span></div>
+          <div class="row"><span class="k">Расход / CO₂</span><span class="v">13,2 л/100 км · 299 г/км</span></div>
+          <div class="row"><span class="k">Нюрбургринг</span><span class="v">6:49.328</span></div>
+          <div class="row"><span class="k">Цена</span><span class="v">от 229 517 € / $241 300</span></div>
+        </div>
+      </div>
+      <p class="note">
+        Данные приведены по заводским характеристикам Porsche для модели 992 GT3 RS (2022–2023).
+        Значения расхода и выбросов — по циклу WLTP; цены указаны на момент премьеры и различаются
+        по рынкам и комплектациям. 3D-модель в презентации — стилизованная реконструкция пропорций
+        кузова по заводским габаритам, а не точная копия геометрии автомобиля.
+      </p>
+    </div>
+  </section>
+</div>
+
+<nav id="dots" aria-label="Навигация по слайдам"></nav>
+
+<div class="controls">
+  <button class="btn" id="rotBtn">Вращение</button>
+  <button class="btn" id="spinBtn">Колёса</button>
+  <div class="sep"></div>
+  <div class="swatches" id="swatches"></div>
+  <div class="sep"></div>
+  <button class="btn" id="prevBtn">◀</button>
+  <button class="btn" id="nextBtn">▶</button>
+</div>
+
+<script>
+/* ===========================================================================
+   Мини 3D-движок на Canvas 2D.
+   Плоское затенение + сортировка граней методом художника.
+   Никаких внешних библиотек.
+   =========================================================================== */
+
+const V3 = {
+  sub: (a, b) => [a[0] - b[0], a[1] - b[1], a[2] - b[2]],
+  add: (a, b) => [a[0] + b[0], a[1] + b[1], a[2] + b[2]],
+  cross: (a, b) => [
+    a[1] * b[2] - a[2] * b[1],
+    a[2] * b[0] - a[0] * b[2],
+    a[0] * b[1] - a[1] * b[0]
+  ],
+  dot: (a, b) => a[0] * b[0] + a[1] * b[1] + a[2] * b[2],
+  scale: (a, s) => [a[0] * s, a[1] * s, a[2] * s],
+  len: (a) => Math.hypot(a[0], a[1], a[2]),
+  norm: (a) => {
+    const l = Math.hypot(a[0], a[1], a[2]) || 1;
+    return [a[0] / l, a[1] / l, a[2] / l];
+  }
+};
+
+/* --- матрицы 4x4, построчно --------------------------------------------- */
+const M4 = {
+  id: () => [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1],
+  mul(a, b) {
+    const o = new Array(16);
+    for (let r = 0; r < 4; r++) {
+      for (let c = 0; c < 4; c++) {
+        o[r * 4 + c] =
+          a[r * 4] * b[c] +
+          a[r * 4 + 1] * b[4 + c] +
+          a[r * 4 + 2] * b[8 + c] +
+          a[r * 4 + 3] * b[12 + c];
+      }
+    }
+    return o;
+  },
+  trans(x, y, z) {
+    return [1, 0, 0, x, 0, 1, 0, y, 0, 0, 1, z, 0, 0, 0, 1];
+  },
+  rotX(a) {
+    const c = Math.cos(a), s = Math.sin(a);
+    return [1, 0, 0, 0, 0, c, -s, 0, 0, s, c, 0, 0, 0, 0, 1];
+  },
+  rotY(a) {
+    const c = Math.cos(a), s = Math.sin(a);
+    return [c, 0, s, 0, 0, 1, 0, 0, -s, 0, c, 0, 0, 0, 0, 1];
+  },
+  rotZ(a) {
+    const c = Math.cos(a), s = Math.sin(a);
+    return [c, -s, 0, 0, s, c, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1];
+  },
+  apply(m, p) {
+    return [
+      m[0] * p[0] + m[1] * p[1] + m[2] * p[2] + m[3],
+      m[4] * p[0] + m[5] * p[1] + m[6] * p[2] + m[7],
+      m[8] * p[0] + m[9] * p[1] + m[10] * p[2] + m[11]
+    ];
+  },
+  applyDir(m, p) {
+    return [
+      m[0] * p[0] + m[1] * p[1] + m[2] * p[2],
+      m[4] * p[0] + m[5] * p[1] + m[6] * p[2],
+      m[8] * p[0] + m[9] * p[1] + m[10] * p[2]
+    ];
+  }
+};
+
+/* --- Меш ----------------------------------------------------------------- */
+class Mesh {
+  constructor(name) {
+    this.name = name;
+    this.verts = [];
+    this.faces = [];
+    this.matrix = M4.id();
+    this.visible = true;
+    this.opacity = 1;
+    this.highlight = 0; // 0..1 — подсветка детали
+    this._world = [];
+  }
+  v(x, y, z) {
+    this.verts.push([x, y, z]);
+    return this.verts.length - 1;
+  }
+  face(idx, col, opt = {}) {
+    this.faces.push({
+      v: idx,
+      col,
+      gloss: opt.gloss === undefined ? 26 : opt.gloss,
+      spec: opt.spec === undefined ? 0.55 : opt.spec,
+      glass: !!opt.glass,
+      emissive: opt.emissive || 0,
+      paint: !!opt.paint,
+      dbl: !!opt.dbl, // двусторонняя грань (не отсекать)
+      tag: opt.tag || ''
+    });
+  }
+  /* зеркальная копия по Z (левая сторона) */
+  mirrorZ() {
+    const n = this.verts.length;
+    for (let i = 0; i < n; i++) {
+      const p = this.verts[i];
+      this.verts.push([p[0], p[1], -p[2]]);
+    }
+    const fn = this.faces.length;
+    for (let i = 0; i < fn; i++) {
+      const f = this.faces[i];
+      const nv = f.v.map((k) => k + n).reverse();
+      this.faces.push(Object.assign({}, f, { v: nv }));
+    }
+    return this;
+  }
+}
+
+/* --- Сцена и рендер ------------------------------------------------------ */
+class Renderer {
+  constructor(canvas) {
+    this.cv = canvas;
+    this.ctx = canvas.getContext('2d');
+    this.meshes = [];
+    this.dpr = 1;
+    this.light = V3.norm([0.42, 0.82, 0.38]);
+    this.fill = V3.norm([-0.55, 0.35, -0.75]);   // заполняющий свет с теневой стороны
+    this.sky = [96, 122, 150];
+    this.ground = [16, 18, 21];
+    this.cam = {
+      az: -0.9, el: 0.16, dist: 12,
+      target: [0, 0.6, 0],
+      fov: 640,
+      shiftX: 0, shiftY: 0
+    };
+    this._buf = [];
+  }
+
+  resize() {
+    const dpr = Math.min(window.devicePixelRatio || 1, 1.75);
+    const w = this.cv.clientWidth, h = this.cv.clientHeight;
+    this.dpr = dpr;
+    this.cv.width = Math.max(1, Math.round(w * dpr));
+    this.cv.height = Math.max(1, Math.round(h * dpr));
+    this.W = w; this.H = h;
+  }
+
+  camPos() {
+    const c = this.cam;
+    return [
+      c.target[0] + c.dist * Math.cos(c.el) * Math.cos(c.az),
+      c.target[1] + c.dist * Math.sin(c.el),
+      c.target[2] + c.dist * Math.cos(c.el) * Math.sin(c.az)
+    ];
+  }
+
+  /* матрица вида (мир -> камера) */
+  viewMatrix() {
+    const eye = this.camPos();
+    const f = V3.norm(V3.sub(this.cam.target, eye));
+    const up0 = [0, 1, 0];
+    const s = V3.norm(V3.cross(f, up0));
+    const u = V3.cross(s, f);
+    return [
+      s[0], s[1], s[2], -V3.dot(s, eye),
+      u[0], u[1], u[2], -V3.dot(u, eye),
+      -f[0], -f[1], -f[2], V3.dot(f, eye),
+      0, 0, 0, 1
+    ];
+  }
+
+  project(p) {
+    // p — точка в пространстве камеры, взгляд вдоль -z
+    const z = -p[2];
+    const k = this.cam.fov / Math.max(z, 0.05);
+    return [
+      this.W / 2 + p[0] * k + this.cam.shiftX,
+      this.H / 2 - p[1] * k + this.cam.shiftY,
+      z
+    ];
+  }
+
+  shade(col, n, wp, f, eye) {
+    let r = col[0], g = col[1], b = col[2];
+    const nd = Math.max(0, V3.dot(n, this.light));
+    const nf = Math.max(0, V3.dot(n, this.fill));
+    const hemi = 0.5 + 0.5 * n[1];
+    const amb = 0.19 + 0.15 * hemi;
+    let inten = amb + 0.58 * nd + 0.26 * nf;
+
+    // отражение неба/земли для «краски»
+    if (f.paint || f.glass) {
+      const t = Math.max(0, Math.min(1, 0.5 + 0.5 * n[1]));
+      const env = f.glass ? 0.55 : 0.22;
+      r = r * (1 - env) + (this.ground[0] * (1 - t) + this.sky[0] * t) * env;
+      g = g * (1 - env) + (this.ground[1] * (1 - t) + this.sky[1] * t) * env;
+      b = b * (1 - env) + (this.ground[2] * (1 - t) + this.sky[2] * t) * env;
+    }
+
+    r *= inten; g *= inten; b *= inten;
+
+    // блик
+    const view = V3.norm(V3.sub(eye, wp));
+    const h = V3.norm(V3.add(view, this.light));
+    const sp = Math.pow(Math.max(0, V3.dot(n, h)), f.gloss) * f.spec * 255;
+    r += sp; g += sp; b += sp;
+
+    // контровой свет по кромке
+    const rim = Math.pow(1 - Math.max(0, V3.dot(n, view)), 3.5) * 24;
+    r += rim * 0.7; g += rim * 0.85; b += rim;
+
+    if (f.emissive) {
+      r += col[0] * f.emissive; g += col[1] * f.emissive; b += col[2] * f.emissive;
+    }
+    return [r, g, b];
+  }
+
+  render(opts = {}) {
+    const ctx = this.ctx;
+    ctx.setTransform(this.dpr, 0, 0, this.dpr, 0, 0);
+    ctx.clearRect(0, 0, this.W, this.H);
+
+    const view = this.viewMatrix();
+    const eye = this.camPos();
+    const buf = this._buf;
+    buf.length = 0;
+
+    if (opts.shadow !== false) this.drawShadow(2.35, 1.02, 0.008);
+
+    const collect = (flip) => {
+      for (const m of this.meshes) {
+        if (!m.visible) continue;
+        if (flip && m.noReflect) continue;
+        const mm = m.matrix;
+        const wp = m._world;
+        for (let i = 0; i < m.verts.length; i++) {
+          const p = m.verts[i];
+          let o = wp[i];
+          if (!o) o = wp[i] = [0, 0, 0];
+          o[0] = mm[0] * p[0] + mm[1] * p[1] + mm[2] * p[2] + mm[3];
+          o[1] = mm[4] * p[0] + mm[5] * p[1] + mm[6] * p[2] + mm[7];
+          o[2] = mm[8] * p[0] + mm[9] * p[1] + mm[10] * p[2] + mm[11];
+          if (flip) o[1] = -o[1];
+        }
+        for (const f of m.faces) {
+          const idx = f.v;
+          const a = wp[idx[0]], b = wp[idx[1]], c = wp[idx[2]];
+          let n = V3.norm(V3.cross(V3.sub(b, a), V3.sub(c, a)));
+          if (flip) n = [n[0], n[1], n[2]];
+          const cx = (a[0] + b[0] + c[0]) / 3;
+          const cy = (a[1] + b[1] + c[1]) / 3;
+          const cz = (a[2] + b[2] + c[2]) / 3;
+          const cen = [cx, cy, cz];
+          const toEye = V3.sub(eye, cen);
+          const facing = V3.dot(n, toEye);
+          if (!f.dbl && !f.glass && facing < 0) continue;
+          if (facing < 0) n = V3.scale(n, -1);
+          if (flip && cy > 0.02) continue;
+
+          // проекция
+          const pts = [];
+          let depth = 0, behind = false;
+          const halfW = this.W / 2 + this.cam.shiftX;
+          const halfH = this.H / 2 + this.cam.shiftY;
+          for (let i = 0; i < idx.length; i++) {
+            const p = wp[idx[i]];
+            const vx = view[0] * p[0] + view[1] * p[1] + view[2] * p[2] + view[3];
+            const vy = view[4] * p[0] + view[5] * p[1] + view[6] * p[2] + view[7];
+            const vz = -(view[8] * p[0] + view[9] * p[1] + view[10] * p[2] + view[11]);
+            if (vz < 0.08) { behind = true; break; }
+            const kk = this.cam.fov / vz;
+            pts.push([halfW + vx * kk, halfH - vy * kk]);
+            depth += vz;
+          }
+          if (behind) continue;
+          depth /= idx.length;
+
+          let sh = this.shade(f.col, n, cen, f, eye);
+          if (m.highlight > 0) {
+            const k = m.highlight;
+            sh = [
+              sh[0] * (1 - k) + Math.min(255, sh[0] * 1.3 + 96) * k,
+              sh[1] * (1 - k) + Math.min(255, sh[1] * 1.3 + 104) * k,
+              sh[2] * (1 - k) + Math.min(255, sh[2] * 1.3 + 82) * k
+            ];
+          }
+          buf.push({
+            pts, depth,
+            col: sh,
+            alpha: (f.glass ? 0.82 : 1) * m.opacity * (flip ? 0.10 : 1),
+            flip
+          });
+        }
+      }
+    };
+
+    if (opts.reflection !== false) collect(true);
+    collect(false);
+
+    buf.sort((p, q) => q.depth - p.depth);
+
+    ctx.lineJoin = 'round';
+    for (const f of buf) {
+      const c = f.col;
+      const r = c[0] < 0 ? 0 : c[0] > 255 ? 255 : c[0] | 0;
+      const g = c[1] < 0 ? 0 : c[1] > 255 ? 255 : c[1] | 0;
+      const b = c[2] < 0 ? 0 : c[2] > 255 ? 255 : c[2] | 0;
+      const style = `rgb(${r},${g},${b})`;
+      ctx.globalAlpha = f.alpha;
+      ctx.fillStyle = style;
+      ctx.strokeStyle = style;
+      ctx.lineWidth = 0.7;
+      ctx.beginPath();
+      ctx.moveTo(f.pts[0][0], f.pts[0][1]);
+      for (let i = 1; i < f.pts.length; i++) ctx.lineTo(f.pts[i][0], f.pts[i][1]);
+      ctx.closePath();
+      ctx.fill();
+      ctx.stroke();
+    }
+    ctx.globalAlpha = 1;
+  }
+
+  /* мягкая контактная тень под машиной */
+  drawShadow(len, wid, y) {
+    const ctx = this.ctx;
+    const view = this.viewMatrix();
+    const pts = [];
+    const N = 28;
+    for (let i = 0; i < N; i++) {
+      const a = (i / N) * Math.PI * 2;
+      const p = [Math.cos(a) * len, y, Math.sin(a) * wid];
+      const vp = M4.apply(view, p);
+      if (-vp[2] < 0.08) return;
+      pts.push(this.project(vp));
+    }
+    let cx = 0, cy = 0;
+    for (const p of pts) { cx += p[0]; cy += p[1]; }
+    cx /= pts.length; cy /= pts.length;
+    let rad = 0;
+    for (const p of pts) rad = Math.max(rad, Math.hypot(p[0] - cx, p[1] - cy));
+    const g = ctx.createRadialGradient(cx, cy, 0, cx, cy, rad);
+    g.addColorStop(0, 'rgba(0,0,0,0.55)');
+    g.addColorStop(0.55, 'rgba(0,0,0,0.28)');
+    g.addColorStop(1, 'rgba(0,0,0,0)');
+    ctx.save();
+    ctx.setTransform(this.dpr, 0, 0, this.dpr, 0, 0);
+    ctx.fillStyle = g;
+    ctx.beginPath();
+    ctx.moveTo(pts[0][0], pts[0][1]);
+    for (let i = 1; i < pts.length; i++) ctx.lineTo(pts[i][0], pts[i][1]);
+    ctx.closePath();
+    ctx.fill();
+    ctx.restore();
+  }
+}
+
+
+/* ===========================================================================
+   Процедурная модель Porsche 911 GT3 RS (992).
+   Пропорции построены по заводским габаритам:
+   длина 4572 / ширина 1900 / высота 1322 / колёсная база 2457 мм.
+   =========================================================================== */
+
+/* активный цвет кузова — общий объект, мутируется при смене цвета */
+const PAINT = [166, 192, 60];
+const PAINT_DARK = [0, 0, 0];
+
+const COL = {
+  carbon: [30, 32, 35],
+  carbonLite: [46, 49, 53],
+  glass: [16, 20, 26],
+  tire: [24, 25, 27],
+  rim: [178, 182, 186],
+  rimDark: [108, 112, 116],
+  disc: [96, 99, 104],
+  caliper: [186, 30, 26],
+  lamp: [206, 222, 235],
+  tail: [188, 26, 24],
+  chrome: [112, 118, 124],
+  black: [18, 19, 21]
+};
+
+function setPaint(hex) {
+  const n = parseInt(hex.slice(1), 16);
+  PAINT[0] = (n >> 16) & 255;
+  PAINT[1] = (n >> 8) & 255;
+  PAINT[2] = n & 255;
+  PAINT_DARK[0] = PAINT[0] * 0.45;
+  PAINT_DARK[1] = PAINT[1] * 0.45;
+  PAINT_DARK[2] = PAINT[2] * 0.45;
+}
+setPaint('#a6c03c');
+
+/* ---- примитивы ---------------------------------------------------------- */
+function box(m, x0, x1, y0, y1, z0, z1, col, opt = {}) {
+  // границы нормализуются, чтобы обход вершин всегда давал наружные нормали
+  if (x0 > x1) { const t = x0; x0 = x1; x1 = t; }
+  if (y0 > y1) { const t = y0; y0 = y1; y1 = t; }
+  if (z0 > z1) { const t = z0; z0 = z1; z1 = t; }
+  const a = m.v(x0, y0, z0), b = m.v(x1, y0, z0), c = m.v(x1, y1, z0), d = m.v(x0, y1, z0);
+  const e = m.v(x0, y0, z1), f = m.v(x1, y0, z1), g = m.v(x1, y1, z1), h = m.v(x0, y1, z1);
+  m.face([d, c, b, a], col, opt);   // -z
+  m.face([e, f, g, h], col, opt);   // +z
+  m.face([a, b, f, e], col, opt);   // -y
+  m.face([h, g, c, d], col, opt);   // +y
+  m.face([h, d, a, e], col, opt);   // -x
+  m.face([c, g, f, b], col, opt);   // +x
+}
+
+function quad(m, p0, p1, p2, p3, col, opt = {}) {
+  const a = m.v(p0[0], p0[1], p0[2]);
+  const b = m.v(p1[0], p1[1], p1[2]);
+  const c = m.v(p2[0], p2[1], p2[2]);
+  const d = m.v(p3[0], p3[1], p3[2]);
+  m.face([a, b, c, d], col, opt);
+}
+
+/* ---- сечения кузова -----------------------------------------------------
+   Каждая станция: x, полуширина w, низ yb, линия плеча (крыло) ys,
+   верх по центру yt, полуширина крыши rw. Всё в метрах.
+   ya — высота нижней кромки у наружных точек: там, где она поднята,
+   образуется вырез колёсной арки.                                        */
+const STATIONS = [
+  { x:  2.286, w: 0.70, yb: 0.31, ys: 0.53, yt: 0.485, rw: 0.46 },
+  { x:  2.21,  w: 0.845, yb: 0.20, ys: 0.575, yt: 0.505, rw: 0.55 },
+  { x:  2.05,  w: 0.90, yb: 0.145, ys: 0.635, yt: 0.535, rw: 0.62, ya: 0.19 },
+  { x:  1.80,  w: 0.93, yb: 0.13, ys: 0.70, yt: 0.58, rw: 0.66, ya: 0.34 },
+  { x:  1.52,  w: 0.95, yb: 0.155, ys: 0.725, yt: 0.605, rw: 0.68, ya: 0.52 },
+  { x:  1.23,  w: 0.95, yb: 0.17, ys: 0.74, yt: 0.645, rw: 0.69, ya: 0.55 },
+  { x:  0.95,  w: 0.945, yb: 0.185, ys: 0.75, yt: 0.755, rw: 0.71, ya: 0.50 },
+  { x:  0.80,  w: 0.94, yb: 0.19, ys: 0.757, yt: 0.86, rw: 0.70, ya: 0.30 },
+  { x:  0.55,  w: 0.935, yb: 0.20, ys: 0.767, yt: 1.06, rw: 0.65, ya: 0.22 },
+  { x:  0.25,  w: 0.935, yb: 0.20, ys: 0.777, yt: 1.25, rw: 0.60 },
+  { x: -0.10,  w: 0.94, yb: 0.205, ys: 0.788, yt: 1.318, rw: 0.575 },
+  { x: -0.45,  w: 0.945, yb: 0.205, ys: 0.80, yt: 1.322, rw: 0.575 },
+  { x: -0.78,  w: 0.95, yb: 0.20, ys: 0.815, yt: 1.255, rw: 0.578, ya: 0.26 },
+  { x: -1.00,  w: 0.95, yb: 0.198, ys: 0.83, yt: 1.19, rw: 0.59, ya: 0.46 },
+  { x: -1.23,  w: 0.955, yb: 0.195, ys: 0.85, yt: 1.115, rw: 0.61, ya: 0.58 },
+  { x: -1.50,  w: 0.95, yb: 0.19, ys: 0.875, yt: 1.02, rw: 0.68, ya: 0.55 },
+  { x: -1.78,  w: 0.935, yb: 0.185, ys: 0.893, yt: 0.972, rw: 0.73, ya: 0.32 },
+  { x: -2.05,  w: 0.89, yb: 0.19, ys: 0.888, yt: 0.945, rw: 0.72 },
+  { x: -2.24,  w: 0.80, yb: 0.24, ys: 0.85, yt: 0.90, rw: 0.66 },
+  { x: -2.286, w: 0.66, yb: 0.34, ys: 0.78, yt: 0.82, rw: 0.54 }
+];
+
+function sectionPts(s) {
+  const { w, yb, ys, yt, rw } = s;
+  const ya = s.ya === undefined ? yb : s.ya;      // кромка арки
+  const yl = Math.max(ya, yb + (ys - yb) * 0.30); // низ боковины
+  return [
+    [w * 0.80, ya],
+    [w * 0.985, yl],
+    [w, ys],
+    [w * 0.94, ys + (yt - ys) * 0.42],
+    [rw * 1.02, yb + (yt - yb) * 0.99],
+    [rw * 0.55, yt],
+    [0, yt],
+    [-rw * 0.55, yt],
+    [-rw * 1.02, yb + (yt - yb) * 0.99],
+    [-w * 0.94, ys + (yt - ys) * 0.42],
+    [-w, ys],
+    [-w * 0.985, yl],
+    [-w * 0.80, ya],
+    [0, yb]
+  ];
+}
+
+/* какой материал у грани обшивки */
+function skinMaterial(x, y, z, jHigh) {
+  const az = Math.abs(z);
+  // лобовое стекло
+  if (x > 0.25 && x < 0.90 && y > 0.88 && az < 0.72) return 'glass';
+  // боковые стёкла
+  if (x > -1.05 && x < 0.40 && y > 0.92 && az > 0.42) return 'glass';
+  // заднее стекло
+  if (x > -1.40 && x < -0.90 && y > 0.98 && az < 0.70) return 'glass';
+  // крыша — карбон (Weissach)
+  if (x > -0.95 && x < 0.30 && y > 1.20 && az < 0.62) return 'roof';
+  // днище
+  if (y < 0.24 && jHigh === false) return 'under';
+  return 'paint';
+}
+
+/* ---- кузов -------------------------------------------------------------- */
+function buildBody() {
+  const m = new Mesh('body');
+  const rows = STATIONS.map((s) => sectionPts(s));
+  const idx = [];
+  for (let i = 0; i < STATIONS.length; i++) {
+    const row = [];
+    for (const p of rows[i]) row.push(m.v(STATIONS[i].x, p[1], p[0]));
+    idx.push(row);
+  }
+  const N = rows[0].length;
+  for (let i = 0; i < STATIONS.length - 1; i++) {
+    for (let j = 0; j < N; j++) {
+      const j2 = (j + 1) % N;
+      const a = idx[i][j], b = idx[i][j2], c = idx[i + 1][j2], d = idx[i + 1][j];
+      const pa = m.verts[a], pb = m.verts[b], pc = m.verts[c], pd = m.verts[d];
+      const x = (pa[0] + pc[0]) / 2;
+      const y = (pa[1] + pb[1] + pc[1] + pd[1]) / 4;
+      const z = (pa[2] + pb[2] + pc[2] + pd[2]) / 4;
+      // j = 12 и 13 — плоскости днища и внутренние поверхности арок
+      const mat = (j >= 12) ? 'under' : skinMaterial(x, y, z, y > 0.30);
+      if (mat === 'glass') {
+        m.face([a, b, c, d], COL.glass, { glass: true, gloss: 90, spec: 0.9 });
+      } else if (mat === 'roof') {
+        m.face([a, b, c, d], COL.carbon, { gloss: 60, spec: 0.5, paint: true });
+      } else if (mat === 'under') {
+        m.face([a, b, c, d], COL.black, { gloss: 8, spec: 0.05 });
+      } else {
+        m.face([a, b, c, d], PAINT, { gloss: 34, spec: 0.62, paint: true });
+      }
+    }
+  }
+  // заглушки передка и кормы
+  const capF = idx[0], capR = idx[idx.length - 1];
+  for (let j = 1; j < N - 1; j++) {
+    m.face([capF[0], capF[j + 1], capF[j]], PAINT, { gloss: 30, spec: 0.5, paint: true });
+  }
+  for (let j = 1; j < N - 1; j++) {
+    m.face([capR[0], capR[j], capR[j + 1]], COL.carbonLite, { gloss: 24, spec: 0.4 });
+  }
+  return m;
+}
+
+/* ---- аэродинамика и обвес ----------------------------------------------- */
+function buildAeroKit() {
+  const m = new Mesh('aero');
+  // передний сплиттер
+  quad(m, [2.35, 0.115, 0.78], [2.35, 0.115, -0.78], [1.95, 0.135, -0.95], [1.95, 0.135, 0.95],
+    COL.carbon, { gloss: 40, spec: 0.35, dbl: true });
+  quad(m, [2.35, 0.115, 0.78], [2.30, 0.30, 0.71], [2.30, 0.30, -0.71], [2.35, 0.115, -0.78],
+    COL.carbonLite, { gloss: 40, spec: 0.35, dbl: true });
+  // дайв-планы по краям сплиттера
+  quad(m, [2.30, 0.30, 0.90], [2.06, 0.40, 0.965], [2.02, 0.40, 0.94], [2.26, 0.30, 0.875],
+    COL.carbon, { gloss: 40, spec: 0.4, dbl: true });
+  quad(m, [2.30, 0.30, -0.90], [2.26, 0.30, -0.875], [2.02, 0.40, -0.94], [2.06, 0.40, -0.965],
+    COL.carbon, { gloss: 40, spec: 0.4, dbl: true });
+  // пороги
+  box(m, 1.05, -1.15, 0.115, 0.235, 0.90, 1.00, COL.carbon, { gloss: 30, spec: 0.3 });
+  box(m, 1.05, -1.15, 0.115, 0.235, -1.00, -0.90, COL.carbon, { gloss: 30, spec: 0.3 });
+  // диффузор
+  quad(m, [-2.10, 0.20, 0.86], [-2.10, 0.20, -0.86], [-2.34, 0.44, -0.78], [-2.34, 0.44, 0.78],
+    COL.carbon, { gloss: 34, spec: 0.35, dbl: true });
+  for (let i = -2; i <= 2; i++) {
+    const z = i * 0.30;
+    box(m, -2.32, -2.08, 0.21, 0.44, z - 0.022, z + 0.022, COL.carbonLite, { gloss: 30, spec: 0.3 });
+  }
+  // боковые воздухозаборники (за дверьми)
+  quad(m, [-1.05, 0.62, 0.955], [-1.45, 0.66, 0.94], [-1.45, 0.86, 0.94], [-1.08, 0.80, 0.955],
+    COL.black, { gloss: 12, spec: 0.1 });
+  quad(m, [-1.05, 0.62, -0.955], [-1.08, 0.80, -0.955], [-1.45, 0.86, -0.94], [-1.45, 0.66, -0.94],
+    COL.black, { gloss: 12, spec: 0.1 });
+  // прорези над передними крыльями (выпуск воздуха из колёсных арок)
+  for (let s = -1; s <= 1; s += 2) {
+    for (let i = 0; i < 3; i++) {
+      const x = 1.62 - i * 0.13;
+      quad(m,
+        [x, 0.745, s * 0.52], [x - 0.085, 0.745, s * 0.52],
+        [x - 0.085, 0.735, s * 0.80], [x, 0.735, s * 0.80],
+        COL.black, { gloss: 10, spec: 0.08, dbl: true });
+    }
+  }
+  // NACA-каналы на капоте
+  for (let s = -1; s <= 1; s += 2) {
+    quad(m, [1.95, 0.545, s * 0.20], [1.55, 0.615, s * 0.16],
+      [1.55, 0.615, s * 0.34], [1.95, 0.545, s * 0.40],
+      COL.black, { gloss: 14, spec: 0.12, dbl: true });
+  }
+  // жалюзи моторного отсека — узкие щели по линии крышки
+  const deckY = (x) => 1.032 + (x + 1.44) * 0.17;
+  for (let i = 0; i < 6; i++) {
+    const x = -1.46 - i * 0.078;
+    const y0 = deckY(x), y1 = deckY(x - 0.034);
+    const zw = 0.60 - i * 0.012;
+    quad(m, [x, y0 + 0.004, zw], [x - 0.034, y1 + 0.004, zw],
+      [x - 0.034, y1 + 0.004, -zw], [x, y0 + 0.004, -zw],
+      COL.black, { gloss: 16, spec: 0.15, dbl: true });
+    quad(m, [x - 0.034, y1 + 0.004, zw], [x - 0.034, y1 + 0.028, zw],
+      [x - 0.034, y1 + 0.028, -zw], [x - 0.034, y1 + 0.004, -zw],
+      COL.carbonLite, { gloss: 30, spec: 0.3, dbl: true });
+  }
+  // выхлоп по центру
+  box(m, -2.36, -2.20, 0.30, 0.42, -0.16, -0.04, COL.chrome, { gloss: 70, spec: 0.8 });
+  box(m, -2.36, -2.20, 0.30, 0.42, 0.04, 0.16, COL.chrome, { gloss: 70, spec: 0.8 });
+  // зеркала на «крыле-ножке»
+  for (let s = -1; s <= 1; s += 2) {
+    box(m, 0.78, 0.66, 0.79, 0.825, s * 0.905, s * 0.985, COL.carbon, { gloss: 40, spec: 0.4 });
+    box(m, 0.76, 0.60, 0.82, 0.935, s * 0.965, s * 1.055, PAINT, { gloss: 40, spec: 0.6, paint: true });
+  }
+  // фары
+  for (let s = -1; s <= 1; s += 2) {
+    quad(m, [2.085, 0.555, s * 0.56], [2.025, 0.63, s * 0.64],
+      [2.045, 0.63, s * 0.79], [2.105, 0.565, s * 0.745],
+      COL.lamp, { gloss: 90, spec: 0.9, emissive: 0.12, dbl: true });
+  }
+  // задняя световая полоса
+  quad(m, [-2.255, 0.66, 0.62], [-2.255, 0.66, -0.62], [-2.245, 0.735, -0.62], [-2.245, 0.735, 0.62],
+    COL.tail, { gloss: 60, spec: 0.7, emissive: 0.6, dbl: true });
+  // надпись-планка PORSCHE
+  quad(m, [-2.28, 0.80, 0.40], [-2.28, 0.80, -0.40], [-2.275, 0.845, -0.40], [-2.275, 0.845, 0.40],
+    COL.chrome, { gloss: 80, spec: 0.9, dbl: true });
+  return m;
+}
+
+/* ---- заднее антикрыло «лебединая шея» ----------------------------------- */
+function buildWing() {
+  const m = new Mesh('wing');
+  m.pivot = [-1.96, 1.44, 0];
+  const span = 0.90;
+  // профиль (хорда 0.46), точки от передней кромки к задней
+  const prof = [
+    [0.00, 0.000, 0.000],
+    [0.08, 0.036, -0.028],
+    [0.20, 0.046, -0.052],
+    [0.34, 0.030, -0.072],
+    [0.46, 0.004, -0.088]
+  ];
+  const top = [], bot = [];
+  for (const p of prof) {
+    top.push([-p[0], p[1], 0]);
+    bot.push([-p[0], p[2], 0]);
+  }
+  const mk = (z) => {
+    const t = top.map((p) => m.v(p[0], p[1], z));
+    const b = bot.map((p) => m.v(p[0], p[1], z));
+    return { t, b };
+  };
+  const L = mk(span), R = mk(-span);
+  for (let i = 0; i < prof.length - 1; i++) {
+    m.face([R.t[i], R.t[i + 1], L.t[i + 1], L.t[i]], COL.carbonLite, { gloss: 55, spec: 0.5 });
+    m.face([L.b[i], L.b[i + 1], R.b[i + 1], R.b[i]], COL.carbon, { gloss: 45, spec: 0.4 });
+  }
+  // торцы профиля
+  for (const s of [L, R]) {
+    for (let i = 0; i < prof.length - 1; i++) {
+      m.face([s.t[i], s.b[i], s.b[i + 1], s.t[i + 1]], COL.carbon, { gloss: 40, spec: 0.35, dbl: true });
+    }
+  }
+  // передняя и задняя кромки
+  m.face([L.t[0], L.b[0], R.b[0], R.t[0]], COL.carbonLite, { gloss: 60, spec: 0.6, dbl: true });
+  const last = prof.length - 1;
+  m.face([R.t[last], R.b[last], L.b[last], L.t[last]], COL.carbon, { gloss: 40, spec: 0.4, dbl: true });
+  // гурни-флэп
+  box(m, -0.50, -0.46, 0.00, 0.055, -span, span, COL.carbon, { gloss: 45, spec: 0.4 });
+  // боковые пластины
+  for (const s of [1, -1]) {
+    const z = s * span;
+    quad(m, [0.10, -0.20, z], [-0.56, -0.20, z], [-0.56, 0.14, z], [0.10, 0.10, z],
+      COL.carbon, { gloss: 45, spec: 0.45, dbl: true });
+    quad(m, [0.10, -0.20, z * 1.03], [0.10, 0.10, z * 1.03], [-0.56, 0.14, z * 1.03], [-0.56, -0.20, z * 1.03],
+      COL.carbonLite, { gloss: 45, spec: 0.45, dbl: true });
+  }
+  // «лебединая шея» — стойки крепятся сверху к крылу
+  for (const s of [1, -1]) {
+    const z = s * 0.46;
+    box(m, -0.30, -0.16, 0.02, 0.10, z - 0.035, z + 0.035, COL.carbonLite, { gloss: 50, spec: 0.5 });
+    quad(m, [-0.16, 0.06, z - 0.035], [0.16, -0.20, z - 0.035], [0.24, -0.50, z - 0.035], [0.10, -0.50, z - 0.035],
+      COL.carbon, { gloss: 45, spec: 0.45, dbl: true });
+    quad(m, [-0.16, 0.06, z + 0.035], [0.10, -0.50, z + 0.035], [0.24, -0.50, z + 0.035], [0.16, -0.20, z + 0.035],
+      COL.carbon, { gloss: 45, spec: 0.45, dbl: true });
+    quad(m, [-0.16, 0.06, z - 0.035], [0.10, -0.50, z - 0.035], [0.10, -0.50, z + 0.035], [-0.16, 0.06, z + 0.035],
+      COL.carbonLite, { gloss: 50, spec: 0.5, dbl: true });
+    quad(m, [-0.30, 0.02, z - 0.035], [0.24, -0.50, z - 0.035], [0.24, -0.50, z + 0.035], [-0.30, 0.02, z + 0.035],
+      COL.carbon, { gloss: 45, spec: 0.45, dbl: true });
+  }
+  return m;
+}
+
+/* ---- колесо ------------------------------------------------------------- */
+function buildWheel(R, halfW, outSign, spokes) {
+  const m = new Mesh('wheel');
+  const N = 16;
+  const Rr = R * 0.735;           // посадочный диаметр (кромка диска)
+  const zo = outSign * halfW;     // внешняя сторона
+  const zi = -outSign * halfW;    // внутренняя
+  const ringO = [], ringI = [], rimO = [], rimI = [];
+  for (let i = 0; i < N; i++) {
+    const a = (i / N) * Math.PI * 2;
+    const cx = Math.cos(a), cy = Math.sin(a);
+    ringO.push(m.v(cx * R, cy * R, zo * 0.92));
+    ringI.push(m.v(cx * R, cy * R, zi * 0.92));
+    rimO.push(m.v(cx * Rr, cy * Rr, zo));
+    rimI.push(m.v(cx * Rr, cy * Rr, zi));
+  }
+  for (let i = 0; i < N; i++) {
+    const j = (i + 1) % N;
+    // протектор
+    m.face([ringO[i], ringO[j], ringI[j], ringI[i]], COL.tire, { gloss: 6, spec: 0.06, dbl: true });
+    // боковины
+    m.face([rimO[i], rimO[j], ringO[j], ringO[i]], [30, 31, 34], { gloss: 10, spec: 0.1, dbl: true });
+    m.face([ringI[i], ringI[j], rimI[j], rimI[i]], [22, 23, 25], { gloss: 8, spec: 0.08, dbl: true });
+  }
+  // тормозной диск
+  const zd = outSign * halfW * 0.30;
+  const dR = R * 0.66, hub = R * 0.16;
+  const dOut = [], dIn = [];
+  for (let i = 0; i < N; i++) {
+    const a = (i / N) * Math.PI * 2;
+    dOut.push(m.v(Math.cos(a) * dR, Math.sin(a) * dR, zd));
+    dIn.push(m.v(Math.cos(a) * hub, Math.sin(a) * hub, zd));
+  }
+  for (let i = 0; i < N; i++) {
+    const j = (i + 1) % N;
+    m.face([dIn[i], dIn[j], dOut[j], dOut[i]], COL.disc, { gloss: 22, spec: 0.25, dbl: true });
+  }
+  // обод (кольцо диска)
+  const zf = outSign * halfW * 0.86;
+  const oOut = [], oIn = [];
+  for (let i = 0; i < N; i++) {
+    const a = (i / N) * Math.PI * 2;
+    oOut.push(m.v(Math.cos(a) * Rr * 0.995, Math.sin(a) * Rr * 0.995, zf));
+    oIn.push(m.v(Math.cos(a) * Rr * 0.88, Math.sin(a) * Rr * 0.88, zf));
+  }
+  for (let i = 0; i < N; i++) {
+    const j = (i + 1) % N;
+    m.face([oIn[i], oIn[j], oOut[j], oOut[i]], COL.rim, { gloss: 46, spec: 0.55, dbl: true });
+  }
+  // спицы
+  for (let s = 0; s < spokes; s++) {
+    const a = (s / spokes) * Math.PI * 2;
+    const wA = Math.PI / spokes * 0.42;
+    const r0 = R * 0.17, r1 = Rr * 0.90;
+    const p = (r, off) => [Math.cos(a + off) * r, Math.sin(a + off) * r, zf];
+    quad(m, p(r0, -wA * 1.5), p(r1, -wA), p(r1, wA), p(r0, wA * 1.5),
+      COL.rim, { gloss: 40, spec: 0.5, dbl: true });
+    quad(m, p(r0, -wA * 1.5), p(r0, wA * 1.5), p(r1, wA), p(r1, -wA),
+      COL.rimDark, { gloss: 30, spec: 0.35, dbl: true });
+  }
+  // центральная гайка
+  const cN = 8, cR = R * 0.16;
+  const capIdx = [];
+  for (let i = 0; i < cN; i++) {
+    const a = (i / cN) * Math.PI * 2;
+    capIdx.push(m.v(Math.cos(a) * cR, Math.sin(a) * cR, zf * 1.06));
+  }
+  for (let i = 1; i < cN - 1; i++) {
+    m.face([capIdx[0], capIdx[i], capIdx[i + 1]], [196, 168, 60], { gloss: 60, spec: 0.7, dbl: true });
+  }
+  return m;
+}
+
+/* суппорт не вращается — отдельным мешем */
+function buildCaliper(R, halfW, outSign) {
+  const m = new Mesh('caliper');
+  m.noReflect = true;
+  const zc = outSign * halfW * 0.30;
+  const r = R * 0.60;
+  quad(m, [-0.05, r * 0.98, zc + outSign * 0.05], [0.16, r * 0.86, zc + outSign * 0.05],
+    [0.16, r * 0.62, zc + outSign * 0.05], [-0.05, r * 0.70, zc + outSign * 0.05],
+    COL.caliper, { gloss: 40, spec: 0.5, dbl: true });
+  quad(m, [-0.05, r * 0.98, zc - outSign * 0.02], [-0.05, r * 0.70, zc - outSign * 0.02],
+    [0.16, r * 0.62, zc - outSign * 0.02], [0.16, r * 0.86, zc - outSign * 0.02],
+    COL.caliper, { gloss: 40, spec: 0.5, dbl: true });
+  quad(m, [-0.05, r * 0.98, zc - outSign * 0.02], [0.16, r * 0.86, zc - outSign * 0.02],
+    [0.16, r * 0.86, zc + outSign * 0.05], [-0.05, r * 0.98, zc + outSign * 0.05],
+    [150, 24, 20], { gloss: 40, spec: 0.5, dbl: true });
+  return m;
+}
+
+/* ---- оппозитный 6-цилиндровый двигатель (для «разрезного» слайда) -------- */
+function buildEngine() {
+  const m = new Mesh('engine');
+  const cx = -1.62, cy = 0.52, len = 0.62;
+  // картер
+  box(m, cx - 0.34, cx + 0.34, cy - 0.18, cy + 0.20, -0.26, 0.26,
+    [78, 82, 88], { gloss: 30, spec: 0.35 });
+  // блоки цилиндров слева и справа (по 3)
+  for (const s of [1, -1]) {
+    for (let i = 0; i < 3; i++) {
+      const x = cx - 0.24 + i * 0.24;
+      box(m, x - 0.09, x + 0.09, cy - 0.10, cy + 0.10, s * 0.26, s * 0.60,
+        [104, 108, 114], { gloss: 34, spec: 0.4 });
+      box(m, x - 0.11, x + 0.11, cy - 0.13, cy + 0.13, s * 0.60, s * 0.70,
+        [138, 142, 148], { gloss: 44, spec: 0.5 });
+    }
+    // распредвалы / крышка ГБЦ
+    box(m, cx - 0.38, cx + 0.38, cy + 0.13, cy + 0.20, s * 0.30, s * 0.66,
+      [166, 170, 176], { gloss: 50, spec: 0.55 });
+  }
+  // впуск с индивидуальными дросселями
+  box(m, cx - 0.40, cx + 0.40, cy + 0.24, cy + 0.34, -0.20, 0.20,
+    [58, 62, 68], { gloss: 30, spec: 0.35 });
+  for (const s of [1, -1]) {
+    for (let i = 0; i < 3; i++) {
+      const x = cx - 0.24 + i * 0.24;
+      box(m, x - 0.05, x + 0.05, cy + 0.20, cy + 0.28, s * 0.20, s * 0.34,
+        [40, 44, 50], { gloss: 26, spec: 0.3 });
+    }
+  }
+  // выпускные коллекторы
+  for (const s of [1, -1]) {
+    for (let i = 0; i < 3; i++) {
+      const x = cx - 0.24 + i * 0.24;
+      box(m, x - 0.035, x + 0.035, cy - 0.30, cy - 0.08, s * 0.44, s * 0.51,
+        [126, 96, 74], { gloss: 24, spec: 0.3 });
+    }
+    box(m, cx - 0.34, cx + 0.34, cy - 0.36, cy - 0.28, s * 0.34, s * 0.52,
+      [112, 84, 64], { gloss: 22, spec: 0.28 });
+  }
+  m.visible = false;
+  return m;
+}
+
+/* ---- сборка ------------------------------------------------------------- */
+function buildCar() {
+  const FRONT_AXLE = 1.228, REAR_AXLE = -1.229;
+  const Rf = 0.3505, Rr = 0.3671;     // 275/35 ZR20 и 335/30 ZR21
+  const hwF = 0.1375, hwR = 0.1675;
+  const zF = 0.812, zR = 0.828;
+
+  const body = buildBody();
+  const aero = buildAeroKit();
+  const wing = buildWing();
+  const engine = buildEngine();
+
+  const wheels = [
+    { m: buildWheel(Rf, hwF, 1, 10), x: FRONT_AXLE, z: zF, R: Rf },
+    { m: buildWheel(Rf, hwF, -1, 10), x: FRONT_AXLE, z: -zF, R: Rf },
+    { m: buildWheel(Rr, hwR, 1, 10), x: REAR_AXLE, z: zR, R: Rr },
+    { m: buildWheel(Rr, hwR, -1, 10), x: REAR_AXLE, z: -zR, R: Rr }
+  ];
+  const calipers = [
+    { m: buildCaliper(Rf, hwF, 1), x: FRONT_AXLE, z: zF, R: Rf },
+    { m: buildCaliper(Rf, hwF, -1), x: FRONT_AXLE, z: -zF, R: Rf },
+    { m: buildCaliper(Rr, hwR, 1), x: REAR_AXLE, z: zR, R: Rr },
+    { m: buildCaliper(Rr, hwR, -1), x: REAR_AXLE, z: -zR, R: Rr }
+  ];
+
+  for (const w of wheels) w.m.matrix = M4.trans(w.x, w.R, w.z);
+  for (const c of calipers) c.m.matrix = M4.trans(c.x, c.R, c.z);
+  wing.matrix = M4.trans(wing.pivot[0], wing.pivot[1], wing.pivot[2]);
+
+  return {
+    body, aero, wing, engine, wheels, calipers,
+    meshes: [body, aero, wing, engine, ...wheels.map((w) => w.m), ...calipers.map((c) => c.m)],
+    setSpin(rad) {
+      for (const w of this.wheels) {
+        w.m.matrix = M4.mul(M4.trans(w.x, w.R, w.z), M4.rotZ(rad));
+      }
+    },
+    setWing(angleRad) {
+      const p = this.wing.pivot;
+      this.wing.matrix = M4.mul(M4.trans(p[0], p[1], p[2]), M4.rotZ(angleRad));
+    }
+  };
+}
+
+
+/* ===========================================================================
+   Логика презентации: камера, слайды, анимации, интерактив.
+   =========================================================================== */
+(function () {
+  const cv = document.getElementById('scene');
+  const R = new Renderer(cv);
+  const car = buildCar();
+  R.meshes = car.meshes;
+
+  const isSmall = () => window.innerWidth < 880;
+
+  /* --- положения камеры по слайдам --------------------------------------- */
+  const CAMS = {
+    hero:     { az: -0.78, el: 0.150, dist: 10.4, t: [0.00, 0.70, 0], rot: 0.050, spin: 0.9 },
+    engine:   { az:  2.30, el: 0.28,  dist: 6.8,  t: [-1.62, 0.70, 0], rot: 0.014, spin: 0.0, xray: 1 },
+    perf:     { az: -0.44, el: 0.055, dist: 9.2,  t: [0.30, 0.60, 0], rot: 0.020, spin: 9.0 },
+    aero:     { az:  2.34, el: 0.28,  dist: 8.2,  t: [-1.40, 1.05, 0], rot: 0.012, spin: 2.4, hlWing: 1 },
+    chassis:  { az: -2.10, el: -0.02, dist: 8.8,  t: [0.85, 0.42, 0], rot: 0.016, spin: 1.6, hlWheel: 1 },
+    mass:     { az: -1.20, el: 0.58,  dist: 10.2, t: [0.00, 0.72, 0], rot: 0.030, spin: 0.6 },
+    dims:     { az: -1.5708, el: 0.02, dist: 10.6, t: [0.00, 0.68, 0], rot: 0,    spin: 0.0, dims: 1 },
+    ring:     { az: -0.55, el: 0.10,  dist: 9.4,  t: [0.10, 0.64, 0], rot: 0.045, spin: 12.0 },
+    weissach: { az:  2.05, el: 0.24,  dist: 8.8,  t: [-0.85, 0.84, 0], rot: 0.020, spin: 1.0 },
+    finale:   { az: -0.95, el: 0.22,  dist: 13.6, t: [0.00, 0.72, 0], rot: 0.070, spin: 3.0, sx: 0 }
+  };
+
+  const slides = Array.from(document.querySelectorAll('.slide'));
+  let current = 0;
+
+  /* --- состояние сцены (сглаживается покадрово) --------------------------- */
+  const goal = {
+    az: CAMS.hero.az, el: CAMS.hero.el, dist: CAMS.hero.dist,
+    tx: 0, ty: 0.72, tz: 0,
+    xray: 0, hlWing: 0, hlWheel: 0, dims: 0, spin: CAMS.hero.spin,
+    shiftX: 0, shiftY: 0
+  };
+  const cur = Object.assign({}, goal);
+  let autoRot = CAMS.hero.rot;
+  let orbit = 0;              // накопленный угол автовращения, сбрасывается на смене слайда
+  let rotOn = true, spinOn = true;
+  let spinAngle = 0, spinSpeed = CAMS.hero.spin;
+  let drsOpen = false, wingAngle = 0, wingGoal = 0;
+
+  function applySlide(i) {
+    const key = slides[i].dataset.cam;
+    const c = CAMS[key] || CAMS.hero;
+    goal.az = c.az; goal.el = c.el;
+    goal.dist = c.dist * (isSmall() ? 0.86 : 1);
+    goal.tx = c.t[0]; goal.ty = c.t[1]; goal.tz = c.t[2];
+    goal.xray = c.xray || 0;
+    goal.hlWing = c.hlWing || 0;
+    goal.hlWheel = c.hlWheel || 0;
+    goal.dims = c.dims || 0;
+    goal.spin = c.spin;
+    goal.shiftX = c.sx !== undefined ? c.sx : baseShiftX;
+    goal.shiftY = c.sy !== undefined ? c.sy : baseShiftY;
+    autoRot = c.rot || 0;
+    orbit = 0;
+    manualAz = 0;
+    manualEl = 0;
+    document.getElementById('dimlayer').classList.toggle('on', !!c.dims);
+    document.querySelectorAll('#dots button').forEach((b, k) => b.classList.toggle('on', k === i));
+    document.getElementById('progress').style.width =
+      ((i / (slides.length - 1)) * 100).toFixed(1) + '%';
+    if (key === 'aero') { setTimeout(() => { if (!drsOpen) toggleDrs(true); }, 900); }
+  }
+
+  /* --- точки навигации ---------------------------------------------------- */
+  const dots = document.getElementById('dots');
+  slides.forEach((s, i) => {
+    const b = document.createElement('button');
+    b.innerHTML = '<i></i>';
+    b.setAttribute('aria-label', 'Слайд ' + (i + 1));
+    b.onclick = () => goTo(i);
+    dots.appendChild(b);
+  });
+
+  const deck = document.getElementById('deck');
+  function goTo(i) {
+    i = Math.max(0, Math.min(slides.length - 1, i));
+    slides[i].scrollIntoView({ behavior: 'smooth' });
+  }
+  document.getElementById('prevBtn').onclick = () => goTo(current - 1);
+  document.getElementById('nextBtn').onclick = () => goTo(current + 1);
+  window.addEventListener('keydown', (e) => {
+    if (e.key === 'ArrowDown' || e.key === 'PageDown' || e.key === ' ') { e.preventDefault(); goTo(current + 1); }
+    if (e.key === 'ArrowUp' || e.key === 'PageUp') { e.preventDefault(); goTo(current - 1); }
+    if (e.key === 'Home') goTo(0);
+    if (e.key === 'End') goTo(slides.length - 1);
+  });
+
+  /* --- появление панелей и запуск счётчиков ------------------------------- */
+  const seen = new WeakSet();
+  const io = new IntersectionObserver((entries) => {
+    for (const e of entries) {
+      if (e.intersectionRatio > 0.55) {
+        const i = slides.indexOf(e.target);
+        if (i !== current) { current = i; applySlide(i); }
+        e.target.classList.add('on');
+        if (!seen.has(e.target)) { seen.add(e.target); runNumbers(e.target); }
+      }
+    }
+  }, { root: deck, threshold: [0, 0.55, 0.9] });
+  slides.forEach((s) => io.observe(s));
+
+  /* --- анимация чисел ------------------------------------------------------ */
+  function fmt(n, dec) {
+    const s = Math.abs(n).toFixed(dec);
+    const parts = s.split('.');
+    parts[0] = parts[0].replace(/\B(?=(\d{3})+(?!\d))/g, ' ');
+    return parts.length > 1 ? parts[0] + ',' + parts[1] : parts[0];
+  }
+  function runNumbers(root) {
+    root.querySelectorAll('[data-count]').forEach((el) => {
+      const target = parseFloat(el.dataset.count);
+      const dec = parseInt(el.dataset.dec || '0', 10);
+      const dur = 1400;
+      const t0 = performance.now();
+      const step = (now) => {
+        const p = Math.min(1, (now - t0) / dur);
+        const e = 1 - Math.pow(1 - p, 3);
+        el.textContent = fmt(target * e, dec);
+        if (p < 1) requestAnimationFrame(step);
+        else el.textContent = fmt(target, dec);
+      };
+      requestAnimationFrame(step);
+    });
+    root.querySelectorAll('.fill').forEach((el, i) => {
+      setTimeout(() => { el.style.width = el.dataset.w + '%'; }, 180 + i * 130);
+    });
+  }
+
+  /* --- тахометр ------------------------------------------------------------ */
+  const rpmArc = document.getElementById('rpmArc');
+  const rpmNeedle = document.getElementById('rpmNeedle');
+  const rpmVal = document.getElementById('rpmVal');
+  const GC = 66, GR = 56;
+  function gaugePoint(frac, r) {
+    const a = (-135 + 270 * frac) * Math.PI / 180;
+    return [GC + Math.sin(a) * r, GC - Math.cos(a) * r];
+  }
+  function arcPath(f0, f1, r) {
+    const p0 = gaugePoint(f0, r), p1 = gaugePoint(f1, r);
+    const large = (f1 - f0) * 270 > 180 ? 1 : 0;
+    return `M ${p0[0].toFixed(2)} ${p0[1].toFixed(2)} A ${r} ${r} 0 ${large} 1 ${p1[0].toFixed(2)} ${p1[1].toFixed(2)}`;
+  }
+  if (rpmArc) {
+    const red = document.createElementNS('http://www.w3.org/2000/svg', 'path');
+    red.setAttribute('d', arcPath(0.944, 1, GR));
+    red.setAttribute('fill', 'none');
+    red.setAttribute('stroke', '#d8483c');
+    red.setAttribute('stroke-width', '9');
+    red.setAttribute('stroke-linecap', 'round');
+    rpmArc.parentNode.insertBefore(red, rpmArc);
+  }
+  function updateGauge(t) {
+    // цикл: раскрутка до отсечки -> удержание -> сброс
+    const period = 5.2;
+    const p = (t % period) / period;
+    let rpm;
+    if (p < 0.45) rpm = 9000 * Math.pow(p / 0.45, 0.72);
+    else if (p < 0.62) rpm = 9000 - Math.sin((p - 0.45) / 0.17 * Math.PI * 4) * 120;
+    else rpm = 9000 * Math.max(0, 1 - (p - 0.62) / 0.28) + 800 * Math.min(1, (p - 0.62) / 0.28);
+    rpm = Math.max(0, Math.min(9000, rpm));
+    const frac = rpm / 9000;
+    if (rpmArc) rpmArc.setAttribute('d', frac > 0.005 ? arcPath(0, frac, GR) : '');
+    if (rpmNeedle) {
+      const q = gaugePoint(frac, 44);
+      rpmNeedle.setAttribute('d', `M ${GC} ${GC} L ${q[0].toFixed(2)} ${q[1].toFixed(2)}`);
+    }
+    if (rpmVal) rpmVal.textContent = fmt(Math.round(rpm / 50) * 50, 0);
+  }
+
+  /* --- DRS ----------------------------------------------------------------- */
+  const drsFlag = document.getElementById('drsFlag');
+  const drsBtn = document.getElementById('drsBtn');
+  function toggleDrs(state) {
+    drsOpen = state === undefined ? !drsOpen : state;
+    wingGoal = drsOpen ? 0.30 : 0;   // DRS «уплощает» крыло
+    if (drsFlag) {
+      drsFlag.classList.toggle('open', drsOpen);
+      drsFlag.querySelector('span').textContent = drsOpen ? 'DRS ОТКРЫТ · минимум сопротивления' : 'DRS ЗАКРЫТ · максимум прижима';
+    }
+    if (drsBtn) drsBtn.textContent = drsOpen ? 'Закрыть DRS' : 'Нажать DRS';
+  }
+  if (drsBtn) drsBtn.onclick = () => toggleDrs();
+
+  /* --- цвета кузова -------------------------------------------------------- */
+  const COLORS = [
+    ['#a6c03c', 'Python Green'],
+    ['#c8ced2', 'Arctic Grey'],
+    ['#bd120f', 'Guards Red'],
+    ['#1c6ea6', 'Shark Blue'],
+    ['#b7bbbe', 'GT Silver'],
+    ['#17191b', 'Black']
+  ];
+  const swWrap = document.getElementById('swatches');
+  COLORS.forEach((c, i) => {
+    const b = document.createElement('button');
+    b.className = 'sw' + (i === 0 ? ' on' : '');
+    b.style.background = c[0];
+    b.title = c[1];
+    b.setAttribute('aria-label', 'Цвет: ' + c[1]);
+    b.onclick = () => {
+      setPaint(c[0]);
+      swWrap.querySelectorAll('.sw').forEach((x) => x.classList.remove('on'));
+      b.classList.add('on');
+    };
+    swWrap.appendChild(b);
+  });
+
+  /* --- кнопки вращения ------------------------------------------------------ */
+  const rotBtn = document.getElementById('rotBtn');
+  const spinBtn = document.getElementById('spinBtn');
+  rotBtn.classList.add('active');
+  spinBtn.classList.add('active');
+  rotBtn.onclick = () => { rotOn = !rotOn; rotBtn.classList.toggle('active', rotOn); };
+  spinBtn.onclick = () => { spinOn = !spinOn; spinBtn.classList.toggle('active', spinOn); };
+
+  /* --- перетаскивание мышью / пальцем --------------------------------------- */
+  let drag = null, manualAz = 0, manualEl = 0;
+  const onDown = (x, y) => { drag = { x, y }; };
+  const onMove = (x, y) => {
+    if (!drag) return;
+    manualAz += (x - drag.x) * 0.006;
+    manualEl = Math.max(-0.35, Math.min(1.0, manualEl - (y - drag.y) * 0.004));
+    drag = { x, y };
+  };
+  const onUp = () => { drag = null; };
+  cv.addEventListener('pointerdown', (e) => onDown(e.clientX, e.clientY));
+  window.addEventListener('pointermove', (e) => onMove(e.clientX, e.clientY));
+  window.addEventListener('pointerup', onUp);
+  cv.style.touchAction = 'none';
+
+  /* --- выноски габаритов ----------------------------------------------------- */
+  const dimSvg = document.getElementById('dimlayer');
+  const SVGNS = 'http://www.w3.org/2000/svg';
+  function w2s(p) {
+    const vp = M4.apply(R.viewMatrix(), p);
+    if (-vp[2] < 0.12) return null;
+    return R.project(vp);
+  }
+  function drawDims() {
+    if (cur.dims < 0.5) { dimSvg.innerHTML = ''; return; }
+    const zo = -1.55;
+    const items = [
+      { a: [2.286, 0.02, zo], b: [-2.286, 0.02, zo], off: [0, 34], label: 'ДЛИНА 4572 мм' },
+      { a: [1.228, 1.62, zo], b: [-1.229, 1.62, zo], off: [0, -14], label: 'КОЛЁСНАЯ БАЗА 2457 мм' },
+      { a: [-2.95, 0.0, zo], b: [-2.95, 1.322, zo], off: [-16, 0], label: 'ВЫСОТА 1322 мм' }
+    ];
+    let out = '';
+    for (const it of items) {
+      const A = w2s(it.a), B = w2s(it.b);
+      if (!A || !B) continue;
+      const ax = A[0] + it.off[0], ay = A[1] + it.off[1];
+      const bx = B[0] + it.off[0], by = B[1] + it.off[1];
+      const nx = -(by - ay), ny = bx - ax;
+      const nl = Math.hypot(nx, ny) || 1;
+      const tx = (nx / nl) * 8, ty = (ny / nl) * 8;
+      out += `<line x1="${ax}" y1="${ay}" x2="${bx}" y2="${by}"/>`;
+      out += `<line class="tick" x1="${ax - tx}" y1="${ay - ty}" x2="${ax + tx}" y2="${ay + ty}"/>`;
+      out += `<line class="tick" x1="${bx - tx}" y1="${by - ty}" x2="${bx + tx}" y2="${by + ty}"/>`;
+      const mx = (ax + bx) / 2, my = (ay + by) / 2;
+      const vertical = Math.abs(by - ay) > Math.abs(bx - ax);
+      out += `<text x="${mx}" y="${my - (vertical ? 0 : 9)}" text-anchor="middle"` +
+        (vertical ? ` transform="rotate(-90 ${mx} ${my})"` : '') + `>${it.label}</text>`;
+    }
+    dimSvg.innerHTML = out;
+  }
+
+  /* --- вспомогательное ------------------------------------------------------- */
+  const lerp = (a, b, k) => a + (b - a) * k;
+  function lerpAngle(a, b, k) {
+    let d = ((b - a + Math.PI) % (Math.PI * 2) + Math.PI * 2) % (Math.PI * 2) - Math.PI;
+    return a + d * k;
+  }
+
+  let baseShiftX = 0, baseShiftY = 0;
+  function resize() {
+    R.resize();
+    dimSvg.setAttribute('viewBox', `0 0 ${R.W} ${R.H}`);
+    dimSvg.setAttribute('width', R.W);
+    dimSvg.setAttribute('height', R.H);
+    baseShiftX = isSmall() ? 0 : Math.min(230, R.W * 0.19);
+    baseShiftY = isSmall() ? -R.H * 0.27 : 0;
+    const c = CAMS[slides[current].dataset.cam] || CAMS.hero;
+    goal.shiftX = c.sx !== undefined ? c.sx : baseShiftX;
+    goal.shiftY = c.sy !== undefined ? c.sy : baseShiftY;
+    R.cam.fov = Math.min(R.W, R.H) * (isSmall() ? 0.92 : 1.02);
+  }
+  window.addEventListener('resize', resize);
+  resize();
+  applySlide(0);
+  slides[0].classList.add('on');
+  seen.add(slides[0]);
+  runNumbers(slides[0]);
+
+  /* --- главный цикл ----------------------------------------------------------- */
+  let last = performance.now();
+  function frame(now) {
+    const dt = Math.min(0.05, (now - last) / 1000);
+    last = now;
+    const t = now / 1000;
+
+    if (rotOn) orbit += autoRot * dt;
+
+    // сглаживание камеры
+    const k = 1 - Math.pow(0.001, dt);
+    cur.az = lerpAngle(cur.az, goal.az + orbit + manualAz, k);
+    cur.el = lerp(cur.el, goal.el + manualEl, k);
+    cur.dist = lerp(cur.dist, goal.dist, k);
+    cur.tx = lerp(cur.tx, goal.tx, k);
+    cur.ty = lerp(cur.ty, goal.ty, k);
+    cur.tz = lerp(cur.tz, goal.tz, k);
+    cur.xray = lerp(cur.xray, goal.xray, k);
+    cur.hlWing = lerp(cur.hlWing, goal.hlWing, k);
+    cur.hlWheel = lerp(cur.hlWheel, goal.hlWheel, k);
+    cur.dims = lerp(cur.dims, goal.dims, k);
+    cur.shiftX = lerp(cur.shiftX, goal.shiftX, k);
+    cur.shiftY = lerp(cur.shiftY, goal.shiftY, k);
+
+    R.cam.az = cur.az;
+    R.cam.el = cur.el;
+    R.cam.dist = cur.dist;
+    R.cam.target = [cur.tx, cur.ty, cur.tz];
+    R.cam.shiftX = cur.shiftX;
+    R.cam.shiftY = cur.shiftY;
+
+    // колёса
+    spinSpeed = lerp(spinSpeed, spinOn ? goal.spin : 0, 1 - Math.pow(0.02, dt));
+    spinAngle -= spinSpeed * dt;
+    car.setSpin(spinAngle);
+
+    // антикрыло / DRS
+    wingAngle = lerp(wingAngle, wingGoal, 1 - Math.pow(0.004, dt));
+    car.setWing(wingAngle);
+
+    // «рентген» на слайде двигателя
+    const x = cur.xray;
+    car.body.opacity = 1 - 0.78 * x;
+    car.aero.opacity = 1 - 0.62 * x;
+    car.wing.opacity = 1 - 0.55 * x;
+    car.engine.visible = x > 0.03;
+    car.engine.opacity = Math.min(1, x * 1.6);
+    car.engine.highlight = x * (0.18 + 0.12 * Math.sin(t * 2.0));
+
+    // подсветка деталей (пульсация)
+    const pulse = 0.55 + 0.45 * Math.sin(t * 2.4);
+    car.wing.highlight = cur.hlWing * pulse * 0.7;
+    for (const w of car.wheels) w.m.highlight = cur.hlWheel * pulse * 0.45;
+    for (const c of car.calipers) c.m.highlight = cur.hlWheel * pulse * 0.8;
+
+    updateGauge(t);
+
+    R.render({ reflection: !isSmall() && cur.dims < 0.35 });
+    drawDims();
+    requestAnimationFrame(frame);
+  }
+  requestAnimationFrame(frame);
+})();
+
+</script>
