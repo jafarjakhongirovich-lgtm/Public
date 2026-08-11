@@ -8,6 +8,15 @@
   R.meshes = car.meshes;
 
   const isSmall = () => window.innerWidth < 880;
+  const calmQuery = window.matchMedia('(prefers-reduced-motion: reduce)');
+  let calm = calmQuery.matches;
+  calmQuery.addEventListener('change', (e) => {
+    calm = e.matches;
+    rotOn = !calm;
+    spinOn = !calm;
+    rotBtn.classList.toggle('active', rotOn);
+    spinBtn.classList.toggle('active', spinOn);
+  });
 
   /* --- положения камеры по слайдам --------------------------------------- */
   const CAMS = {
@@ -153,6 +162,7 @@
     rpmArc.parentNode.insertBefore(red, rpmArc);
   }
   function updateGauge(t) {
+    if (calm) { setGauge(9000); return; }   // без анимации — просто показываем отсечку
     // цикл: раскрутка до отсечки -> удержание -> сброс
     const period = 5.2;
     const p = (t % period) / period;
@@ -160,6 +170,9 @@
     if (p < 0.45) rpm = 9000 * Math.pow(p / 0.45, 0.72);
     else if (p < 0.62) rpm = 9000 - Math.sin((p - 0.45) / 0.17 * Math.PI * 4) * 120;
     else rpm = 9000 * Math.max(0, 1 - (p - 0.62) / 0.28) + 800 * Math.min(1, (p - 0.62) / 0.28);
+    setGauge(rpm);
+  }
+  function setGauge(rpm) {
     rpm = Math.max(0, Math.min(9000, rpm));
     const frac = rpm / 9000;
     if (rpmArc) rpmArc.setAttribute('d', frac > 0.005 ? arcPath(0, frac, GR) : '');
@@ -209,10 +222,13 @@
   });
 
   /* --- кнопки вращения ------------------------------------------------------ */
+  // при включённом «уменьшить движение» сцена стоит, пока пользователь сам не запустит
   const rotBtn = document.getElementById('rotBtn');
   const spinBtn = document.getElementById('spinBtn');
-  rotBtn.classList.add('active');
-  spinBtn.classList.add('active');
+  rotOn = !calm;
+  spinOn = !calm;
+  rotBtn.classList.toggle('active', rotOn);
+  spinBtn.classList.toggle('active', spinOn);
   rotBtn.onclick = () => { rotOn = !rotOn; rotBtn.classList.toggle('active', rotOn); };
   spinBtn.onclick = () => { spinOn = !spinOn; spinBtn.classList.toggle('active', spinOn); };
 
@@ -341,10 +357,10 @@
     car.wing.opacity = 1 - 0.55 * x;
     car.engine.visible = x > 0.03;
     car.engine.opacity = Math.min(1, x * 1.6);
-    car.engine.highlight = x * (0.18 + 0.12 * Math.sin(t * 2.0));
+    car.engine.highlight = x * (calm ? 0.22 : 0.18 + 0.12 * Math.sin(t * 2.0));
 
     // подсветка деталей (пульсация)
-    const pulse = 0.55 + 0.45 * Math.sin(t * 2.4);
+    const pulse = calm ? 0.7 : 0.55 + 0.45 * Math.sin(t * 2.4);
     car.wing.highlight = cur.hlWing * pulse * 0.7;
     for (const w of car.wheels) w.m.highlight = cur.hlWheel * pulse * 0.45;
     for (const c of car.calipers) c.m.highlight = cur.hlWheel * pulse * 0.8;

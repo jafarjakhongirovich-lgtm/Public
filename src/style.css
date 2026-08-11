@@ -155,6 +155,7 @@ h2 {
   margin: 0 0 12px;
   letter-spacing: -.024em;
   font-weight: 700;
+  text-wrap: balance;
 }
 p.lead {
   color: var(--ink-dim);
@@ -186,6 +187,7 @@ p.lead {
   align-items: baseline;
   gap: 3px;
   white-space: nowrap;
+  font-variant-numeric: tabular-nums;   /* цифры не «прыгают» при анимации счётчика */
 }
 .specs .val .u {
   font-size: 10.5px;
@@ -215,7 +217,12 @@ p.lead {
 }
 .row:last-child { border-bottom: 0; }
 .row .k { color: var(--ink-dim); }
-.row .v { font-weight: 650; text-align: right; letter-spacing: -.01em; }
+.row .v {
+  font-weight: 650;
+  text-align: right;
+  letter-spacing: -.01em;
+  font-variant-numeric: tabular-nums;
+}
 .row .v small { color: var(--ink-faint); font-weight: 500; }
 
 /* --- список преимуществ -------------------------------------------------- */
@@ -486,7 +493,18 @@ ul.ticks li b { color: var(--ink); font-weight: 650; }
   h1 { font-size: clamp(32px, 11vw, 52px); }
 }
 
+/* --- фокус с клавиатуры -------------------------------------------------- */
+:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 3px;
+  border-radius: 4px;
+}
+.sw:focus-visible { outline-offset: 4px; }
+
 @media (prefers-reduced-motion: reduce) {
   #deck { scroll-behavior: auto; }
   .panel { transition: none; opacity: 1; transform: none; }
+  .bar .fill { transition: none; }
+  .scroll-hint i { animation: none; }
+  .drs-flag.open i { animation: none; }
 }
