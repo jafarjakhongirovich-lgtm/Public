@@ -20,6 +20,7 @@ except ImportError:  # pragma: no cover
     ToolUseBlock = ()  # type: ignore[assignment]
 
 from .config import Config
+from .store import SessionStore
 
 log = logging.getLogger(__name__)
 
@@ -34,7 +35,7 @@ class Reply:
     error: str | None = None
 
 
-def build_options(config: Config) -> ClaudeAgentOptions:
+def build_options(config: Config, resume: str | None = None) -> ClaudeAgentOptions:
     """Опции агента.
 
     Ключевой момент для подписки: мы не передаём ANTHROPIC_API_KEY.
@@ -59,6 +60,9 @@ def build_options(config: Config) -> ClaudeAgentOptions:
         kwargs["max_turns"] = config.max_turns
     if config.max_budget_usd:
         kwargs["max_budget_usd"] = config.max_budget_usd
+    if resume:
+        # Продолжаем прошлый разговор — вместе со всем, что в нём обсуждалось.
+        kwargs["resume"] = resume
     return ClaudeAgentOptions(**kwargs)
 
 
@@ -69,17 +73,35 @@ class JarvisSession:
     два сообщения подряд не полезут в одну сессию одновременно.
     """
 
-    def __init__(self, config: Config) -> None:
+    def __init__(self, config: Config, chat_id: int, store: SessionStore | None = None) -> None:
         self._config = config
+        self._chat_id = chat_id
+        self._store = store
         self._client: ClaudeSDKClient | None = None
         self._lock = asyncio.Lock()
 
     async def _ensure_client(self) -> ClaudeSDKClient:
-        if self._client is None:
+        if self._client is not None:
+            return self._client
+
+        resume = self._store.get(self._chat_id) if self._store else None
+        try:
+            client = ClaudeSDKClient(options=build_options(self._config, resume=resume))
+            await client.connect()
+        except Exception:
+            if not resume:
+                raise
+            # Сессия могла быть удалена или испорчена — не теряем из-за этого чат.
+            log.warning("Не удалось продолжить сессию %s, начинаю новую", resume)
+            if self._store:
+                self._store.clear(self._chat_id)
             client = ClaudeSDKClient(options=build_options(self._config))
             await client.connect()
-            self._client = client
-        return self._client
+
+        if resume:
+            log.info("Чат %s: продолжаю прошлый разговор", self._chat_id)
+        self._client = client
+        return client
 
     async def ask(self, prompt: str) -> Reply:
         async with self._lock:
@@ -106,6 +128,10 @@ class JarvisSession:
                         tools.append(block.name)
             elif isinstance(message, ResultMessage):
                 cost = getattr(message, "total_cost_usd", None)
+                # Запоминаем сессию, чтобы вернуться к разговору после перезапуска.
+                session_id = getattr(message, "session_id", None)
+                if session_id and self._store:
+                    self._store.put(self._chat_id, session_id)
 
         return Reply(text="\n".join(c for c in chunks if c).strip(), tools_used=tools, cost_usd=cost)
 
@@ -131,18 +157,23 @@ class JarvisSession:
 
 
 class SessionRegistry:
-    """Сессии по chat_id."""
+    """Сессии по chat_id, с памятью на диске."""
 
     def __init__(self, config: Config) -> None:
         self._config = config
+        self._store = SessionStore(
+            config.workspace.parent / "sessions.json", ttl_days=config.memory_days
+        )
         self._sessions: dict[int, JarvisSession] = {}
 
     def get(self, chat_id: int) -> JarvisSession:
         if chat_id not in self._sessions:
-            self._sessions[chat_id] = JarvisSession(self._config)
+            self._sessions[chat_id] = JarvisSession(self._config, chat_id, self._store)
         return self._sessions[chat_id]
 
     async def reset(self, chat_id: int) -> None:
+        """Полный сброс: и живая сессия, и запомненная история."""
+        self._store.clear(chat_id)
         session = self._sessions.pop(chat_id, None)
         if session is not None:
             await session.reset()

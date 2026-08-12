@@ -48,6 +48,9 @@ class Config:
     show_tools: bool
     max_turns: int | None
     max_budget_usd: float | None
+    whisper_model: str
+    max_files_per_reply: int
+    memory_days: float
     persona: str = field(repr=False, default="")
 
     @classmethod
@@ -72,7 +75,11 @@ class Config:
         workspace = Path(os.environ.get("JARVIS_WORKSPACE", "./workspace")).expanduser()
         workspace.mkdir(parents=True, exist_ok=True)
 
-        tools_raw = os.environ.get("JARVIS_ALLOWED_TOOLS", "Read,Write,Edit,Glob,Grep,WebSearch,WebFetch")
+        # Bash нужен для навыков вроде pptx/xlsx: они собирают документы
+        # python-скриптами. Уберите его, если такая возможность не нужна.
+        tools_raw = os.environ.get(
+            "JARVIS_ALLOWED_TOOLS", "Read,Write,Edit,Glob,Grep,Bash,WebSearch,WebFetch"
+        )
         allowed_tools = [t.strip() for t in tools_raw.split(",") if t.strip()]
 
         max_turns = os.environ.get("JARVIS_MAX_TURNS", "").strip()
@@ -88,6 +95,11 @@ class Config:
             show_tools=os.environ.get("JARVIS_SHOW_TOOLS", "1").strip() not in ("0", "false", ""),
             max_turns=int(max_turns) if max_turns else None,
             max_budget_usd=float(budget) if budget else None,
+            # Пусто = голосовые не распознаём. tiny/base/small/medium/large-v3
+            whisper_model=os.environ.get("JARVIS_WHISPER_MODEL", "small").strip(),
+            max_files_per_reply=int(os.environ.get("JARVIS_MAX_FILES", "5")),
+            # 0 = помнить бессрочно. Число = забывать разговор через столько дней.
+            memory_days=float(os.environ.get("JARVIS_MEMORY_DAYS", "0")),
             persona=os.environ.get("JARVIS_PERSONA", DEFAULT_PERSONA),
         )
 
@@ -110,4 +122,22 @@ DEFAULT_PERSONA = """\
 - У тебя есть инструменты для файлов и веба. Рабочая папка — твоя песочница.
 - Не выходи за рамки просьбы: не рефактори, не добавляй лишнего.
 - Если чего-то не знаешь или инструмент недоступен — скажи прямо, не выдумывай.
+
+Файлы:
+- Всё, что ты сохранишь в рабочей папке, бот сам отправит собеседнику в чат.
+- Поэтому готовый результат — презентацию, таблицу, документ — просто сохрани
+  файлом с понятным именем. Не пересказывай его содержимое текстом и не пиши
+  «файл сохранён по пути…»: человек получит его следующим сообщением.
+- Черновики и промежуточные файлы держи в подпапке `tmp`, её бот не отправляет.
+
+Память:
+- Разговор продолжается бессрочно, но старые сообщения со временем сжимаются
+  в пересказ. Поэтому важное храни дословно в файле `tmp/memory.md`.
+- Туда записывай то, что должно пережить любое сжатие: факты о собеседнике,
+  его предпочтения, решения, договорённости, имена и цифры, к которым вы
+  возвращаетесь. Одна строка — один факт, с датой.
+- Прочитай `tmp/memory.md` в начале разговора и всякий раз, когда собеседник
+  ссылается на что-то из прошлого. Не заставляй его повторять сказанное.
+- Обновляй существующие записи вместо дублирования, устаревшее удаляй.
+  Не записывай пароли и коды.
 """
