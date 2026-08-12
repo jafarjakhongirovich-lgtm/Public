@@ -18,11 +18,23 @@ Agent SDK не ходит в API сам: он запускает локальн�
 > к такому боту посторонним нельзя — поэтому `JARVIS_OWNER_IDS` обязателен, и
 > всем остальным бот просто отказывает.
 
-## Установка
+## Установка на Windows — одним щелчком
+
+Двойной щелчок по **`install.bat`**. Скрипт сам проверит Node.js и Python,
+поставит Claude Code, выполнит вход по подписке, установит зависимости,
+спросит токен бота, сам определит ваш Telegram ID и запустит Jarvis.
+
+Дальше для запуска — **`start.bat`**.
+
+Заранее нужны только [Node.js](https://nodejs.org) и
+[Python](https://www.python.org/downloads/); если их нет, скрипт скажет об этом
+и даст ссылки.
+
+## Установка вручную (macOS, Linux или если хочется контроля)
 
 ```bash
 # 1. Claude Code CLI и вход по подписке
-npm install -g @anthropic-ai/claude-code
+npm install -g --allow-scripts=@anthropic-ai/claude-code @anthropic-ai/claude-code
 claude auth login
 
 # 2. Зависимости бота
@@ -92,6 +104,10 @@ jarvis/
   config.py     конфигурация из окружения, персона по умолчанию
   agent.py      сессии Claude Agent SDK, одна на чат
   bot.py        Telegram: команды, обработчики, разбиение длинных ответов
+
+install.bat     установка в один щелчок (Windows)
+start.bat       запуск после установки (Windows)
+setup.ps1       что именно делает install.bat
 ```
 
 ## Что дальше

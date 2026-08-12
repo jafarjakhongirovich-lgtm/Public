@@ -24,7 +24,8 @@ def _load_dotenv(path: Path) -> None:
     """Минимальный .env-загрузчик, чтобы не тянуть лишнюю зависимость."""
     if not path.is_file():
         return
-    for raw in path.read_text(encoding="utf-8").splitlines():
+    # utf-8-sig: Блокнот и PowerShell любят ставить BOM в начало файла.
+    for raw in path.read_text(encoding="utf-8-sig").splitlines():
         line = raw.strip()
         if not line or line.startswith("#") or "=" not in line:
             continue
