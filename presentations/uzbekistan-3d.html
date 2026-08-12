@@ -1,0 +1,736 @@
+<title>Узбекистан — 3D-презентация</title>
+<style>
+  :root {
+    --night: #071627;
+    --night-2: #0E2A47;
+    --panel: #14385C;
+    --panel-2: #1B4573;
+    --blue: #1E7BB8;
+    --teal: #2FB3AE;
+    --gold: #E0A62F;
+    --terra: #C7614A;
+    --parch: #F0E8D8;
+    --muted: #94AEC6;
+    --line: rgba(224, 166, 47, 0.28);
+    --display: Georgia, "Times New Roman", "Liberation Serif", serif;
+    --ui: "Segoe UI", Roboto, system-ui, -apple-system, "Helvetica Neue", Arial, sans-serif;
+  }
+
+  * { box-sizing: border-box; }
+
+  body {
+    margin: 0;
+    background: var(--night);
+    color: var(--parch);
+    font-family: var(--ui);
+    overflow: hidden;
+    height: 100vh;
+  }
+
+  /* ---------- сцена ---------- */
+  .viewport {
+    position: fixed;
+    inset: 0;
+    display: grid;
+    place-items: center;
+    background:
+      radial-gradient(900px 620px at 80% 8%, rgba(30, 123, 184, 0.22), transparent 62%),
+      radial-gradient(760px 520px at 12% 92%, rgba(47, 179, 174, 0.14), transparent 60%),
+      var(--night);
+    perspective: 1900px;
+    perspective-origin: 50% 46%;
+  }
+
+  .stage {
+    position: relative;
+    width: 1280px;
+    height: 720px;
+    transform-style: preserve-3d;
+    transition: transform 400ms ease-out;
+  }
+
+  /* фоновые звёзды-гирихи на разной глубине */
+  .starfield { position: absolute; inset: -160px; transform-style: preserve-3d; pointer-events: none; }
+  .gstar { position: absolute; transform-style: preserve-3d; }
+  .gstar i {
+    position: absolute; inset: 0; display: block;
+    border: 1.5px solid currentColor; border-radius: 4px;
+  }
+  .gstar i:last-child { transform: rotate(45deg); }
+  .gstar.spin { animation: spin 46s linear infinite; }
+  .gstar.spin-slow { animation: spin 96s linear infinite reverse; }
+  @keyframes spin { to { transform: rotate(360deg); } }
+
+  /* ---------- слайды ---------- */
+  .slide {
+    position: absolute;
+    inset: 0;
+    padding: 46px 58px 52px;
+    border-radius: 10px;
+    background: linear-gradient(160deg, #0F2C4A 0%, #0A1F36 58%, #081A2D 100%);
+    box-shadow: 0 40px 90px rgba(0, 0, 0, 0.55), 0 0 0 1px rgba(148, 174, 198, 0.13) inset;
+    transform-origin: 50% 50%;
+    backface-visibility: hidden;
+    opacity: 0;
+    visibility: hidden;
+    transform: translateZ(-900px);
+    transition: transform 820ms cubic-bezier(0.62, 0.05, 0.2, 1), opacity 620ms ease;
+    display: flex;
+    flex-direction: column;
+  }
+  .slide.active { opacity: 1; visibility: visible; transform: rotateY(0deg) translateZ(0); z-index: 3; }
+  .slide.prev { opacity: 0; visibility: visible; transform: translateX(-46%) translateZ(-560px) rotateY(58deg); }
+  .slide.next { opacity: 0; visibility: visible; transform: translateX(46%) translateZ(-560px) rotateY(-58deg); }
+
+  /* ---------- шапка слайда ---------- */
+  .kicker {
+    display: flex; align-items: center; gap: 12px;
+    font-size: 12.5px; font-weight: 700; letter-spacing: 0.19em;
+    text-transform: uppercase; color: var(--gold); margin: 0 0 10px;
+  }
+  .kicker .mark { position: relative; width: 14px; height: 14px; flex: none; color: var(--gold); }
+  .kicker .mark i { position: absolute; inset: 0; background: currentColor; border-radius: 2px; }
+  .kicker .mark i:last-child { transform: rotate(45deg); }
+
+  h1.title {
+    font-family: var(--display);
+    font-size: 46px; line-height: 1.08; font-weight: 700;
+    margin: 0 0 26px; color: #fff; text-wrap: balance;
+  }
+  .lede { font-size: 17px; line-height: 1.5; color: var(--muted); margin: -14px 0 24px; max-width: 62ch; }
+
+  /* ---------- сетки ---------- */
+  .grid { display: grid; gap: 18px; }
+  .g3 { grid-template-columns: repeat(3, 1fr); }
+  .g2 { grid-template-columns: repeat(2, 1fr); }
+  .g4 { grid-template-columns: repeat(4, 1fr); }
+  .grid.fill { flex: 1; align-content: stretch; min-height: 0; }
+  .split { display: grid; grid-template-columns: 4.1fr 7fr; gap: 22px; flex: 1; min-height: 0; }
+  .split.wide { grid-template-columns: 4.6fr 7fr; }
+
+  .card {
+    background: linear-gradient(155deg, rgba(30, 123, 184, 0.16), rgba(20, 56, 92, 0.42));
+    border: 1px solid rgba(148, 174, 198, 0.16);
+    border-radius: 12px;
+    padding: 20px 20px 18px;
+    transform-style: preserve-3d;
+    transition: transform 260ms ease, border-color 260ms ease, box-shadow 260ms ease;
+  }
+  .card:hover { transform: translateZ(34px) translateY(-3px); border-color: var(--line); box-shadow: 0 22px 44px rgba(0, 0, 0, 0.4); }
+  .badge {
+    width: 34px; height: 34px; border-radius: 50%;
+    display: grid; place-items: center;
+    font-size: 14px; font-weight: 700; color: #fff; margin-bottom: 12px;
+  }
+  .card h3 { font-family: var(--display); font-size: 19px; line-height: 1.2; margin: 0 0 8px; color: #fff; }
+  .card p { font-size: 13.5px; line-height: 1.5; margin: 0; color: var(--muted); }
+
+  .stat { text-align: left; }
+  .stat .big {
+    font-family: var(--display); font-size: 34px; line-height: 1; margin-bottom: 10px;
+    font-variant-numeric: tabular-nums; letter-spacing: -0.01em;
+  }
+  .stat p { font-size: 13.5px; }
+
+  .era { display: grid; grid-template-columns: 84px 1fr; gap: 16px; align-items: center; }
+  .era .when {
+    font-size: 13px; font-weight: 700; text-align: center; color: #fff;
+    padding: 10px 4px; border-radius: 9px; line-height: 1.2;
+  }
+
+  .row {
+    display: grid; grid-template-columns: 34px 1fr; gap: 14px; align-items: center;
+    background: rgba(20, 56, 92, 0.4);
+    border: 1px solid rgba(148, 174, 198, 0.14);
+    border-radius: 11px; padding: 12px 16px;
+    transition: transform 240ms ease, border-color 240ms ease;
+    transform-style: preserve-3d;
+  }
+  .row:hover { transform: translateZ(24px); border-color: var(--line); }
+  .row h3 { font-family: var(--display); font-size: 16.5px; margin: 0 0 3px; color: #fff; }
+  .row p { font-size: 13px; line-height: 1.45; margin: 0; color: var(--muted); }
+  .row .badge { margin: 0; width: 34px; height: 34px; font-size: 13px; }
+  .rows { display: flex; flex-direction: column; gap: 12px; }
+
+  .panel {
+    background: linear-gradient(160deg, var(--panel) 0%, #0C2743 100%);
+    border: 1px solid rgba(224, 166, 47, 0.22);
+    border-radius: 14px; padding: 26px 26px 24px;
+    display: flex; flex-direction: column; gap: 12px; position: relative; overflow: hidden;
+  }
+  .panel .huge {
+    font-family: var(--display); font-size: 86px; line-height: 0.9; color: var(--gold);
+    font-variant-numeric: tabular-nums;
+  }
+  .panel h2 { font-family: var(--display); font-size: 25px; margin: 0; color: #fff; line-height: 1.15; }
+  .panel p { font-size: 14px; line-height: 1.55; color: var(--muted); margin: 0; }
+  .panel .deco { position: absolute; right: -34px; bottom: -34px; width: 168px; height: 168px; color: rgba(224, 166, 47, 0.2); }
+
+  .chip-row { display: flex; flex-wrap: wrap; gap: 10px; }
+  .chip {
+    border: 1px solid var(--line); border-radius: 999px;
+    padding: 8px 16px; font-size: 13.5px; color: var(--parch);
+    background: rgba(255, 255, 255, 0.05);
+  }
+
+  .route { display: grid; grid-template-columns: repeat(5, 1fr); gap: 12px; align-items: stretch; }
+  .step {
+    border-radius: 11px; padding: 14px 10px; text-align: center; color: #fff;
+    transform-style: preserve-3d; transition: transform 240ms ease;
+  }
+  .step:hover { transform: translateZ(28px); }
+  .step b { font-family: var(--display); font-size: 17px; display: block; }
+  .step span { font-size: 12.5px; opacity: 0.86; }
+
+  .tips .card { display: flex; flex-direction: column; justify-content: center; }
+  .note { font-size: 14px; font-style: italic; color: var(--gold); margin-top: auto; padding-top: 14px; }
+
+  /* ---------- титул ---------- */
+  .cover { justify-content: center; }
+  .cover .eyebrow { font-size: 13px; letter-spacing: 0.28em; color: var(--gold); font-weight: 700; text-transform: uppercase; }
+  .cover h1 {
+    font-family: var(--display); font-size: 96px; line-height: 0.98; margin: 16px 0 18px;
+    color: #fff; letter-spacing: 0.01em;
+  }
+  .cover .eyebrow { max-width: none; }
+  .cover p { font-size: 20px; line-height: 1.45; color: var(--muted); margin: 0 0 26px; max-width: 46ch; }
+
+  .cube-wrap { position: absolute; right: 96px; top: 50%; width: 260px; height: 260px; margin-top: -130px; perspective: 900px; }
+  .cube { position: relative; width: 100%; height: 100%; transform-style: preserve-3d; animation: tumble 26s linear infinite; }
+  .cube div {
+    position: absolute; inset: 0;
+    border: 1.5px solid rgba(224, 166, 47, 0.5);
+    background: linear-gradient(150deg, rgba(47, 179, 174, 0.19), rgba(30, 123, 184, 0.1));
+    display: grid; place-items: center;
+  }
+  .cube div::before, .cube div::after {
+    content: ""; position: absolute; width: 58%; height: 58%;
+    border: 1.5px solid rgba(240, 232, 216, 0.42); border-radius: 4px;
+  }
+  .cube div::after { transform: rotate(45deg); }
+  .cf1 { transform: rotateY(0deg) translateZ(130px); }
+  .cf2 { transform: rotateY(90deg) translateZ(130px); }
+  .cf3 { transform: rotateY(180deg) translateZ(130px); }
+  .cf4 { transform: rotateY(-90deg) translateZ(130px); }
+  .cf5 { transform: rotateX(90deg) translateZ(130px); }
+  .cf6 { transform: rotateX(-90deg) translateZ(130px); }
+  @keyframes tumble {
+    0% { transform: rotateX(-18deg) rotateY(0deg); }
+    100% { transform: rotateX(-18deg) rotateY(360deg); }
+  }
+
+  /* ---------- анимация появления ---------- */
+  .rise { opacity: 0; transform: translate3d(0, 30px, -140px) rotateX(-9deg); }
+  .slide.active .rise {
+    animation: rise 700ms cubic-bezier(0.2, 0.7, 0.25, 1) forwards;
+    animation-delay: var(--d, 0ms);
+  }
+  @keyframes rise {
+    to { opacity: 1; transform: translate3d(0, 0, 0) rotateX(0deg); }
+  }
+
+  /* ---------- управление ---------- */
+  .hud {
+    position: fixed; left: 0; right: 0; bottom: 0;
+    display: flex; align-items: center; gap: 14px;
+    padding: 12px 20px; z-index: 20;
+    background: linear-gradient(to top, rgba(4, 12, 22, 0.86), transparent);
+  }
+  .hud button {
+    font: inherit; font-size: 13px; color: var(--parch);
+    background: rgba(255, 255, 255, 0.07);
+    border: 1px solid rgba(148, 174, 198, 0.22);
+    border-radius: 8px; padding: 7px 13px; cursor: pointer;
+    transition: background 180ms ease, border-color 180ms ease;
+  }
+  .hud button:hover { background: rgba(224, 166, 47, 0.18); border-color: var(--line); }
+  .hud button:focus-visible, .dot:focus-visible { outline: 2px solid var(--gold); outline-offset: 2px; }
+  .counter { font-size: 13px; color: var(--muted); font-variant-numeric: tabular-nums; min-width: 62px; }
+  .dots { display: flex; gap: 7px; flex: 1; flex-wrap: wrap; }
+  .dot {
+    width: 10px; height: 10px; padding: 0; border-radius: 50%; cursor: pointer;
+    background: rgba(148, 174, 198, 0.3); border: none;
+    transition: background 200ms ease, transform 200ms ease;
+  }
+  .dot:hover { background: var(--muted); }
+  .dot.on { background: var(--gold); transform: scale(1.35); }
+  .bar { position: fixed; top: 0; left: 0; height: 3px; background: linear-gradient(90deg, var(--teal), var(--gold)); z-index: 30; transition: width 500ms ease; }
+  .hint {
+    position: fixed; top: 18px; right: 20px; z-index: 20;
+    font-size: 12.5px; color: var(--muted); background: rgba(7, 22, 39, 0.7);
+    border: 1px solid rgba(148, 174, 198, 0.2); border-radius: 8px; padding: 8px 12px;
+    transition: opacity 600ms ease;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .slide, .card, .row, .step, .stage { transition-duration: 1ms; }
+    .slide.active .rise { animation-duration: 1ms; }
+    .cube, .gstar.spin, .gstar.spin-slow { animation: none; }
+  }
+</style>
+
+<div class="viewport" id="viewport">
+  <div class="stage" id="stage">
+    <div class="starfield" id="starfield" aria-hidden="true"></div>
+    <div id="slides"></div>
+  </div>
+</div>
+
+<div class="bar" id="bar" style="width: 0"></div>
+<div class="hint" id="hint">← → или пробел — листать · F — во весь экран · A — автопоказ</div>
+
+<div class="hud">
+  <button id="prev" type="button" aria-label="Предыдущий слайд">‹ Назад</button>
+  <button id="next" type="button" aria-label="Следующий слайд">Вперёд ›</button>
+  <span class="counter" id="counter">1 / 15</span>
+  <div class="dots" id="dots"></div>
+  <button id="auto" type="button">Автопоказ</button>
+  <button id="full" type="button">Во весь экран</button>
+</div>
+
+<script>
+  const C = { blue: "#1E7BB8", teal: "#2FB3AE", gold: "#E0A62F", terra: "#C7614A" };
+
+  const SLIDES = [
+    { type: "cover" },
+    {
+      type: "stats", kicker: "Знакомство со страной", title: "Общие сведения",
+      items: [
+        ["Ташкент", "Столица и крупнейший город — около 3 млн жителей", C.blue],
+        ["≈ 37 млн", "Население — самое многочисленное в Центральной Азии", C.teal],
+        ["448 978 км²", "Площадь территории страны", C.gold],
+        ["Узбекский", "Государственный язык; русский широко используется", C.terra],
+        ["Сум (UZS)", "Национальная валюта, введена в 1994 году", C.blue],
+        ["7 объектов", "Включено в список Всемирного наследия ЮНЕСКО", C.teal]
+      ],
+      foot: "<b>Уникальный факт:</b> Узбекистан — одна из двух стран мира (наряду с Лихтенштейном), которая дважды не имеет выхода к морю: её соседи тоже не имеют морских границ."
+    },
+    {
+      type: "eras", kicker: "Более двух тысяч лет истории", title: "Ключевые вехи",
+      items: [
+        ["IV в.<br>до н.э.", "Мараканда", "Александр Македонский покоряет Согдиану. Самарканд — ровесник Рима и Афин.", C.terra],
+        ["IX–XII<br>вв.", "Золотой век науки", "Аль-Хорезми, Ибн Сина и Аль-Бируни — уроженцы этих земель.", C.blue],
+        ["1220", "Нашествие Чингисхана", "Монголы разрушают цветущие города Мавераннахра.", "#4E6478"],
+        ["1370–<br>1507", "Империя Тимуридов", "Амир Темур делает Самарканд столицей; при Улугбеке — расцвет астрономии.", C.gold],
+        ["XVI–<br>XIX вв.", "Эпоха ханств", "Бухарский эмират, Хивинское и Кокандское ханства — время великих караванов.", C.teal],
+        ["1991", "Независимость", "1 сентября 1991 года провозглашена Республика Узбекистан.", C.terra]
+      ]
+    },
+    {
+      type: "panelList", kicker: "Всемирное наследие", title: "7 объектов ЮНЕСКО",
+      panel: { huge: "7", h2: "объектов Всемирного наследия ЮНЕСКО", p: "Четыре объекта — памятники древних городов, три — природные и трансграничные. По числу сохранившихся памятников исламской архитектуры страна входит в число мировых лидеров." },
+      items: [
+        ["1990", "Ичан-Кала (Хива)", "Внутренний город-крепость под открытым небом", C.blue],
+        ["1993", "Исторический центр Бухары", "Более 140 памятников на средневековых улицах", C.blue],
+        ["2000", "Исторический центр Шахрисабза", "Родина Амира Темура и дворец Ак-Сарай", C.blue],
+        ["2001", "Самарканд — перекрёсток культур", "Регистан, Гур-Эмир, Шахи-Зинда, Афросиаб", C.blue],
+        ["2016", "Западный Тянь-Шань", "Общий объект с Казахстаном и Кыргызстаном", C.teal],
+        ["2023", "Холодные зимние пустыни Турана", "Уникальные экосистемы пустынь Средней Азии", C.teal],
+        ["2023", "Шёлковый путь: Зарафшан-Каракумский коридор", "Совместно с Таджикистаном и Туркменистаном", C.teal]
+      ]
+    },
+    {
+      type: "cards", kicker: "Достопримечательность № 1", title: "Площадь Регистан",
+      lede: "Ансамбль из трёх медресе в сердце Самарканда — символ Узбекистана и самая известная площадь Востока. «Регистан» значит «песчаное место»: здесь сходились шесть дорог и шумел главный базар города.",
+      cols: 3,
+      items: [
+        ["1417–1420", "Медресе Улугбека", "Старейшее здание ансамбля. Внук Тимура, астроном Улугбек, сам читал здесь лекции.", C.gold],
+        ["1619–1636", "Медресе Шердор", "«Обитель львов»: на портале — тигрольвы с солнцем на спине, редкое изображение живых существ.", C.terra],
+        ["1646–1660", "Медресе Тилля-Кари", "«Покрытое золотом»: на отделку интерьера мечети ушло около 3 кг сусального золота.", C.teal]
+      ],
+      note: "Приходите на закат — золото порталов светится, а вечером включают подсветку и светомузыкальное шоу."
+    },
+    {
+      type: "cards", kicker: "Город № 1 для туриста", title: "Самарканд: что ещё увидеть", cols: 3,
+      items: [
+        ["1", "Гур-Эмир", "Мавзолей Амира Темура (1404) с ребристым бирюзовым куполом — прообраз Тадж-Махала.", C.blue],
+        ["2", "Биби-Ханым", "Соборная мечеть (1399–1404) после похода Тимура в Индию — одна из крупнейших в исламском мире.", C.terra],
+        ["3", "Шахи-Зинда", "Улица-некрополь из 11 мавзолеев XIV–XV вв. — самый красивый изразцовый ансамбль страны.", C.teal],
+        ["4", "Обсерватория Улугбека", "Остатки гигантского секстанта (1420-е): здесь измерили длину года почти без ошибки.", C.gold],
+        ["5", "Городище Афросиаб", "Древний Самарканд до монголов и музей с согдийскими фресками VII века.", C.blue],
+        ["6", "Сиабский базар", "Восточный рынок у мечети Биби-Ханым: лепёшки, сухофрукты, специи, халва.", C.terra]
+      ]
+    },
+    {
+      type: "cards", kicker: "Священный город", title: "Бухара: город-музей", cols: 3,
+      lede: "«Бухара-и-Шариф» — Благородная Бухара. Более 140 памятников на компактной территории; исторический центр целиком внесён в список ЮНЕСКО.",
+      items: [
+        ["1", "Пои-Калян", "Минарет Калян (1127, 46 м), который пощадил Чингисхан, и медресе Мири Араб.", C.blue],
+        ["2", "Мавзолей Саманидов", "IX–X вв. — древнейший памятник города и шедевр кирпичной кладки.", C.teal],
+        ["3", "Крепость Арк", "Цитадель эмиров с тронным залом, монетным двором и музеями.", C.gold],
+        ["4", "Ляби-Хауз", "Старинный пруд с чайханами в тени тутовых деревьев.", C.terra],
+        ["5", "Чор-Минор", "Ворота медресе с четырьмя голубыми башенками — символ города.", C.blue],
+        ["6", "Торговые купола", "Средневековые крытые базары: ювелиры, менялы, шапочники.", C.teal]
+      ]
+    },
+    {
+      type: "panelRows", kicker: "Музей под открытым небом", title: "Хива: крепость Ичан-Кала",
+      panel: { h2: "Ичан-Кала", p: "Внутренний город Хивы за глинобитной стеной длиной около 2,2 км и высотой до 10 м. Первый объект Узбекистана в списке ЮНЕСКО (1990).<br><br>Внутри — более 50 памятников и около 250 старых домов, где по-прежнему живут люди: застройка сохранилась почти в первозданном виде." },
+      items: [
+        ["1", "Кальта-Минор", "Бирюзовый «короткий минарет» (1855): по замыслу хана — самый высокий в мире, но остался недостроенным.", C.teal],
+        ["2", "Минарет Ислам-Ходжа", "Самый высокий минарет страны — 57 м. С его вершины виден весь старый город.", C.gold],
+        ["3", "Джума-мечеть", "Мечеть без куполов и порталов: полумрак зала держат 213 резных деревянных колонн.", C.blue],
+        ["4", "Куня-Арк и Таш-Хаули", "Старая крепость правителей и роскошный дворец XIX века с изразцовыми айванами.", C.terra]
+      ]
+    },
+    {
+      type: "twoCol", kicker: "За пределами «большой тройки»", title: "Шахрисабз и Ферганская долина",
+      cols: [
+        {
+          h: "Шахрисабз", sub: "Родина Амира Темура · ЮНЕСКО с 2000 г.", color: C.terra,
+          items: [
+            ["Ак-Сарай", "«Белый дворец» Тимура: сохранились фрагменты портала высотой 38 м."],
+            ["Дорут-Тиловат", "Мавзолеи предков Тимура и мечеть Кок-Гумбаз."],
+            ["Дорус-Сиадат", "Склеп, построенный Тимуром как собственная усыпальница."]
+          ]
+        },
+        {
+          h: "Ферганская долина", sub: "Центр ремёсел и самый плодородный край", color: C.teal,
+          items: [
+            ["Коканд", "Дворец Худояр-хана с 19 залами и изразцовым фасадом."],
+            ["Маргилан", "Столица шёлка: фабрика «Йодгорлик», хан-атлас ткут вручную."],
+            ["Риштан", "Центр керамики: бело-голубая посуда из местной глины."]
+          ]
+        }
+      ]
+    },
+    {
+      type: "cards", kicker: "Столица и точка входа", title: "Ташкент: древность и модерн", cols: 3,
+      items: [
+        ["1", "Хазрати Имам", "Религиозный центр столицы: здесь хранится Коран Османа VII века.", C.blue],
+        ["2", "Базар Чорсу", "Купольный рынок старого города: специи, сухофрукты, казаны с пловом.", C.terra],
+        ["3", "Медресе Кукельдаш", "Памятник XVI века рядом с Чорсу — редкое здание той эпохи.", C.gold],
+        ["4", "Ташкентское метро", "Первое метро в Центральной Азии (1977): станции — подземные дворцы.", C.teal],
+        ["5", "Площадь Независимости", "Фонтаны, арка Эзгулик и мемориал Скорбящей матери.", C.blue],
+        ["6", "Современный Ташкент", "Небоскрёбы Tashkent City, телебашня 375 м, лучшие рестораны страны.", C.terra]
+      ]
+    },
+    {
+      type: "cards", kicker: "Не только архитектура", title: "Природа и активный отдых", cols: 2,
+      items: [
+        ["1", "Чарвак и Чимган", "Бирюзовое водохранилище в горах Западного Тянь-Шаня в часе езды от Ташкента; зимой рядом работают горнолыжные склоны.", C.teal],
+        ["2", "Пустыня Кызылкум", "Юртовые лагеря у озера Айдаркуль, ночёвка под звёздами, прогулки на верблюдах и древние караван-сараи.", C.gold],
+        ["3", "Аральское море и Муйнак", "«Кладбище кораблей» на бывшем дне моря — самый наглядный экологический урок XX века.", C.terra],
+        ["4", "Горы Нуратау и Сармышсай", "Пешие маршруты, гостевые дома в кишлаках и ущелье с наскальными рисунками возрастом до 6000 лет.", C.blue]
+      ]
+    },
+    {
+      type: "food", kicker: "Гастрономия", title: "Узбекская кухня",
+      panel: {
+        h2: "Плов", sub: "Главное блюдо и часть национальной идентичности",
+        p: "В 2016 году культура и традиции плова внесены в Список нематериального культурного наследия ЮНЕСКО.<br><br>У каждого региона свой рецепт: ташкентский, самаркандский, бухарский, ферганский, хорезмский. Готовят в казане на открытом огне, а на праздники — на сотни гостей."
+      },
+      items: [
+        ["Самса", "Треугольные пирожки с мясом и луком из тандыра", C.gold],
+        ["Шурпа и лагман", "Наваристый суп и тянутая лапша с овощами", C.blue],
+        ["Манты и димлама", "Крупные паровые пельмени и томлёное рагу", C.teal],
+        ["Нон", "Лепёшки из тандыра — в каждом городе свой узор", C.gold],
+        ["Сумаляк", "Ритуальное блюдо из ростков пшеницы на Навруз", C.blue],
+        ["Чай и сладости", "Зелёный чай, халва, нават, сухофрукты и орехи", C.teal]
+      ]
+    },
+    {
+      type: "cards", kicker: "Живые традиции", title: "Ремёсла, праздники, гостеприимство", cols: 3,
+      items: [
+        ["1", "Сюзане", "Ручная вышивка с солярными кругами и цветами — приданое невесты.", C.terra],
+        ["2", "Керамика", "Школы Риштана (бело-голубая) и Гиждувана (тёплая охра) — своя палитра у каждой.", C.blue],
+        ["3", "Шёлк и хан-атлас", "Икат: нити красят до ткачества, поэтому узор «размытый». Центр — Маргилан.", C.gold],
+        ["4", "Навруз", "21 марта — праздник весны: сумаляк, игры, музыка и накрытые дворы.", C.teal],
+        ["5", "Чайхана и дастархан", "Гостя усаживают за дастархан и первым делом подают чай в пиале.", C.terra],
+        ["6", "Музыка и танец", "Макомы, дойра и карнай, хорезмский танец лазги — наследие ЮНЕСКО.", C.blue]
+      ]
+    },
+    {
+      type: "route", kicker: "Полезно знать", title: "Маршрут и советы путешественнику",
+      route: [["Ташкент", "2 дня"], ["Самарканд", "2–3 дня"], ["Шахрисабз", "1 день"], ["Бухара", "2 дня"], ["Хива", "1–2 дня"]],
+      items: [
+        ["Когда ехать", "Апрель–май и сентябрь–октябрь: тепло и цветёт. Летом бывает выше +40 °C.", C.gold],
+        ["Виза", "Для граждан многих стран, включая Россию и страны СНГ, действует безвизовый режим.", C.blue],
+        ["Транспорт", "Поезда «Афросиаб»: Ташкент — Самарканд около 2 ч, Ташкент — Бухара около 4 ч.", C.teal],
+        ["Деньги и связь", "Валюта — сум; карты принимают в городах, наличные нужны на базарах.", C.terra]
+      ],
+      note: "Между городами всё близко, а внутри старых центров всё обходится пешком."
+    },
+    {
+      type: "outro", kicker: "Почему стоит поехать", title: "Страна, где история<br>ещё живёт на улицах",
+      items: [
+        ["Наследие", "Четыре города-музея и 7 объектов ЮНЕСКО", C.gold],
+        ["Доступность", "Безвизовый въезд и невысокие цены", C.teal],
+        ["Гостеприимство", "Одна из самых радушных стран Азии", C.terra]
+      ]
+    }
+  ];
+
+  /* ---------- рендер ---------- */
+  const esc = (s) => s;
+  const head = (s) =>
+    `<p class="kicker rise" style="--d:60ms"><span class="mark"><i></i><i></i></span>${s.kicker}</p>
+     <h1 class="title rise" style="--d:120ms">${s.title}</h1>` +
+    (s.lede ? `<p class="lede rise" style="--d:180ms">${s.lede}</p>` : "");
+
+  const deco = `<span class="deco"><span class="gstar" style="position:relative;display:block;width:100%;height:100%"><i></i><i></i></span></span>`;
+
+  function render(s, idx) {
+    let inner = "";
+    const d = (i, base = 220) => `--d:${base + i * 70}ms`;
+
+    if (s.type === "cover") {
+      inner = `
+        <div class="cube-wrap" aria-hidden="true"><div class="cube">
+          <div class="cf1"></div><div class="cf2"></div><div class="cf3"></div>
+          <div class="cf4"></div><div class="cf5"></div><div class="cf6"></div>
+        </div></div>
+        <p class="eyebrow rise" style="--d:80ms">Центральная Азия · Великий шёлковый путь</p>
+        <h1 class="rise" style="--d:160ms">УЗБЕКИСТАН</h1>
+        <p class="rise" style="--d:260ms">Достопримечательности, главные туристические места и всё, что стоит знать о стране бирюзовых куполов</p>
+        <div class="chip-row rise" style="--d:360ms">
+          ${["Самарканд", "Бухара", "Хива", "Ташкент"].map((c) => `<span class="chip">${c}</span>`).join("")}
+        </div>`;
+      return `<section class="slide cover" data-i="${idx}">${inner}</section>`;
+    }
+
+    if (s.type === "stats") {
+      inner = head(s) + `<div class="grid g3 fill">` +
+        s.items.map((it, i) =>
+          `<div class="card stat rise" style="${d(i)}">
+             <div class="big" style="color:${it[2]}">${it[0]}</div>
+             <p>${it[1]}</p>
+           </div>`).join("") +
+        `</div><p class="note rise" style="--d:700ms">${s.foot}</p>`;
+    }
+
+    if (s.type === "eras") {
+      inner = head(s) + `<div class="grid g2 fill">` +
+        s.items.map((it, i) =>
+          `<div class="card era rise" style="${d(i)}">
+             <div class="when" style="background:${it[3]}">${it[0]}</div>
+             <div><h3>${it[1]}</h3><p>${it[2]}</p></div>
+           </div>`).join("") +
+        `</div>`;
+    }
+
+    if (s.type === "panelList") {
+      inner = head(s) + `<div class="split">
+          <div class="panel rise" style="--d:200ms">
+            <div class="huge">${s.panel.huge}</div>
+            <h2>${s.panel.h2}</h2><p>${s.panel.p}</p>${deco}
+          </div>
+          <div class="rows">` +
+        s.items.map((it, i) =>
+          `<div class="row rise" style="${d(i, 260)}">
+             <span class="badge" style="background:${it[3]};font-size:11px">${it[0]}</span>
+             <div><h3>${it[1]}</h3><p>${it[2]}</p></div>
+           </div>`).join("") +
+        `</div></div>`;
+    }
+
+    if (s.type === "panelRows") {
+      inner = head(s) + `<div class="split wide">
+          <div class="panel rise" style="--d:200ms">
+            <h2 style="font-size:32px">${s.panel.h2}</h2><p>${s.panel.p}</p>${deco}
+          </div>
+          <div class="rows">` +
+        s.items.map((it, i) =>
+          `<div class="row rise" style="${d(i, 260)}">
+             <span class="badge" style="background:${it[3]}">${it[0]}</span>
+             <div><h3>${it[1]}</h3><p>${it[2]}</p></div>
+           </div>`).join("") +
+        `</div></div>`;
+    }
+
+    if (s.type === "cards") {
+      inner = head(s) + `<div class="grid g${s.cols} fill">` +
+        s.items.map((it, i) =>
+          `<div class="card rise" style="${d(i)}">
+             <span class="badge" style="background:${it[3]}">${it[0].length > 4 ? "★" : it[0]}</span>
+             <h3>${it[1]}</h3><p>${it[2]}</p>
+             ${it[0].length > 4 ? `<p style="color:${it[3]};font-weight:700;margin-top:8px">${it[0]}</p>` : ""}
+           </div>`).join("") +
+        `</div>` + (s.note ? `<p class="note rise" style="--d:640ms">${s.note}</p>` : "");
+    }
+
+    if (s.type === "twoCol") {
+      inner = head(s) + `<div class="grid g2">` +
+        s.cols.map((col, ci) =>
+          `<div>
+             <div class="rise" style="--d:${200 + ci * 90}ms;background:${col.color};border-radius:12px;padding:14px 20px;margin-bottom:14px">
+               <div style="font-family:var(--display);font-size:23px;color:#fff;font-weight:700">${col.h}</div>
+               <div style="font-size:13px;color:rgba(255,255,255,0.88)">${col.sub}</div>
+             </div>
+             <div class="rows">` +
+          col.items.map((it, i) =>
+            `<div class="row rise" style="${d(i + ci * 3, 300)}">
+               <span class="badge" style="background:${col.color}">${i + 1}</span>
+               <div><h3>${it[0]}</h3><p>${it[1]}</p></div>
+             </div>`).join("") +
+          `</div></div>`).join("") +
+        `</div>`;
+    }
+
+    if (s.type === "food") {
+      inner = head(s) + `<div class="split wide">
+          <div class="panel rise" style="--d:200ms;background:linear-gradient(160deg,#B4523C 0%,#8E3C2C 100%);border-color:rgba(255,255,255,0.24)">
+            <h2 style="font-size:44px">${s.panel.h2}</h2>
+            <div style="font-style:italic;color:#FFE2CE;font-size:15px">${s.panel.sub}</div>
+            <p style="color:#FBEADF">${s.panel.p}</p>${deco}
+          </div>
+          <div class="grid g2 fill">` +
+        s.items.map((it, i) =>
+          `<div class="card rise" style="${d(i, 260)};padding:16px 18px">
+             <div style="display:flex;align-items:center;gap:10px;margin-bottom:6px">
+               <span class="gstar" style="position:relative;width:16px;height:16px;color:${it[2]};flex:none"><i style="border-color:${it[2]};background:${it[2]}"></i><i style="border-color:${it[2]};background:${it[2]}"></i></span>
+               <h3 style="margin:0">${it[0]}</h3>
+             </div>
+             <p>${it[1]}</p>
+           </div>`).join("") +
+        `</div></div>`;
+    }
+
+    if (s.type === "route") {
+      inner = head(s) +
+        `<p class="rise" style="--d:180ms;font-family:var(--display);font-size:20px;margin:0 0 14px;color:#fff">Классический маршрут на 8–10 дней</p>
+         <div class="route">` +
+        s.route.map((r, i) =>
+          `<div class="step rise" style="${d(i, 240)};background:${i % 2 ? C.teal : C.blue}">
+             <b>${r[0]}</b><span>${r[1]}</span>
+           </div>`).join("") +
+        `</div><div class="grid g4 fill tips" style="margin-top:20px">` +
+        s.items.map((it, i) =>
+          `<div class="card rise" style="${d(i, 560)}">
+             <span class="badge" style="background:${it[2]}">★</span>
+             <h3>${it[0]}</h3><p>${it[1]}</p>
+           </div>`).join("") +
+        `</div><p class="note rise" style="--d:900ms">${s.note}</p>`;
+    }
+
+    if (s.type === "outro") {
+      inner = `<div style="margin:auto 0">
+          <p class="kicker rise" style="--d:80ms"><span class="mark"><i></i><i></i></span>${s.kicker}</p>
+          <h1 class="rise" style="--d:150ms;font-family:var(--display);font-size:58px;line-height:1.12;color:#fff;margin:0 0 34px">${s.title}</h1>
+          <div class="grid g3">` +
+        s.items.map((it, i) =>
+          `<div class="card rise" style="${d(i, 300)}">
+             <h3 style="color:${it[2]}">${it[0]}</h3><p>${it[1]}</p>
+           </div>`).join("") +
+        `</div>
+          <p class="rise" style="--d:620ms;font-family:var(--display);font-size:26px;color:#fff;margin:32px 0 0">Спасибо за внимание!</p>
+        </div>`;
+    }
+
+    return `<section class="slide" data-i="${idx}">${inner}</section>`;
+  }
+
+  /* ---------- фон ---------- */
+  const sf = document.getElementById("starfield");
+  const specs = [
+    [80, 90, 210, -620, "rgba(224,166,47,0.22)", "spin"],
+    [1030, 120, 150, -420, "rgba(47,179,174,0.2)", "spin-slow"],
+    [880, 520, 260, -780, "rgba(30,123,184,0.24)", "spin"],
+    [180, 560, 120, -300, "rgba(224,166,47,0.16)", "spin-slow"],
+    [560, 40, 90, -240, "rgba(240,232,216,0.12)", "spin"]
+  ];
+  sf.innerHTML = specs.map(
+    ([x, y, size, z, color, cls]) =>
+      `<span class="gstar ${cls}" style="left:${x}px;top:${y}px;width:${size}px;height:${size}px;color:${color};transform:translateZ(${z}px)"><i></i><i></i></span>`
+  ).join("");
+
+  /* ---------- сборка ---------- */
+  const holder = document.getElementById("slides");
+  holder.innerHTML = SLIDES.map(render).join("");
+  const slides = Array.from(holder.children);
+  const dots = document.getElementById("dots");
+  dots.innerHTML = slides.map((_, i) => `<button class="dot" type="button" data-i="${i}" aria-label="Слайд ${i + 1}"></button>`).join("");
+
+  let cur = 0;
+  const bar = document.getElementById("bar");
+  const counter = document.getElementById("counter");
+
+  function show(n, dir) {
+    n = (n + slides.length) % slides.length;
+    const from = cur;
+    cur = n;
+    slides.forEach((el, i) => {
+      el.classList.remove("active", "prev", "next");
+      if (i === n) {
+        // перезапуск анимаций появления
+        el.querySelectorAll(".rise").forEach((r) => { r.style.animation = "none"; void r.offsetWidth; r.style.animation = ""; });
+        el.classList.add("active");
+      } else if (i === from) {
+        el.classList.add(dir === "back" ? "next" : "prev");
+      }
+    });
+    bar.style.width = ((n + 1) / slides.length) * 100 + "%";
+    counter.textContent = (n + 1) + " / " + slides.length;
+    dots.querySelectorAll(".dot").forEach((d, i) => d.classList.toggle("on", i === n));
+  }
+
+  const next = () => show(cur + 1, "fwd");
+  const back = () => show(cur - 1, "back");
+
+  document.getElementById("next").onclick = next;
+  document.getElementById("prev").onclick = back;
+  dots.onclick = (e) => {
+    const b = e.target.closest(".dot");
+    if (b) show(+b.dataset.i, +b.dataset.i > cur ? "fwd" : "back");
+  };
+
+  document.addEventListener("keydown", (e) => {
+    if (["ArrowRight", " ", "PageDown", "Enter"].includes(e.key)) { e.preventDefault(); next(); }
+    else if (["ArrowLeft", "PageUp"].includes(e.key)) { e.preventDefault(); back(); }
+    else if (e.key === "Home") show(0, "back");
+    else if (e.key === "End") show(slides.length - 1, "fwd");
+    else if (e.key.toLowerCase() === "f") toggleFull();
+    else if (e.key.toLowerCase() === "a") toggleAuto();
+  });
+
+  /* масштабирование сцены под окно */
+  const stage = document.getElementById("stage");
+  function fit() {
+    const s = Math.min(window.innerWidth / 1340, (window.innerHeight - 62) / 756);
+    stage.style.transform = `scale(${s})`;
+  }
+  window.addEventListener("resize", fit);
+  fit();
+
+  /* параллакс от курсора */
+  const vp = document.getElementById("viewport");
+  let raf = 0;
+  vp.addEventListener("mousemove", (e) => {
+    if (raf) return;
+    raf = requestAnimationFrame(() => {
+      raf = 0;
+      const dx = (e.clientX / window.innerWidth - 0.5) * 2;
+      const dy = (e.clientY / window.innerHeight - 0.5) * 2;
+      vp.style.perspectiveOrigin = `${50 + dx * 12}% ${46 + dy * 10}%`;
+    });
+  });
+
+  /* свайпы */
+  let tx = 0;
+  vp.addEventListener("touchstart", (e) => { tx = e.touches[0].clientX; }, { passive: true });
+  vp.addEventListener("touchend", (e) => {
+    const dx = e.changedTouches[0].clientX - tx;
+    if (Math.abs(dx) > 55) (dx < 0 ? next : back)();
+  }, { passive: true });
+
+  /* автопоказ и полный экран */
+  let timer = null;
+  const autoBtn = document.getElementById("auto");
+  function toggleAuto() {
+    if (timer) { clearInterval(timer); timer = null; autoBtn.textContent = "Автопоказ"; }
+    else { timer = setInterval(next, 7000); autoBtn.textContent = "Стоп"; }
+  }
+  autoBtn.onclick = toggleAuto;
+
+  function toggleFull() {
+    if (document.fullscreenElement) document.exitFullscreen();
+    else document.documentElement.requestFullscreen && document.documentElement.requestFullscreen();
+  }
+  document.getElementById("full").onclick = toggleFull;
+
+  const hint = document.getElementById("hint");
+  setTimeout(() => { hint.style.opacity = "0"; }, 6000);
+
+  if (location.hash.startsWith("#s=")) show(parseInt(location.hash.slice(3), 10) - 1 || 0, "fwd");
+  else show(0, "fwd");
+</script>
