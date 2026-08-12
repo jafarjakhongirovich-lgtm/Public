@@ -6,7 +6,7 @@
 ## Как устроена авторизация
 
 Agent SDK не ходит в API сам: он запускает локальный Claude Code CLI, а тот
-берёт OAuth-токен из `claude login`. То есть бот использует ровно ту же
+берёт OAuth-токен из `claude auth login`. То есть бот использует ровно ту же
 авторизацию, что и ваш `claude` в терминале — вашу подписку.
 
 Единственное, что может это сломать — переменная `ANTHROPIC_API_KEY` в
@@ -23,7 +23,7 @@ Agent SDK не ходит в API сам: он запускает локальн�
 ```bash
 # 1. Claude Code CLI и вход по подписке
 npm install -g @anthropic-ai/claude-code
-claude login
+claude auth login
 
 # 2. Зависимости бота
 python3 -m venv .venv
@@ -45,7 +45,7 @@ python -m jarvis
 ```
 
 Бот работает, пока запущен процесс. Для постоянной работы — systemd-юнит,
-`screen`/`tmux` или любой супервизор на машине, где вы выполнили `claude login`.
+`screen`/`tmux` или любой супервизор на машине, где вы выполнили `claude auth login`.
 
 ## Команды
 

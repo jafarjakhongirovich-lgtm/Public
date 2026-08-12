@@ -18,7 +18,7 @@ def preflight() -> None:
         raise SystemExit(
             "Claude Code CLI не найден. Установите его и войдите под своей подпиской:\n"
             "  npm install -g @anthropic-ai/claude-code\n"
-            "  claude login"
+            "  claude auth login"
         )
 
     removed = force_subscription_auth()
@@ -43,7 +43,7 @@ def main() -> int:
 
     log.info("Рабочая папка: %s", config.workspace)
     log.info("Доступ разрешён для ID: %s", ", ".join(str(i) for i in sorted(config.owner_ids)))
-    log.info("Авторизация: подписка Claude (через claude login), API-ключ не используется")
+    log.info("Авторизация: подписка Claude (через claude auth login), API-ключ не используется")
 
     JarvisBot(config).build().run_polling(drop_pending_updates=True)
     return 0

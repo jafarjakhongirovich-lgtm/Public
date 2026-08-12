@@ -38,7 +38,7 @@ def build_options(config: Config) -> ClaudeAgentOptions:
     """Опции агента.
 
     Ключевой момент для подписки: мы не передаём ANTHROPIC_API_KEY.
-    SDK запускает Claude Code CLI, а тот берёт OAuth-креды из `claude login`.
+    SDK запускает Claude Code CLI, а тот берёт OAuth-креды из `claude auth login`.
     """
     kwargs: dict = {
         "system_prompt": {
