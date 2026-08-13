@@ -198,7 +198,7 @@ JARVIS_SHOW_TOOLS=1
 JARVIS_MEMORY_DAYS=0
 JARVIS_WHISPER_MODEL=small
 JARVIS_TTS_VOICE=ru-RU-DmitryNeural
-JARVIS_TTS_MODE=auto
+JARVIS_TTS_MODE=always
 JARVIS_EXTRA_DIRS=
 "@
     # ASCII, чтобы Windows не подмешал в начало файла невидимые символы.

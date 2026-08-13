@@ -122,8 +122,8 @@ class Config:
             # Пусто = отвечать только текстом, без голосовых.
             tts_voice=os.environ.get("JARVIS_TTS_VOICE", "ru-RU-DmitryNeural").strip(),
             tts_max_chars=int(os.environ.get("JARVIS_TTS_MAX_CHARS", "700")),
-            # auto = отвечать тем же способом, каким спросили. always | never
-            tts_mode=os.environ.get("JARVIS_TTS_MODE", "auto").strip().lower(),
+            # always = озвучивать каждый ответ. auto = только на голосовые. never
+            tts_mode=os.environ.get("JARVIS_TTS_MODE", "always").strip().lower(),
             max_files_per_reply=int(os.environ.get("JARVIS_MAX_FILES", "5")),
             # 0 = помнить бессрочно. Число = забывать разговор через столько дней.
             memory_days=float(os.environ.get("JARVIS_MEMORY_DAYS", "0")),

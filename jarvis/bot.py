@@ -95,6 +95,8 @@ class JarvisBot:
         self.voice_mode: dict[int, str] = {}
         # Про кого из посторонних уже доложили владельцу.
         self._reported: set[int] = set()
+        # В каких чатах уже пожаловались на поломку озвучки.
+        self._voice_warned: set[int] = set()
 
     # ---------- доступ ----------
 
@@ -338,16 +340,32 @@ class JarvisBot:
         ):
             return
         if not Speaker.installed():
-            log.warning("edge-tts не установлен — озвучка пропущена")
+            await self._voice_problem(
+                message,
+                "не установлен edge-tts. В папке бота выполните:\n"
+                ".venv\\Scripts\\pip install edge-tts",
+            )
             return
         try:
             async with typing(message.get_bot(), message.chat_id):
                 audio = await self.speaker.synthesize(text)
             if audio:
                 await message.reply_voice(voice=audio)
-        except Exception:  # noqa: BLE001
-            # Текст собеседник уже получил, молчание тут лучше ошибки.
+        except Exception as exc:  # noqa: BLE001
             log.exception("Не удалось озвучить ответ")
+            # Молча пропускать нельзя: со стороны это выглядит как «просто
+            # не говорит», и причину не найти.
+            await self._voice_problem(message, str(exc)[:200])
+
+    async def _voice_problem(self, message, reason: str) -> None:
+        """Сообщает о поломке озвучки один раз на чат, чтобы не надоедать."""
+        if message.chat_id in self._voice_warned:
+            return
+        self._voice_warned.add(message.chat_id)
+        await message.reply_text(
+            f"Голосом ответить не смог: {reason}\n"
+            "Дальше отвечаю текстом. Отключить озвучку совсем: /voice выкл"
+        )
 
     async def _send_files(self, message, paths: list[Path]) -> None:
         """Отправляет то, что агент сохранил в рабочей папке."""
