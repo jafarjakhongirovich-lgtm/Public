@@ -2,9 +2,12 @@
 
 from __future__ import annotations
 
+import logging
 import os
 from dataclasses import dataclass, field
 from pathlib import Path
+
+log = logging.getLogger(__name__)
 
 # Переменные, через которые SDK ушёл бы на оплату по API-ключу.
 # Снимаем их до старта, чтобы Claude Code CLI использовал OAuth-подписку.
@@ -37,6 +40,21 @@ def _int_set(raw: str) -> frozenset[int]:
     return frozenset(int(part) for part in raw.replace(",", " ").split() if part.strip())
 
 
+def _dirs(raw: str) -> list[Path]:
+    """Папки компьютера, к которым Jarvis получает доступ помимо песочницы."""
+    result = []
+    for part in raw.split(";"):
+        part = part.strip().strip('"')
+        if not part:
+            continue
+        path = Path(os.path.expandvars(part)).expanduser()
+        if path.is_dir():
+            result.append(path.resolve())
+        else:
+            log.warning("Папки нет, пропускаю: %s", path)
+    return result
+
+
 @dataclass(frozen=True)
 class Config:
     telegram_token: str
@@ -49,8 +67,11 @@ class Config:
     max_turns: int | None
     max_budget_usd: float | None
     whisper_model: str
+    tts_voice: str
+    tts_max_chars: int
     max_files_per_reply: int
     memory_days: float
+    extra_dirs: list[Path]
     persona: str = field(repr=False, default="")
 
     @classmethod
@@ -97,9 +118,13 @@ class Config:
             max_budget_usd=float(budget) if budget else None,
             # Пусто = голосовые не распознаём. tiny/base/small/medium/large-v3
             whisper_model=os.environ.get("JARVIS_WHISPER_MODEL", "small").strip(),
+            # Пусто = отвечать только текстом, без голосовых.
+            tts_voice=os.environ.get("JARVIS_TTS_VOICE", "ru-RU-DmitryNeural").strip(),
+            tts_max_chars=int(os.environ.get("JARVIS_TTS_MAX_CHARS", "700")),
             max_files_per_reply=int(os.environ.get("JARVIS_MAX_FILES", "5")),
             # 0 = помнить бессрочно. Число = забывать разговор через столько дней.
             memory_days=float(os.environ.get("JARVIS_MEMORY_DAYS", "0")),
+            extra_dirs=_dirs(os.environ.get("JARVIS_EXTRA_DIRS", "")),
             persona=os.environ.get("JARVIS_PERSONA", DEFAULT_PERSONA),
         )
 
@@ -119,9 +144,20 @@ DEFAULT_PERSONA = """\
 - Списки — только когда пунктов действительно несколько.
 
 Работа:
-- У тебя есть инструменты для файлов и веба. Рабочая папка — твоя песочница.
+- У тебя есть инструменты для файлов, команд и веба. Рабочая папка — песочница;
+  кроме неё могут быть открыты настоящие папки компьютера собеседника.
+- В чужих папках будь осторожен: читать и создавать — свободно, изменять и
+  удалять чужие файлы — только когда об этом попросили прямо и однозначно.
+- Часть необратимых команд заблокирована предохранителем. Получив отказ, не
+  ищи обход: объясни, что и почему не вышло, и предложи безопасный путь.
 - Не выходи за рамки просьбы: не рефактори, не добавляй лишнего.
 - Если чего-то не знаешь или инструмент недоступен — скажи прямо, не выдумывай.
+
+Файлы от собеседника:
+- Присланные файлы, фотографии и скриншоты бот кладёт в подпапку `inbox` и
+  сообщает тебе путь. Открой файл и работай с ним: разбери, объясни, переведи,
+  посчитай — смотря о чём просят. Фотографии тоже открывай, ты их видишь.
+- Если к файлу нет вопроса, коротко скажи, что это, и спроси, что с ним делать.
 
 Файлы:
 - Всё, что ты сохранишь в рабочей папке, бот сам отправит собеседнику в чат.

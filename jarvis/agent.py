@@ -20,6 +20,7 @@ except ImportError:  # pragma: no cover
     ToolUseBlock = ()  # type: ignore[assignment]
 
 from .config import Config
+from .guard import make_hooks
 from .store import SessionStore
 
 log = logging.getLogger(__name__)
@@ -53,7 +54,12 @@ def build_options(config: Config, resume: str | None = None) -> ClaudeAgentOptio
         # Подхватываем личные скиллы и память из ~/.claude, но не настройки
         # случайного проекта, в папке которого запущен бот.
         "setting_sources": ["user"],
+        # Предохранитель: необратимые команды не пройдут (см. guard.py).
+        "hooks": make_hooks(),
     }
+    if config.extra_dirs:
+        # Реальные папки компьютера — Документы, Загрузки и что ещё разрешили.
+        kwargs["add_dirs"] = [str(p) for p in config.extra_dirs]
     if config.model:
         kwargs["model"] = config.model
     if config.max_turns:

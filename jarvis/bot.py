@@ -21,6 +21,7 @@ from telegram.ext import (
 from . import outbox
 from .agent import Reply, SessionRegistry
 from .config import Config
+from .speech import Speaker
 from .voice import INSTALL_HINT, Transcriber
 
 log = logging.getLogger(__name__)
@@ -83,6 +84,9 @@ class JarvisBot:
         self.config = config
         self.sessions = SessionRegistry(config)
         self.transcriber = Transcriber(config.whisper_model) if config.whisper_model else None
+        self.speaker = (
+            Speaker(config.tts_voice, config.tts_max_chars) if config.tts_voice else None
+        )
 
     # ---------- доступ ----------
 
@@ -159,6 +163,46 @@ class JarvisBot:
         await message.reply_text(f"Услышал: {text}")
         await self._run(message, text)
 
+    async def on_file(self, update: Update, _ctx: ContextTypes.DEFAULT_TYPE) -> None:
+        """Пользователь прислал документ или фото — кладём в inbox и разбираем."""
+        if not self._authorized(update):
+            return await self._deny(update)
+
+        message = update.effective_message
+        try:
+            path = await self._save_incoming(message)
+        except Exception as exc:  # noqa: BLE001
+            log.exception("Не удалось принять файл")
+            await message.reply_text(f"Не смог принять файл: {exc}")
+            return
+
+        question = (message.caption or "").strip()
+        prompt = (
+            f"Собеседник прислал файл: {path}\n"
+            + (f"И спрашивает: {question}" if question else "Вопроса не задал.")
+        )
+        await self._run(message, prompt)
+
+    async def _save_incoming(self, message) -> Path:
+        """Скачивает присланное в inbox под понятным именем."""
+        inbox = self.config.workspace / "inbox"
+        inbox.mkdir(parents=True, exist_ok=True)
+
+        if message.photo:
+            # В photo лежит лесенка размеров, последний — самый крупный.
+            tg_file = await message.photo[-1].get_file()
+            name = f"photo_{message.message_id}.jpg"
+        else:
+            source = message.document or message.video or message.audio
+            tg_file = await source.get_file()
+            name = getattr(source, "file_name", None) or f"file_{message.message_id}"
+
+        path = inbox / Path(name).name
+        async with typing(message.get_bot(), message.chat_id):
+            await tg_file.download_to_drive(path)
+        log.info("Принят файл: %s", path.name)
+        return path
+
     async def _transcribe(self, message) -> str | None:
         voice = message.voice or message.audio
         async with typing(message.get_bot(), message.chat_id):
@@ -191,7 +235,24 @@ class JarvisBot:
         )
 
         await self._send(message, reply)
+        await self._speak(message, reply.text)
         await self._send_files(message, produced)
+
+    async def _speak(self, message, text: str) -> None:
+        """Присылает голосовую версию ответа вдобавок к тексту."""
+        if not text or self.speaker is None:
+            return
+        if not Speaker.installed():
+            log.warning("edge-tts не установлен — озвучка пропущена")
+            return
+        try:
+            async with typing(message.get_bot(), message.chat_id):
+                audio = await self.speaker.synthesize(text)
+            if audio:
+                await message.reply_voice(voice=audio)
+        except Exception:  # noqa: BLE001
+            # Текст собеседник уже получил, молчание тут лучше ошибки.
+            log.exception("Не удалось озвучить ответ")
 
     async def _send_files(self, message, paths: list[Path]) -> None:
         """Отправляет то, что агент сохранил в рабочей папке."""
@@ -235,7 +296,10 @@ class JarvisBot:
         app.add_handler(CommandHandler("new", self.cmd_new))
         app.add_handler(CommandHandler("stop", self.cmd_stop))
         app.add_handler(CommandHandler("id", self.cmd_id))
-        app.add_handler(MessageHandler(filters.VOICE | filters.AUDIO, self.on_voice))
+        app.add_handler(MessageHandler(filters.VOICE, self.on_voice))
+        app.add_handler(
+            MessageHandler(filters.Document.ALL | filters.PHOTO | filters.AUDIO, self.on_file)
+        )
         app.add_handler(MessageHandler(filters.TEXT & ~filters.COMMAND, self.on_text))
         return app
 

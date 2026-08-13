@@ -2,3 +2,5 @@ claude-agent-sdk>=0.2.0
 python-telegram-bot>=21.6
 # Распознавание голосовых — локально, без API-ключей.
 faster-whisper>=1.0.0
+# Озвучка ответов — голоса Microsoft, бесплатно и без ключей.
+edge-tts>=7.0.0

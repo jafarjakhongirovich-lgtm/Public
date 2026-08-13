@@ -15,8 +15,11 @@ log = logging.getLogger(__name__)
 TELEGRAM_FILE_LIMIT = 50 * 1024 * 1024
 
 # Служебное: шумит и пользователю не нужно.
-# tmp — черновики агента: он туда пишет промежуточное, отправлять их не надо.
-SKIP_DIRS = {"tmp", ".git", "__pycache__", ".venv", "node_modules", ".cache", ".ipynb_checkpoints"}
+# tmp — черновики агента; inbox — то, что прислал сам собеседник.
+# Ни то, ни другое отправлять обратно не нужно.
+SKIP_DIRS = {
+    "tmp", "inbox", ".git", "__pycache__", ".venv", "node_modules", ".cache", ".ipynb_checkpoints"
+}
 SKIP_SUFFIXES = {".pyc", ".pyo", ".tmp", ".part", ".crdownload", ".lock"}
 
 Snapshot = dict[Path, tuple[float, int]]
