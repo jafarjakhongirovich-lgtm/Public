@@ -107,6 +107,109 @@ def check_command(command: str, allowed_dirs: list[Path] | None = None) -> str |
     return None
 
 
+# --- скрипты -------------------------------------------------------------
+
+# Скрипт — обычный способ обойти проверку команды: «запусти build.py» выглядит
+# безобидно, а внутри может быть что угодно. Поэтому читаем и его тоже.
+
+SCRIPT_SUFFIXES = {".py", ".js", ".mjs", ".ps1", ".sh", ".bash", ".bat", ".cmd", ".rb", ".pl"}
+
+# Строка в кавычках — как раз там и живут пути внутри кода.
+_STRING_LITERAL = re.compile(r"""(['"])(.*?)\1""", re.S)
+
+# Запрещаем только то, что необратимо по своей природе. Обычное удаление и
+# запуск подпроцессов оставляем: ими пользуются штатные навыки для презентаций
+# и таблиц, а куда именно они лезут — ловит проверка путей ниже.
+DANGEROUS_CALLS: list[tuple[re.Pattern[str], str]] = [
+    (re.compile(r"\bshutil\.rmtree\b"), "рекурсивное удаление в скрипте"),
+    (re.compile(r"\bfs\.rmSync?\b[^)]*recursive", re.S), "рекурсивное удаление в скрипте"),
+    (re.compile(r"\bRemove-Item\b[^\n]*-Recurse", re.I), "рекурсивное удаление в скрипте"),
+    (re.compile(r"\bwinreg\b|\bMicrosoft\.Win32\.Registry\b"), "доступ к реестру Windows"),
+    (re.compile(r"\bctypes\.(windll|WinDLL)\b"), "прямые вызовы системных функций"),
+    (re.compile(r"\bkeyring\b|\bwin32crypt\b"), "доступ к хранилищу паролей"),
+]
+
+# Ограничение чтения: гигантский файл нам всё равно не разобрать осмысленно.
+MAX_SCRIPT_BYTES = 200_000
+
+
+def check_script_source(source: str, allowed_dirs: list[Path] | None = None) -> str | None:
+    """Причина отказа для содержимого скрипта или None."""
+    for pattern, reason in DANGEROUS_CALLS:
+        if pattern.search(source):
+            return reason
+
+    if SECRETS.search(source):
+        return "обращение к паролям, ключам или личным данным в скрипте"
+    if _HOME_SHORTHAND.search(source):
+        return "обращение к личной папке пользователя в скрипте"
+
+    roots = list(allowed_dirs or [])
+    for match in _STRING_LITERAL.finditer(source):
+        literal = match.group(2)
+        if not literal:
+            continue
+        looks_like_path = _WIN_PATH.fullmatch(literal) or _UNIX_PATH.fullmatch(literal)
+        if looks_like_path and not _inside(literal, roots):
+            return "обращение к файлам за пределами рабочей папки в скрипте"
+        # Скрипт может запустить команду строкой — проверяем её как команду.
+        # Так `os.system('del /s /q C:\\*')` не проскочит, а обычный
+        # subprocess для сборки документа продолжит работать.
+        if len(literal) > 3:
+            reason = check_command(literal, roots)
+            if reason:
+                return f"{reason} — командой из скрипта"
+    return None
+
+
+def _script_paths(command: str, workspace: Path | None) -> list[Path]:
+    """Файлы скриптов, упомянутые в команде."""
+    found = []
+    for token in re.split(r"[\s|&;]+", command):
+        token = token.strip("\"'")
+        if not token or Path(token).suffix.lower() not in SCRIPT_SUFFIXES:
+            continue
+        path = Path(token)
+        if not path.is_absolute() and workspace is not None:
+            path = workspace / path
+        found.append(path)
+    return found
+
+
+def _inline_code(command: str) -> list[str]:
+    """Код, переданный команде прямо в аргументе: python -c "...", powershell -Command."""
+    pattern = re.compile(
+        r"(?:-c|-Command|-EncodedCommand|--eval|-e)\s+(\"(?:[^\"]*)\"|'(?:[^']*)'|\S+)",
+        re.I,
+    )
+    return [m.group(1).strip("\"'") for m in pattern.finditer(command)]
+
+
+def check_execution(command: str, allowed_dirs: list[Path] | None = None) -> str | None:
+    """Полная проверка: сама команда, встроенный код и запускаемые скрипты."""
+    reason = check_command(command, allowed_dirs)
+    if reason:
+        return reason
+
+    for code in _inline_code(command):
+        reason = check_script_source(code, allowed_dirs)
+        if reason:
+            return reason
+
+    workspace = allowed_dirs[0] if allowed_dirs else None
+    for path in _script_paths(command, workspace):
+        try:
+            if not path.is_file() or path.stat().st_size > MAX_SCRIPT_BYTES:
+                continue
+            source = path.read_text(encoding="utf-8", errors="replace")
+        except OSError:
+            continue
+        reason = check_script_source(source, allowed_dirs)
+        if reason:
+            return f"{reason} ({path.name})"
+    return None
+
+
 def make_hooks(allowed_dirs: list[Path] | None = None) -> dict:
     """Хуки для ClaudeAgentOptions.hooks.
 
@@ -118,7 +221,7 @@ def make_hooks(allowed_dirs: list[Path] | None = None) -> dict:
 
     async def before_bash(input_data: dict, _tool_use_id, _context) -> dict:
         command = str(input_data.get("tool_input", {}).get("command", ""))
-        reason = check_command(command, allowed_dirs)
+        reason = check_execution(command, allowed_dirs)
         if not reason:
             return {}
         log.warning("Заблокирована команда (%s): %s", reason, command[:200])
