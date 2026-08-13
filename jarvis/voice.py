@@ -31,6 +31,11 @@ class Transcriber:
     def enabled(self) -> bool:
         return bool(self._model_size)
 
+    @property
+    def ready(self) -> bool:
+        """Модель уже в памяти. Первая загрузка качает ~0.5 ГБ и это долго."""
+        return self._model is not None
+
     @staticmethod
     def installed() -> bool:
         try:

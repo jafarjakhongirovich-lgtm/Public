@@ -27,6 +27,8 @@ from .voice import INSTALL_HINT, Transcriber
 log = logging.getLogger(__name__)
 
 TELEGRAM_MSG_LIMIT = 4096
+# Боты не могут скачивать файлы крупнее — ограничение Bot API.
+TELEGRAM_DOWNLOAD_LIMIT = 20 * 1024 * 1024
 
 GREETING = (
     "Jarvis на связи.\n\n"
@@ -227,6 +229,13 @@ class JarvisBot:
             await message.reply_text(INSTALL_HINT)
             return
 
+        if not self.transcriber.ready:
+            # Молчание на несколько минут выглядит как зависший бот.
+            await message.reply_text(
+                "Первое голосовое: скачиваю модель распознавания, это разово "
+                "и займёт пару минут. Дальше будет быстро."
+            )
+
         text = await self._transcribe(message)
         if not text:
             return
@@ -257,6 +266,16 @@ class JarvisBot:
 
     async def _save_incoming(self, message) -> Path:
         """Скачивает присланное в inbox под понятным именем."""
+        source = message.document or message.video or message.audio
+        size = getattr(source, "file_size", None) if source else None
+        if size and size > TELEGRAM_DOWNLOAD_LIMIT:
+            # Ограничение Telegram, обойти его на нашей стороне нельзя.
+            raise ValueError(
+                f"файл {size // 1024 // 1024} МБ, а боты в Telegram могут "
+                "скачивать не больше 20 МБ. Пришлите файл поменьше или "
+                "положите его в рабочую папку сами."
+            )
+
         inbox = self.config.workspace / "inbox"
         inbox.mkdir(parents=True, exist_ok=True)
 
@@ -265,7 +284,6 @@ class JarvisBot:
             tg_file = await message.photo[-1].get_file()
             name = f"photo_{message.message_id}.jpg"
         else:
-            source = message.document or message.video or message.audio
             tg_file = await source.get_file()
             name = getattr(source, "file_name", None) or f"file_{message.message_id}"
 
