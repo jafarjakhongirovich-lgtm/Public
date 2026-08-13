@@ -76,6 +76,25 @@ def _to_ogg_opus(mp3: bytes) -> bytes:
     return buffer.getvalue()
 
 
+def should_speak(text: str, *, asked_by_voice: bool, mode: str, limit: int) -> bool:
+    """Озвучивать ли этот ответ.
+
+    В режиме `auto` бот отвечает тем же способом, каким к нему обратились:
+    наговорили голосом — ответит голосом, напечатали — ответит текстом.
+    Код вслух не читается никогда: слушать его невозможно.
+    """
+    if mode == "never" or not text.strip():
+        return False
+    if "```" in text:
+        return False
+    if mode == "always":
+        return True
+    if not asked_by_voice:
+        return False
+    # Ответ во много раз длиннее лимита озвучки — слушать огрызок бессмысленно.
+    return len(text) <= limit * 3
+
+
 class Speaker:
     """Синтез речи. Молча отключается, если что-то не так — текст всё равно уйдёт."""
 

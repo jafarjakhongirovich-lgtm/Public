@@ -21,7 +21,7 @@ from telegram.ext import (
 from . import outbox
 from .agent import Reply, SessionRegistry
 from .config import Config
-from .speech import Speaker
+from .speech import Speaker, should_speak
 from .voice import INSTALL_HINT, Transcriber
 
 log = logging.getLogger(__name__)
@@ -31,10 +31,12 @@ TELEGRAM_MSG_LIMIT = 4096
 GREETING = (
     "Jarvis на связи.\n\n"
     "Пишите текстом или наговаривайте голосовые — понимаю и то, и другое.\n"
+    "Отвечаю так же, как спросили: на голосовое — голосом.\n"
     "Могу собрать презентацию, таблицу или документ и прислать файлом.\n"
     "Разговор помню, даже если бот перезапускался.\n\n"
     "/new — забыть всё и начать заново\n"
     "/stop — прервать текущую работу\n"
+    "/voice — когда отвечать голосом\n"
     "/id — показать ваш Telegram ID"
 )
 
@@ -87,6 +89,8 @@ class JarvisBot:
         self.speaker = (
             Speaker(config.tts_voice, config.tts_max_chars) if config.tts_voice else None
         )
+        # Режим озвучки на чат: auto | always | never. Меняется командой /voice.
+        self.voice_mode: dict[int, str] = {}
 
     # ---------- доступ ----------
 
@@ -132,6 +136,41 @@ class JarvisBot:
             "Остановил." if stopped else "Сейчас нечего останавливать."
         )
 
+    async def cmd_voice(self, update: Update, ctx: ContextTypes.DEFAULT_TYPE) -> None:
+        if not self._authorized(update):
+            return await self._deny(update)
+
+        chat_id = update.effective_chat.id
+        arg = (ctx.args[0].lower() if ctx.args else "").strip()
+        aliases = {
+            "auto": "auto", "авто": "auto",
+            "on": "always", "вкл": "always", "да": "always", "always": "always",
+            "off": "never", "выкл": "never", "нет": "never", "never": "never",
+        }
+
+        if arg not in aliases:
+            current = self.voice_mode.get(chat_id, self.config.tts_mode)
+            names = {
+                "auto": "по обстановке — голосом отвечаю на голосовые",
+                "always": "всегда голосом",
+                "never": "только текстом",
+            }
+            await update.effective_message.reply_text(
+                f"Сейчас: {names.get(current, current)}.\n\n"
+                "/voice авто — отвечать так же, как спросили\n"
+                "/voice вкл — озвучивать всё\n"
+                "/voice выкл — только текст"
+            )
+            return
+
+        self.voice_mode[chat_id] = aliases[arg]
+        replies = {
+            "auto": "Буду отвечать так же, как вы спросите.",
+            "always": "Буду озвучивать ответы.",
+            "never": "Только текст.",
+        }
+        await update.effective_message.reply_text(replies[aliases[arg]])
+
     # ---------- сообщения ----------
 
     async def on_text(self, update: Update, _ctx: ContextTypes.DEFAULT_TYPE) -> None:
@@ -161,7 +200,7 @@ class JarvisBot:
 
         # Показываем расшифровку: видно, что именно бот услышал.
         await message.reply_text(f"Услышал: {text}")
-        await self._run(message, text)
+        await self._run(message, text, by_voice=True)
 
     async def on_file(self, update: Update, _ctx: ContextTypes.DEFAULT_TYPE) -> None:
         """Пользователь прислал документ или фото — кладём в inbox и разбираем."""
@@ -222,7 +261,7 @@ class JarvisBot:
             return None
         return text
 
-    async def _run(self, message, prompt: str) -> None:
+    async def _run(self, message, prompt: str, *, by_voice: bool = False) -> None:
         """Общий путь для текста и расшифрованного голоса."""
         session = self.sessions.get(message.chat_id)
         workspace = self.config.workspace
@@ -235,12 +274,17 @@ class JarvisBot:
         )
 
         await self._send(message, reply)
-        await self._speak(message, reply.text)
+        await self._speak(message, reply.text, by_voice)
         await self._send_files(message, produced)
 
-    async def _speak(self, message, text: str) -> None:
-        """Присылает голосовую версию ответа вдобавок к тексту."""
-        if not text or self.speaker is None:
+    async def _speak(self, message, text: str, by_voice: bool) -> None:
+        """Присылает голосовую версию ответа, когда это уместно."""
+        if self.speaker is None:
+            return
+        mode = self.voice_mode.get(message.chat_id, self.config.tts_mode)
+        if not should_speak(
+            text, asked_by_voice=by_voice, mode=mode, limit=self.config.tts_max_chars
+        ):
             return
         if not Speaker.installed():
             log.warning("edge-tts не установлен — озвучка пропущена")
@@ -296,6 +340,7 @@ class JarvisBot:
         app.add_handler(CommandHandler("new", self.cmd_new))
         app.add_handler(CommandHandler("stop", self.cmd_stop))
         app.add_handler(CommandHandler("id", self.cmd_id))
+        app.add_handler(CommandHandler("voice", self.cmd_voice))
         app.add_handler(MessageHandler(filters.VOICE, self.on_voice))
         app.add_handler(
             MessageHandler(filters.Document.ALL | filters.PHOTO | filters.AUDIO, self.on_file)
