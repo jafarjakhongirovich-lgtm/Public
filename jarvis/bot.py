@@ -9,7 +9,7 @@ import tempfile
 from pathlib import Path
 
 from telegram import Update
-from telegram.constants import ChatAction
+from telegram.constants import ChatAction, ChatType
 from telegram.ext import (
     Application,
     CommandHandler,
@@ -91,24 +91,57 @@ class JarvisBot:
         )
         # Режим озвучки на чат: auto | always | never. Меняется командой /voice.
         self.voice_mode: dict[int, str] = {}
+        # Про кого из посторонних уже доложили владельцу.
+        self._reported: set[int] = set()
 
     # ---------- доступ ----------
 
     def _authorized(self, update: Update) -> bool:
+        """Владелец, и только в личной переписке.
+
+        Групповой чат отсекаем отдельно: там владельца могли добавить без его
+        ведома, и любой участник видел бы ответы бота.
+        """
         user = update.effective_user
-        return user is not None and user.id in self.config.owner_ids
+        chat = update.effective_chat
+        if user is None or chat is None:
+            return False
+        if chat.type != ChatType.PRIVATE:
+            return False
+        return user.id in self.config.owner_ids
 
     async def _deny(self, update: Update) -> None:
+        """Посторонним не отвечаем ничего.
+
+        Ответ — это подтверждение, что бот жив, и повод продолжать. Молчание
+        не даёт ни того, ни другого. Владельцу сообщаем один раз про каждого,
+        чтобы он знал, что кто-то стучится.
+        """
         user = update.effective_user
-        log.warning("Отклонён доступ: id=%s username=%s", getattr(user, "id", "?"), getattr(user, "username", "?"))
-        if update.effective_message:
-            await update.effective_message.reply_text(
-                "Этот бот работает на личной подписке владельца и отвечает только ему."
-            )
+        chat = update.effective_chat
+        user_id = getattr(user, "id", None)
+        log.warning(
+            "Отклонён доступ: id=%s username=%s чат=%s",
+            user_id,
+            getattr(user, "username", "?"),
+            getattr(chat, "type", "?"),
+        )
+        if user_id is None or user_id in self._reported:
+            return
+        self._reported.add(user_id)
+        name = getattr(user, "full_name", None) or getattr(user, "username", "") or "без имени"
+        for owner in self.config.owner_ids:
+            with contextlib.suppress(Exception):
+                await update.get_bot().send_message(
+                    owner,
+                    f"К боту постучался посторонний: {name} (ID {user_id}). "
+                    "Я ему не ответил.",
+                )
 
     # ---------- команды ----------
 
     async def cmd_id(self, update: Update, _ctx: ContextTypes.DEFAULT_TYPE) -> None:
+        """Единственная команда для всех: без неё владелец не узнает свой ID."""
         user = update.effective_user
         if user and update.effective_message:
             await update.effective_message.reply_text(f"Ваш Telegram ID: {user.id}")

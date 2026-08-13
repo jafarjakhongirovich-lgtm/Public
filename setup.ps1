@@ -16,7 +16,7 @@ try { [Net.ServicePointManager]::SecurityProtocol = [Net.SecurityProtocolType]::
 Set-Location -LiteralPath $PSScriptRoot
 
 function Say([string]$text, [string]$color = 'Gray') { Write-Host $text -ForegroundColor $color }
-function Step([int]$n, [string]$text) { Write-Host ''; Say ">>> Шаг $n из 6. $text" 'Cyan' }
+function Step([int]$n, [string]$text) { Write-Host ''; Say ">>> Шаг $n из 7. $text" 'Cyan' }
 function Ok([string]$text) { Say "    Готово: $text" 'Green' }
 
 function Stop-With([string]$problem, [string]$howto) {
@@ -193,17 +193,45 @@ TELEGRAM_BOT_TOKEN=$token
 JARVIS_OWNER_IDS=$ownerId
 JARVIS_WORKSPACE=./workspace
 JARVIS_PERMISSION_MODE=acceptEdits
-JARVIS_ALLOWED_TOOLS=Read,Write,Edit,Glob,Grep,WebSearch,WebFetch
+JARVIS_ALLOWED_TOOLS=Read,Write,Edit,Glob,Grep,Bash,WebSearch,WebFetch
 JARVIS_SHOW_TOOLS=1
+JARVIS_MEMORY_DAYS=0
+JARVIS_WHISPER_MODEL=small
+JARVIS_TTS_VOICE=ru-RU-DmitryNeural
+JARVIS_TTS_MODE=auto
+JARVIS_EXTRA_DIRS=
 "@
     # ASCII, чтобы Windows не подмешал в начало файла невидимые символы.
     Set-Content -LiteralPath '.env' -Value $env_text -Encoding ASCII
     Ok 'Настройки сохранены'
 }
 
-# --- Шаг 6: запуск ------------------------------------------------------------
+# --- Шаг 6: автозапуск --------------------------------------------------------
 
-Step 6 'Запускаю Jarvis'
+Step 6 'Запуск вместе с Windows'
+
+$startupLink = Join-Path ([Environment]::GetFolderPath('Startup')) 'Jarvis.lnk'
+if (Test-Path -LiteralPath $startupLink) {
+    Ok 'Автозапуск уже настроен'
+} else {
+    $answer = Read-Host '    Запускать Jarvis сам при включении компьютера? (д/н)'
+    if ($answer -match '^[дdyу]') {
+        $shell = New-Object -ComObject WScript.Shell
+        $shortcut = $shell.CreateShortcut($startupLink)
+        $shortcut.TargetPath       = Join-Path $PSScriptRoot 'start.bat'
+        $shortcut.WorkingDirectory = $PSScriptRoot
+        $shortcut.WindowStyle      = 7
+        $shortcut.Description      = 'Jarvis - личный ассистент в Telegram'
+        $shortcut.Save()
+        Ok 'Будет запускаться сам при входе в Windows'
+    } else {
+        Say '    Хорошо. Включить потом - autostart.bat' 'DarkGray'
+    }
+}
+
+# --- Шаг 7: запуск ------------------------------------------------------------
+
+Step 7 'Запускаю Jarvis'
 
 Write-Host ''
 Say '=====================================' 'Green'

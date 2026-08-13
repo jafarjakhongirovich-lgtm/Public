@@ -76,7 +76,7 @@ class Config:
     persona: str = field(repr=False, default="")
 
     @classmethod
-    def from_env(cls, env_file: Path | None = None) -> "Config":
+    def from_env(cls, env_file: Path | None = None) -> Config:
         _load_dotenv(env_file or Path(".env"))
 
         token = os.environ.get("TELEGRAM_BOT_TOKEN", "").strip()

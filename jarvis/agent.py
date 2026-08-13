@@ -55,7 +55,7 @@ def build_options(config: Config, resume: str | None = None) -> ClaudeAgentOptio
         # случайного проекта, в папке которого запущен бот.
         "setting_sources": ["user"],
         # Предохранитель: необратимые команды не пройдут (см. guard.py).
-        "hooks": make_hooks(),
+        "hooks": make_hooks([config.workspace, *config.extra_dirs]),
     }
     if config.extra_dirs:
         # Реальные папки компьютера — Документы, Загрузки и что ещё разрешили.
@@ -139,7 +139,11 @@ class JarvisSession:
                 if session_id and self._store:
                     self._store.put(self._chat_id, session_id)
 
-        return Reply(text="\n".join(c for c in chunks if c).strip(), tools_used=tools, cost_usd=cost)
+        return Reply(
+            text="\n".join(c for c in chunks if c).strip(),
+            tools_used=tools,
+            cost_usd=cost,
+        )
 
     async def interrupt(self) -> bool:
         """Прерывает текущую работу агента. True — если было что прерывать."""
