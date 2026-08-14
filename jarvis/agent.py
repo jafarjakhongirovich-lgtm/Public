@@ -54,6 +54,8 @@ def build_options(config: Config, resume: str | None = None) -> ClaudeAgentOptio
         # Подхватываем личные скиллы и память из ~/.claude, но не настройки
         # случайного проекта, в папке которого запущен бот.
         "setting_sources": ["user"],
+        # Приёмник сообщений от CLI. По умолчанию 1 МБ — мало.
+        "max_buffer_size": config.max_buffer_mb * 1024 * 1024,
         # Предохранитель: необратимые команды не пройдут (см. guard.py).
         "hooks": make_hooks([config.workspace, *config.extra_dirs]),
     }

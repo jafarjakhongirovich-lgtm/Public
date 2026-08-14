@@ -43,6 +43,45 @@ GREETING = (
 )
 
 
+# Технические сбои переводим на человеческий: пользователю нужно знать,
+# что случилось и что делать, а не внутреннее сообщение библиотеки.
+ERROR_HINTS: list[tuple[str, str]] = [
+    (
+        "exceeded maximum buffer size",
+        "Я взял слишком большой кусок данных за раз — обычно это большой файл "
+        "или картинка, прочитанные целиком. Попробуйте ещё раз: попросите "
+        "разобрать файл по частям или пришлите поменьше.",
+    ),
+    (
+        "CLINotFoundError",
+        "Не нахожу Claude Code. Похоже, он не установлен или слетел — "
+        "запустите install.bat заново.",
+    ),
+    (
+        "authentication",
+        "Не могу войти в ваш аккаунт Claude. Откройте чёрное окно и выполните "
+        "claude auth login.",
+    ),
+    (
+        "rate limit",
+        "Упёрлись в ограничение подписки. Подождите немного и повторите.",
+    ),
+    (
+        "ProcessError",
+        "Claude Code завершился с ошибкой. Попробуйте ещё раз; если повторится — "
+        "перезапустите бота через start.bat.",
+    ),
+]
+
+
+def humanize_error(text: str) -> str:
+    """Понятное объяснение сбоя, если оно у нас есть."""
+    for marker, hint in ERROR_HINTS:
+        if marker.lower() in text.lower():
+            return hint
+    return f"Что-то пошло не так: {text[:300]}"
+
+
 def split_message(text: str, limit: int = TELEGRAM_MSG_LIMIT) -> list[str]:
     """Режет длинный ответ на части по границам строк, не ломая слова."""
     if len(text) <= limit:
@@ -381,7 +420,7 @@ class JarvisBot:
 
     async def _send(self, message, reply: Reply) -> None:
         if reply.error:
-            await message.reply_text(f"Сбой: {reply.error}")
+            await message.reply_text(humanize_error(reply.error))
             return
 
         # Пустой текст — нормально, когда весь ответ это файл: он придёт следом.

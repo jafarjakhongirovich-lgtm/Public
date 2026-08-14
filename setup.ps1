@@ -200,6 +200,7 @@ JARVIS_WHISPER_MODEL=small
 JARVIS_TTS_VOICE=ru-RU-DmitryNeural
 JARVIS_TTS_MODE=always
 JARVIS_EXTRA_DIRS=
+JARVIS_MAX_BUFFER_MB=64
 "@
     # ASCII, чтобы Windows не подмешал в начало файла невидимые символы.
     Set-Content -LiteralPath '.env' -Value $env_text -Encoding ASCII

@@ -72,6 +72,7 @@ class Config:
     tts_mode: str
     max_files_per_reply: int
     memory_days: float
+    max_buffer_mb: int
     extra_dirs: list[Path]
     persona: str = field(repr=False, default="")
 
@@ -127,6 +128,9 @@ class Config:
             max_files_per_reply=int(os.environ.get("JARVIS_MAX_FILES", "5")),
             # 0 = помнить бессрочно. Число = забывать разговор через столько дней.
             memory_days=float(os.environ.get("JARVIS_MEMORY_DAYS", "0")),
+            # Штатного мегабайта не хватает: одна большая картинка или файл,
+            # прочитанный целиком, разом переполняют приёмник.
+            max_buffer_mb=int(os.environ.get("JARVIS_MAX_BUFFER_MB", "64")),
             extra_dirs=_dirs(os.environ.get("JARVIS_EXTRA_DIRS", "")),
             persona=os.environ.get("JARVIS_PERSONA", DEFAULT_PERSONA),
         )
@@ -170,6 +174,9 @@ DEFAULT_PERSONA = """\
   файлом с понятным именем. Не пересказывай его содержимое текстом и не пиши
   «файл сохранён по пути…»: человек получит его следующим сообщением.
 - Черновики и промежуточные файлы держи в подпапке `tmp`, её бот не отправляет.
+- Большие файлы не читай целиком: сначала посмотри размер, потом бери нужные
+  куски через grep или частями. Файл на десятки мегабайт, загруженный разом,
+  переполняет канал связи и обрывает ответ.
 
 Память:
 - Разговор продолжается бессрочно, но старые сообщения со временем сжимаются
