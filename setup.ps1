@@ -136,6 +136,45 @@ if (Test-Path -LiteralPath '.env') {
         Ok 'Оставляю прежние настройки'
         $skipConfig = $true
     }
+} else {
+    # Настроек нет — возможно, это обновление, и всё нажитое лежит в прошлой
+    # папке. Без переноса Jarvis потерял бы память и пришлось бы вводить токен.
+    $previous = @()
+    foreach ($root in @($HOME, (Join-Path $HOME 'Downloads'), (Join-Path $HOME 'Desktop'))) {
+        if (-not (Test-Path -LiteralPath $root)) { continue }
+        try {
+            Get-ChildItem -LiteralPath $root -Directory -Depth 2 -ErrorAction SilentlyContinue |
+                ForEach-Object {
+                    if ((Test-Path -LiteralPath (Join-Path $_.FullName '.env')) -and
+                        (Test-Path -LiteralPath (Join-Path $_.FullName 'jarvis\__main__.py')) -and
+                        ($_.FullName -ne $PSScriptRoot)) { $previous += $_ }
+                }
+        } catch {}
+    }
+    $previous = $previous | Sort-Object LastWriteTime -Descending | Select-Object -First 1
+
+    if ($previous) {
+        Write-Host ''
+        Say "    Нашёл прошлую установку: $($previous.FullName)" 'Yellow'
+        $take = Read-Host '    Перенести оттуда настройки и память? (д/н)'
+        if ($take -match '^[дdyу]') {
+            Copy-Item -LiteralPath (Join-Path $previous.FullName '.env') `
+                      -Destination (Join-Path $PSScriptRoot '.env') -Force
+            $oldSessions = Join-Path $previous.FullName 'sessions.json'
+            if (Test-Path -LiteralPath $oldSessions) {
+                Copy-Item -LiteralPath $oldSessions -Destination $PSScriptRoot -Force
+            }
+            $oldWs = Join-Path $previous.FullName 'workspace'
+            if (Test-Path -LiteralPath $oldWs) {
+                New-Item -ItemType Directory -Path (Join-Path $PSScriptRoot 'workspace') -Force | Out-Null
+                Copy-Item -LiteralPath (Join-Path $oldWs '*') `
+                          -Destination (Join-Path $PSScriptRoot 'workspace') `
+                          -Recurse -Force -ErrorAction SilentlyContinue
+            }
+            Ok 'Настройки, память и заметки перенесены'
+            $skipConfig = $true
+        }
+    }
 }
 
 if (-not $skipConfig) {
