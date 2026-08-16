@@ -896,7 +896,7 @@ const PRODUCTS = [
     id:'kurt-cube', photo:null,
     name:'Курт кубиками',
     sub:'классический, 30 г',
-    form:'flow',
+    form:'flow', hang:'round', wave:false,
     title:'КУРТ',
     weight:'30 г',
     size:{ w:1.90, h:2.75, d:0.44, r:0.16 },
@@ -912,23 +912,23 @@ const PRODUCTS = [
     id:'kurt-ball', photo:null,
     name:'Курт шариками',
     sub:'классический, круглый',
-    form:'flow',
+    form:'flow', hang:'round', wave:false,
     title:'КУРТ',
     weight:'',
     size:{ w:2.05, h:2.60, d:0.46, r:0.16 },
     win:{ t:0.40, b:0.80 },
-    piece:{ kind:'ball', s:0.28, cols:4, rows:3, sx:0.33, sy:0.31, color:'#f1eadb' },
+    piece:{ kind:'ball', s:0.46, cols:2, rows:2, sx:0.50, sy:0.50, color:'#f1eadb' },
     accent:'#f5d90a', base:'#f6dc14', base2:'#d4ac00', ink:'#15130a',
     fly:'ball', flyColor:'#f3efe4',
-    desc:'Курт классической круглой формы. Двенадцать шариков в пачке — тот же вкус, привычный вид.',
-    tags:['Кисломолочный','Круглый','12 шт'],
+    desc:'Курт классической круглой формы. Четыре шарика в пачке — тот же вкус, привычный вид.',
+    tags:['Кисломолочный','Круглый','4 шт'],
     spec:{ weight:'уточняется', comp:'Молоко, йодированная соль', pack:'Флоу-пак', life:'3 месяца', box:'уточняется' },
   },
   {
     id:'kurt-stick', photo:null,
     name:'Курт палочками',
     sub:'классический, батончики',
-    form:'flow',
+    form:'flow', hang:'round', wave:false,
     title:'КУРТ',
     weight:'',
     size:{ w:2.00, h:2.55, d:0.44, r:0.16 },
@@ -943,30 +943,30 @@ const PRODUCTS = [
   {
     id:'sticks', photo:null,
     name:'Сырные палочки',
-    sub:'тонкие, солёные',
-    form:'flow',
+    sub:'солёные, тянущиеся',
+    form:'flow', hang:'slot', wave:true,
     title:'СЫРНЫЕ', titleSub:'ПАЛОЧКИ',
     weight:'',
-    size:{ w:1.60, h:3.10, d:0.36, r:0.14 },
-    win:{ t:0.38, b:0.80 },
-    piece:{ kind:'thin', s:1.15, cols:9, rows:1, sx:0.105, sy:0, color:'#efe0b6' },
-    accent:'#4ec8dd', base:'#4ec8dd', base2:'#2589a0', ink:'#0c2a31',
+    size:{ w:1.72, h:3.05, d:0.40, r:0.14 },
+    win:{ t:0.40, b:0.86 },
+    piece:{ kind:'thin', s:1.35, cols:6, rows:1, sx:0.20, sy:0, color:'#ecdcae' },
+    accent:'#ecdf1c', base:'#eddf1a', base2:'#c9ac00', ink:'#14130a',
     fly:'thin', flyColor:'#e8d9a8',
-    desc:'Тонкие сырные палочки в бирюзовой пачке. Солёные, тянущиеся — берут к чаю и к пиву.',
-    tags:['Сыр чечил','Солёные','Тянущиеся'],
+    desc:'Сырные палочки чечил: плотные, солёные, тянутся нитями. Шесть штук в пачке — берут к чаю и к пиву.',
+    tags:['Сыр чечил','Солёные','6 штук'],
     spec:{ weight:'уточняется', comp:'Сыр, соль', pack:'Флоу-пак с подвесом', life:'уточняется', box:'уточняется' },
   },
   {
     id:'braid', photo:null,
     name:'Сырная косичка',
     sub:'плетёный чечил',
-    form:'flow',
+    form:'flow', hang:'round', wave:true,
     title:'СЫРНАЯ', titleSub:'КОСИЧКА',
     weight:'',
-    size:{ w:1.80, h:2.95, d:0.42, r:0.14 },
-    win:{ t:0.36, b:0.78 },
-    piece:{ kind:'braid', s:1.0, cols:2, rows:1, sx:0.46, sy:0, color:'#e8d5a6' },
-    accent:'#8fd14f', base:'#8ed24e', base2:'#5aa02a', ink:'#12290a',
+    size:{ w:1.72, h:2.95, d:0.44, r:0.14 },
+    win:{ t:0.34, b:0.84 },
+    piece:{ kind:'braid', s:1.0, cols:1, rows:1, sx:0, sy:0, color:'#e8d3a0' },
+    accent:'#ecdf1c', base:'#eddf1a', base2:'#c9ac00', ink:'#14130a',
     fly:'braid', flyColor:'#e9d7a2',
     desc:'Классическая плетёная косичка из сыра чечил. Плотная, солёная, разбирается на нити — самый «долгий» снек из линейки.',
     tags:['Сыр чечил','Плетёная','Солёная'],
@@ -1075,8 +1075,9 @@ function drawFlowPrint(g, p, W, H){
   filmFill(g, p, 0, 0, W, winT + H * .06);
   g.restore();
 
-  // отверстие-подвес
-  drawHangHole(g, W / 2, y(.052), 54, 20);
+  // отверстие-подвес: у сыра широкий еврослот, у курта круглое
+  if(p.hang === 'slot') drawEuroSlot(g, W / 2, y(.062), W * 0.30, H * 0.026);
+  else                  drawRoundHole(g, W / 2, y(.055), W * 0.028);
 
   // логотип и название
   drawScriptLogo(g, p, W / 2, y(.175), W * .72);
@@ -1093,6 +1094,24 @@ function drawFlowPrint(g, p, W, H){
   finePrint(g, p.ink, W * .06, printBase - H * .055, W * .26, 5);
   finePrint(g, p.ink, W * .37, printBase - H * .055, W * .26, 5);
   drawBarcode(g, W * .70, printBase - H * .055, W * .24, H * .042);
+
+  // белая волна по краям окна — как на сырных пачках
+  if(p.wave){
+    g.fillStyle = '#ffffff';
+    g.beginPath();
+    g.moveTo(0, winT - H * .012);
+    g.bezierCurveTo(W * .34, winT + H * .052, W * .66, winT - H * .048, W, winT + H * .028);
+    g.lineTo(W, winT + H * .058);
+    g.bezierCurveTo(W * .66, winT - H * .018, W * .34, winT + H * .082, 0, winT + H * .018);
+    g.closePath(); g.fill();
+
+    g.beginPath();
+    g.moveTo(0, winB - H * .022);
+    g.bezierCurveTo(W * .34, winB - H * .072, W * .66, winB + H * .022, W, winB - H * .052);
+    g.lineTo(W, winB - H * .022);
+    g.bezierCurveTo(W * .66, winB + H * .052, W * .34, winB - H * .042, 0, winB + H * .008);
+    g.closePath(); g.fill();
+  }
 
   /* --- печатный низ: лента NATURAL PRODUCT + подвал --- */
   g.save();
@@ -1234,11 +1253,22 @@ function drawFlourish(g, ink, cx, cy, r){
   g.restore();
 }
 
-/* Отверстие-подвес: вырезаем печать насквозь */
-function drawHangHole(g, cx, cy, w, h){
+/* Круглое отверстие-подвес */
+function drawRoundHole(g, cx, cy, r){
+  g.save();
+  g.globalCompositeOperation = 'destination-out';
+  g.beginPath(); g.arc(cx, cy, r, 0, Math.PI * 2); g.fill();
+  g.restore();
+}
+
+/* Еврослот: прорезь с круглым расширением сверху */
+function drawEuroSlot(g, cx, cy, w, h){
   g.save();
   g.globalCompositeOperation = 'destination-out';
   roundRectPath(g, cx - w / 2, cy - h / 2, w, h, h / 2);
+  g.fill();
+  g.beginPath();
+  g.arc(cx, cy - h * 0.30, h * 0.95, 0, Math.PI * 2);
   g.fill();
   g.restore();
 }
@@ -1517,7 +1547,7 @@ function pieceGeometry(kind, s){
   }
   if(kind === 'ball')  return new THREE.SphereGeometry(s * 0.5, 20, 14);
   if(kind === 'baton') return new THREE.CapsuleGeometry(s * 0.20, s * 0.62, 4, 14);
-  if(kind === 'thin')  return new THREE.CapsuleGeometry(0.035, s * 1.5, 3, 10);
+  if(kind === 'thin')  return new THREE.CapsuleGeometry(0.072, s * 0.86, 4, 14);
   if(kind === 'braid') return braidGeometry();
   return new THREE.SphereGeometry(s * 0.5, 16, 12);
 }
@@ -1529,10 +1559,10 @@ function braidGeometry(){
     const pts = [];
     for(let i = 0; i <= 40; i++){
       const t = i / 40;
-      const a = t * Math.PI * 4 + k * Math.PI * 2 / 3;
-      pts.push(new THREE.Vector3(Math.cos(a) * 0.105, (t - 0.5) * 1.5, Math.sin(a) * 0.06));
+      const a = t * Math.PI * 3.4 + k * Math.PI * 2 / 3;
+      pts.push(new THREE.Vector3(Math.cos(a) * 0.155, (t - 0.5) * 1.5, Math.sin(a) * 0.075));
     }
-    strands.push(new THREE.TubeGeometry(new THREE.CatmullRomCurve3(pts), 64, 0.078, 10, false));
+    strands.push(new THREE.TubeGeometry(new THREE.CatmullRomCurve3(pts), 70, 0.105, 12, false));
   }
   // сводим три пряди в одну геометрию
   const merged = strands[0];
