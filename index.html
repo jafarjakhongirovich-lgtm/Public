@@ -297,13 +297,46 @@ h3{ font-size:clamp(17px,2vw,21px); letter-spacing:-.005em; font-weight:600; lin
 /* Левая колонка — намеренно пустая: в ней «стоит» 3D-пачка */
 #products{ min-height:100svh; display:grid; align-content:center; }
 #products .wrap{
-  display:grid; grid-template-columns:.82fr 1.18fr; gap:clamp(24px,5vw,70px); align-items:center;
+  display:grid; grid-template-columns:.82fr 1.18fr; gap:clamp(24px,5vw,70px); align-items:start;
 }
-.prod-stage{ min-height:64vh; }
+/* колонка липкая: список товаров длинный, а фото должно оставаться в кадре */
+.prod-stage{
+  position:sticky; top:clamp(84px,12vh,120px);
+  min-height:60vh; display:grid; place-items:center;
+}
+
+/* Настоящее фото товара. Пока файла нет — блок скрыт и в колонке
+   остаётся 3D-пачка. */
+.prod-photo{
+  display:none; width:100%; max-width:420px; border-radius:20px;
+  box-shadow:0 40px 90px rgba(0,0,0,.6), 0 0 0 1px rgba(255,255,255,.07);
+  animation:photoIn .7s var(--ease) both;
+}
+.prod-photo.on{ display:block; }
+@keyframes photoIn{ from{ opacity:0; transform:translateY(18px) scale(.97) } to{ opacity:1; transform:none } }
+@media (prefers-reduced-motion: reduce){ .prod-photo{ animation:none } }
+
+/* Галерея фотографий продукции */
+#gallery{ display:none; }
+#gallery.on{ display:block; }
+.gal{ display:grid; grid-template-columns:repeat(3,1fr); gap:20px; margin-top:56px; }
+@media (max-width:900px){ .gal{ grid-template-columns:repeat(2,1fr); } }
+@media (max-width:560px){ .gal{ grid-template-columns:1fr; } }
+.gal figure{
+  margin:0; border:1px solid var(--line-soft); border-radius:var(--r); overflow:hidden;
+  background:rgba(13,12,10,.7); backdrop-filter:blur(10px);
+  transition:border-color .4s var(--ease), transform .4s var(--ease);
+}
+.gal figure:hover{ border-color:color-mix(in srgb, var(--accent) 45%, transparent); transform:translateY(-4px); }
+.gal img{ width:100%; aspect-ratio:3/4; object-fit:cover; display:block; }
+.gal figcaption{ padding:16px 20px 20px; }
+.gal b{ display:block; font-family:var(--display); font-weight:600; font-size:16px; }
+.gal span{ font-size:13px; color:var(--dim); }
 .prod-panel{ display:grid; gap:30px; }
 @media (max-width:980px){
   #products .wrap{ grid-template-columns:1fr; }
-  .prod-stage{ min-height:44vh; }
+  .prod-stage{ position:static; min-height:auto; margin-bottom:8px; }
+  .prod-photo{ max-width:320px; }
 }
 
 .swatches{ display:grid; gap:10px; }
@@ -559,8 +592,10 @@ footer{
   <!-- ============ Продукция ============ -->
   <section id="products" data-pose="products">
     <div class="wrap">
-      <!-- место для 3D-пачки -->
-      <div class="prod-stage" aria-hidden="true"></div>
+      <!-- фото товара, если оно загружено; иначе тут стоит 3D-пачка -->
+      <div class="prod-stage">
+        <img id="prodPhoto" class="prod-photo" alt="" />
+      </div>
 
       <div class="prod-panel">
         <div>
@@ -589,6 +624,15 @@ footer{
           <a href="#wholesale" class="btn primary" style="justify-self:start">Заказать оптом</a>
         </div>
       </div>
+    </div>
+  </section>
+
+  <!-- ============ Галерея фотографий ============ -->
+  <section id="gallery" data-pose="process">
+    <div class="wrap">
+      <p class="eyebrow rv">Продукция</p>
+      <h2 class="rv">Как выглядит на полке</h2>
+      <div class="gal" id="galGrid"></div>
     </div>
   </section>
 
@@ -1968,6 +2012,18 @@ addEventListener('scroll', onScroll, { passive:true });
 
 /* Пачка привязана к секциям, а не к проценту прокрутки: так позиция не
    разъезжается при любых правках контента. */
+/* Одно место, где решается видимость 3D-сцены:
+   на узких экранах она не должна мешать тексту, а в секции продукции
+   уступает место настоящему фото, если оно загружено. */
+function updateStageOpacity(){
+  if(!stageEl) return;
+  const hasPhoto = photoUrl.has(PRODUCTS[activeIndex].id);
+  let o = 1;
+  if(poseName === 'products' && hasPhoto) o = 0.22;
+  else if(isNarrow() && poseName !== 'hero') o = 0.45;
+  stageEl.style.opacity = String(o);
+}
+
 const poseRatios = new Map();
 const poseIO = new IntersectionObserver((entries) => {
   entries.forEach(en => poseRatios.set(en.target, en.isIntersecting ? en.intersectionRatio : 0));
@@ -1980,8 +2036,7 @@ const poseIO = new IntersectionObserver((entries) => {
   if(name === poseName) return;
   poseName = name;
 
-  // на узких экранах приглушаем сцену за текстом, чтобы он читался
-  if(stageEl) stageEl.style.opacity = (isNarrow() && name !== 'hero') ? '0.45' : '1';
+  updateStageOpacity();
 }, { threshold:[0, .15, .3, .5, .75, 1] });
 document.querySelectorAll('[data-pose]').forEach(el => poseIO.observe(el));
 
@@ -2065,6 +2120,65 @@ const SOCIAL_ICONS = {
   navBtn.href = 'tel:' + CONTACTS.phoneRaw;
 })();
 
+/* ============================================================
+   Фотографии товара
+   ------------------------------------------------------------
+   Файл assets/<id>.jpg (или .png, .jpeg, .webp) подхватывается сам.
+   Пока фото нет, в колонке остаётся 3D-пачка, а галерея скрыта.
+   ============================================================ */
+const photoUrl = new Map();          // id продукта → найденный файл
+let photosChecked = 0;
+
+function probePhoto(p, done){
+  const exts = ['jpg', 'png', 'jpeg', 'webp'];
+  const candidates = p.photo ? [p.photo] : exts.map(e => `assets/${p.id}.${e}`);
+  let i = 0;
+  const next = () => {
+    if(i >= candidates.length){ done(null); return; }
+    const url = candidates[i++];
+    const img = new Image();
+    img.onload  = () => done(url);
+    img.onerror = next;
+    img.src = url;
+  };
+  next();
+}
+
+PRODUCTS.forEach(p => probePhoto(p, (url) => {
+  if(url) photoUrl.set(p.id, url);
+  if(++photosChecked === PRODUCTS.length){
+    buildGallery();
+    showPhoto(PRODUCTS[activeIndex]);
+  }
+}));
+
+/* Фото в колонке продукта. Есть фото — 3D-пачка уходит на второй план. */
+function showPhoto(p){
+  const img = document.getElementById('prodPhoto');
+  const url = photoUrl.get(p.id);
+  if(url){
+    img.src = url;
+    img.alt = `${p.name} — упаковка Machos.uz`;
+    img.classList.add('on');
+  }else{
+    img.classList.remove('on');
+    img.removeAttribute('src');
+  }
+  updateStageOpacity();
+}
+
+function buildGallery(){
+  const found = PRODUCTS.filter(p => photoUrl.has(p.id));
+  if(!found.length) return;                     // нет файлов — секции нет
+  document.getElementById('galGrid').innerHTML = found.map(p => `
+    <figure class="rv">
+      <img src="${photoUrl.get(p.id)}" alt="${p.name} — упаковка Machos.uz" loading="lazy" />
+      <figcaption><b>${p.name}</b><span>${p.sub}</span></figcaption>
+    </figure>`).join('');
+  document.getElementById('gallery').classList.add('on');
+  document.querySelectorAll('#gallery .rv').forEach(n => io.observe(n));
+}
+
 /* карточки продуктов */
 const swWrap = document.getElementById('swatches');
 PRODUCTS.forEach((p, i) => {
@@ -2098,6 +2212,7 @@ function selectProduct(i){
 
   document.documentElement.style.setProperty('--accent', p.accent);
 
+  showPhoto(p);
   if(renderer) buildPack(p);
 }
 
