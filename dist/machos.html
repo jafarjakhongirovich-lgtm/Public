@@ -602,7 +602,7 @@ footer{
           <p class="eyebrow rv">Продукция</p>
           <h2 class="rv">Вся линейка Machos</h2>
           <p class="lead rv d1" style="margin-top:18px">
-            Выберите продукт — пачка в сцене сменится вместе с ним.
+            Выберите продукт — фото упаковки сменится вместе с ним.
           </p>
         </div>
 
@@ -628,10 +628,10 @@ footer{
   </section>
 
   <!-- ============ Галерея фотографий ============ -->
-  <section id="gallery" data-pose="process">
+  <section id="gallery" data-pose="gallery">
     <div class="wrap">
       <p class="eyebrow rv">Продукция</p>
-      <h2 class="rv">Как выглядит на полке</h2>
+      <h2 class="rv">Вся продукция<br>в упаковке</h2>
       <div class="gal" id="galGrid"></div>
     </div>
   </section>
@@ -1035,6 +1035,14 @@ const CONTACTS = {
     { name:'Telegram',  url:'' },
   ],
 };
+
+/* Упаковки, которых нет в списке выбора, но они есть в продаже —
+   показываем их в галерее. Файл лежит в assets/. */
+const EXTRA_PHOTOS = [
+  { file:'assets/sticks-cyan.jpg',  name:'Сырные палочки',  sub:'тонкие, бирюзовая упаковка' },
+  { file:'assets/kurt-ball-12.jpg', name:'Курт шариками',   sub:'большая пачка, 12 шт' },
+  { file:'assets/braid-green.jpg',  name:'Сырная косичка',  sub:'зелёная упаковка' },
+];
 
 const TICKER = ['Семечки Pista Tuzli','Курт кубиками','Курт шариками','Курт палочками','Сырные палочки','Сырная косичка','Оптом по Узбекистану','Machos.uz'];
 
@@ -1908,6 +1916,7 @@ const POSES = {
   about:     { x:-2.30, y: 0.05, rot: 0.62, scale:0.70 },
   products:  { x:-2.28, y: 0.00, rot:-0.26, scale:0.86 },
   process:   { x: 2.30, y: 0.05, rot: 0.60, scale:0.70 },
+  gallery:   { x: 2.70, y: 0.10, rot: 0.70, scale:0.52 },
   wholesale: { x:-2.25, y: 0.00, rot:-0.58, scale:0.72 },
   contacts:  { x: 2.15, y: 0.00, rot: 0.48, scale:0.74 },
   footer:    { x: 0.00, y:-0.25, rot: 0.30, scale:0.60 },
@@ -1918,6 +1927,7 @@ const POSES_NARROW = {
   about:     { x:0, y: 0.30, rot: 0.45, scale:0.46 },
   products:  { x:0, y: 1.60, rot:-0.20, scale:0.62 },
   process:   { x:0, y: 0.30, rot: 0.45, scale:0.46 },
+  gallery:   { x:0, y: 0.30, rot: 0.50, scale:0.40 },
   wholesale: { x:0, y: 0.30, rot:-0.40, scale:0.46 },
   contacts:  { x:0, y: 0.40, rot: 0.40, scale:0.46 },
   footer:    { x:0, y: 0.00, rot: 0.25, scale:0.42 },
@@ -2157,7 +2167,8 @@ function updateStageOpacity(){
   if(!stageEl) return;
   const hasPhoto = photoUrl.has(PRODUCTS[activeIndex].id);
   let o = 1;
-  if(poseName === 'products' && hasPhoto) o = 0.22;
+  if(poseName === 'gallery') o = 0.14;             // галерея живёт фотографиями
+  else if(poseName === 'products' && hasPhoto) o = 0.22;
   else if(isNarrow() && poseName !== 'hero') o = 0.45;
   stageEl.style.opacity = String(o);
 }
@@ -2306,12 +2317,15 @@ function showPhoto(p){
 }
 
 function buildGallery(){
-  const found = PRODUCTS.filter(p => photoUrl.has(p.id));
-  if(!found.length) return;                     // нет файлов — секции нет
-  document.getElementById('galGrid').innerHTML = found.map(p => `
+  const cards = PRODUCTS
+    .filter(p => photoUrl.has(p.id))
+    .map(p => ({ file: photoUrl.get(p.id), name: p.name, sub: p.sub }))
+    .concat(EXTRA_PHOTOS);
+  if(!cards.length) return;                     // нет файлов — секции нет
+  document.getElementById('galGrid').innerHTML = cards.map(c => `
     <figure class="rv">
-      <img src="${photoUrl.get(p.id)}" alt="${p.name} — упаковка Machos.uz" loading="lazy" />
-      <figcaption><b>${p.name}</b><span>${p.sub}</span></figcaption>
+      <img src="${c.file}" alt="${c.name} — упаковка Machos.uz" loading="lazy" />
+      <figcaption><b>${c.name}</b><span>${c.sub}</span></figcaption>
     </figure>`).join('');
   document.getElementById('gallery').classList.add('on');
   document.querySelectorAll('#gallery .rv').forEach(n => io.observe(n));
