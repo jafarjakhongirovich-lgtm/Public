@@ -1393,57 +1393,296 @@ function doyGeometry(size){
 
 /* ============================================================
    Продукт внутри пачки
+   ------------------------------------------------------------
+   Идеальные кубы и шары выглядят пластмассово, поэтому каждый
+   кусочек мнётся своим шумом, а поверхность получает зерно:
+   курт — пористый и матовый, чечил — волокнистый и влажный.
    ============================================================ */
-function pieceGeometry(kind, s){
+
+/* --- значение-шум для лепки кусочков --- */
+function hash3(x, y, z){
+  const n = Math.sin(x * 127.1 + y * 311.7 + z * 74.7) * 43758.5453;
+  return n - Math.floor(n);
+}
+function vnoise(x, y, z){
+  const xi = Math.floor(x), yi = Math.floor(y), zi = Math.floor(z);
+  const xf = x - xi, yf = y - yi, zf = z - zi;
+  const u = xf * xf * (3 - 2 * xf), v = yf * yf * (3 - 2 * yf), w = zf * zf * (3 - 2 * zf);
+  const c = (i, j, k) => hash3(xi + i, yi + j, zi + k);
+  const x00 = lerp(c(0,0,0), c(1,0,0), u), x10 = lerp(c(0,1,0), c(1,1,0), u);
+  const x01 = lerp(c(0,0,1), c(1,0,1), u), x11 = lerp(c(0,1,1), c(1,1,1), u);
+  return lerp(lerp(x00, x10, v), lerp(x01, x11, v), w);
+}
+function fbm(x, y, z){
+  return vnoise(x, y, z) * 0.6 + vnoise(x * 2.3, y * 2.3, z * 2.3) * 0.3
+       + vnoise(x * 5.1, y * 5.1, z * 5.1) * 0.1;
+}
+
+/* Мнём геометрию: смещаем вершины вдоль нормалей.
+   fx/fy/fz — частота шума по осям, разная частота даёт волокна. */
+function organic(geo, amp, fx, fy, fz, seed){
+  const pos = geo.attributes.position, nrm = geo.attributes.normal;
+  const v = new THREE.Vector3(), n = new THREE.Vector3();
+  for(let i = 0; i < pos.count; i++){
+    v.fromBufferAttribute(pos, i);
+    n.fromBufferAttribute(nrm, i);
+    const d = (fbm(v.x * fx + seed, v.y * fy + seed * 1.7, v.z * fz + seed * 2.3) - 0.5) * 2 * amp;
+    pos.setXYZ(i, v.x + n.x * d, v.y + n.y * d, v.z + n.z * d);
+  }
+  pos.needsUpdate = true;
+  geo.computeVertexNormals();
+  return geo;
+}
+
+/* --- поверхность: зерно курта и волокна чечила --- */
+function curdTexture(){
+  const S = 512, c = document.createElement('canvas');
+  c.width = c.height = S;
+  const g = c.getContext('2d');
+  g.fillStyle = '#f2ece0'; g.fillRect(0, 0, S, S);
+
+  const rnd = mulberry(31);
+  // крупные пятна подсушки
+  for(let i = 0; i < 40; i++){
+    const x = rnd() * S, y = rnd() * S, r = 24 + rnd() * 70;
+    const gr = g.createRadialGradient(x, y, 0, x, y, r);
+    gr.addColorStop(0, `rgba(214,205,185,${.10 + rnd() * .16})`);
+    gr.addColorStop(1, 'rgba(214,205,185,0)');
+    g.fillStyle = gr; g.beginPath(); g.arc(x, y, r, 0, Math.PI * 2); g.fill();
+  }
+  // поры и крупинки соли
+  for(let i = 0; i < 2600; i++){
+    const x = rnd() * S, y = rnd() * S, r = 0.8 + rnd() * 3.4;
+    g.fillStyle = rnd() > .45
+      ? `rgba(150,140,120,${.10 + rnd() * .30})`
+      : `rgba(255,253,247,${.20 + rnd() * .45})`;
+    g.beginPath(); g.arc(x, y, r, 0, Math.PI * 2); g.fill();
+  }
+  const t = new THREE.CanvasTexture(c);
+  t.colorSpace = THREE.SRGBColorSpace;
+  t.wrapS = t.wrapT = THREE.RepeatWrapping;
+  t.repeat.set(0.45, 0.45);        // меньше повторов — крупнее зерно
+  return t;
+}
+
+function cheeseTexture(){
+  const S = 512, c = document.createElement('canvas');
+  c.width = c.height = S;
+  const g = c.getContext('2d');
+  g.fillStyle = '#f2e6c4'; g.fillRect(0, 0, S, S);
+
+  const rnd = mulberry(53);
+  // волокна вдоль палочки
+  for(let i = 0; i < 260; i++){
+    const x = rnd() * S;
+    g.strokeStyle = rnd() > .5
+      ? `rgba(255,250,232,${.15 + rnd() * .35})`
+      : `rgba(196,159,92,${.10 + rnd() * .28})`;
+    g.lineWidth = 0.6 + rnd() * 2.6;
+    g.beginPath();
+    g.moveTo(x, 0);
+    g.bezierCurveTo(x + (rnd() - .5) * 22, S * .35, x + (rnd() - .5) * 22, S * .7, x + (rnd() - .5) * 14, S);
+    g.stroke();
+  }
+  // подпалины
+  for(let i = 0; i < 16; i++){
+    const x = rnd() * S, y = rnd() * S, rx = 12 + rnd() * 40, ry = 40 + rnd() * 120;
+    const gr = g.createRadialGradient(x, y, 0, x, y, Math.max(rx, ry));
+    gr.addColorStop(0, `rgba(168,112,36,${.22 + rnd() * .30})`);
+    gr.addColorStop(1, 'rgba(176,124,48,0)');
+    g.fillStyle = gr;
+    g.save(); g.translate(x, y); g.scale(rx / ry, 1);
+    g.beginPath(); g.arc(0, 0, ry, 0, Math.PI * 2); g.fill();
+    g.restore();
+  }
+  const t = new THREE.CanvasTexture(c);
+  t.colorSpace = THREE.SRGBColorSpace;
+  t.wrapS = t.wrapT = THREE.RepeatWrapping;
+  return t;
+}
+
+let _curdTex = null, _cheeseTex = null;
+const curdTex   = () => (_curdTex   || (_curdTex   = curdTexture()));
+const cheeseTex = () => (_cheeseTex || (_cheeseTex = cheeseTexture()));
+
+/* Материал продукта: курт матовый и пористый, сыр — влажный и волокнистый */
+function pieceMaterial(kind, color, seed){
+  const isCheese = kind === 'thin' || kind === 'braid';
+  const tex = isCheese ? cheeseTex() : curdTex();
+  const tint = new THREE.Color(color);
+  // лёгкий разброс оттенка: одинаковые кусочки выдают компьютер
+  const rnd = mulberry(seed * 97 + 5);
+  if(isCheese) tint.offsetHSL((rnd() - .5) * 0.02, (rnd() - .3) * 0.14, (rnd() - .55) * 0.16);
+  else         tint.offsetHSL(0, (rnd() - .5) * 0.04, (rnd() - .5) * 0.05);
+
+  // свой сдвиг текстуры на кусочек: одинаковый рисунок волокон выдаёт копию
+  const map = tex.clone();
+  map.needsUpdate = true;
+  map.offset.set(rnd(), rnd());
+  if(isCheese) map.repeat.set(1, 0.55);
+
+  return new THREE.MeshStandardMaterial({
+    color: tint,
+    map: map,
+    bumpMap: map,
+    bumpScale: isCheese ? 0.010 : 0.026,
+    roughness: isCheese ? 0.42 : 0.96,
+    metalness: 0,
+    envMapIntensity: isCheese ? 0.9 : 0.45,
+  });
+}
+
+/* Геометрия одного кусочка — каждый со своим шумом */
+function pieceGeometry(kind, s, seed){
+  seed = seed || 0;
+
   if(kind === 'cube'){
-    const g = new THREE.BoxGeometry(s, s, s * 0.62, 4, 4, 3);
+    const g = new THREE.BoxGeometry(s, s, s * 0.66, 10, 10, 7);
     const pos = g.attributes.position;
-    for(let i = 0; i < pos.count; i++){           // скругляем рёбра — курт лепят руками
-      const v = new THREE.Vector3().fromBufferAttribute(pos, i);
+    const v = new THREE.Vector3();
+    for(let i = 0; i < pos.count; i++){          // скругляем рёбра — курт мнут руками
+      v.fromBufferAttribute(pos, i);
       const n = v.clone().normalize();
-      v.lerp(n.multiplyScalar(s * 0.52), 0.22);
+      v.lerp(n.multiplyScalar(s * 0.54), 0.26);
       pos.setXYZ(i, v.x, v.y, v.z);
     }
     g.computeVertexNormals();
+    return organic(g, s * 0.13, 5.5, 5.5, 5.5, seed);
+  }
+
+  if(kind === 'ball'){
+    const g = new THREE.SphereGeometry(s * 0.5, 32, 22);
+    return organic(g, s * 0.11, 5, 5, 5, seed);
+  }
+
+  if(kind === 'baton'){
+    const g = new THREE.CapsuleGeometry(s * 0.21, s * 0.62, 6, 22);
+    return organic(g, s * 0.085, 6, 3.4, 6, seed);
+  }
+
+  if(kind === 'thin'){
+    // палочка чечила: лёгкий изгиб, неровная толщина, волокна вдоль
+    const g = new THREE.CapsuleGeometry(0.072, s * 0.86, 6, 26);
+    organic(g, 0.011, 9, 2.2, 9, seed);
+    const pos = g.attributes.position;
+    const rnd = mulberry(seed * 13 + 3);
+    const bend = (rnd() - 0.5) * 0.08, tw = 0.6 + rnd() * 0.8;
+    for(let i = 0; i < pos.count; i++){
+      const y = pos.getY(i);
+      pos.setX(i, pos.getX(i) + Math.sin(y * tw) * bend);
+      pos.setZ(i, pos.getZ(i) + Math.cos(y * tw * 0.7) * bend * 0.5);
+    }
+    pos.needsUpdate = true;
+    g.computeVertexNormals();
     return g;
   }
-  if(kind === 'ball')  return new THREE.SphereGeometry(s * 0.5, 20, 14);
-  if(kind === 'baton') return new THREE.CapsuleGeometry(s * 0.20, s * 0.62, 4, 14);
-  if(kind === 'thin')  return new THREE.CapsuleGeometry(0.072, s * 0.86, 4, 14);
-  if(kind === 'braid') return braidGeometry();
+
+  if(kind === 'braid') return braidGeometry(seed);
   return new THREE.SphereGeometry(s * 0.5, 16, 12);
 }
 
-/* Косичка: три пряди, свитые между собой */
-function braidGeometry(){
-  const strands = [];
+/* Косичка: три пряди, свитые между собой, каждая со своей неровностью */
+function braidGeometry(seed){
+  seed = seed || 0;
+  const rnd = mulberry(seed * 29 + 11);
+  const parts = [];
   for(let k = 0; k < 3; k++){
     const pts = [];
-    for(let i = 0; i <= 40; i++){
-      const t = i / 40;
+    for(let i = 0; i <= 44; i++){
+      const t = i / 44;
       const a = t * Math.PI * 3.4 + k * Math.PI * 2 / 3;
-      pts.push(new THREE.Vector3(Math.cos(a) * 0.155, (t - 0.5) * 1.5, Math.sin(a) * 0.075));
+      pts.push(new THREE.Vector3(
+        Math.cos(a) * (0.150 + (rnd() - .5) * 0.02),
+        (t - 0.5) * 1.5,
+        Math.sin(a) * (0.072 + (rnd() - .5) * 0.012)
+      ));
     }
-    strands.push(new THREE.TubeGeometry(new THREE.CatmullRomCurve3(pts), 70, 0.105, 12, false));
+    const tube = new THREE.TubeGeometry(new THREE.CatmullRomCurve3(pts), 72, 0.104, 12, false);
+    organic(tube, 0.012, 8, 3, 8, seed + k);
+    parts.push(tube.toNonIndexed());
+    tube.dispose();
   }
-  // сводим три пряди в одну геометрию
-  const merged = strands[0];
-  const arrays = strands.map(g => g.toNonIndexed());
-  const total = arrays.reduce((n, g) => n + g.attributes.position.count, 0);
+
+  const total = parts.reduce((n, g) => n + g.attributes.position.count, 0);
   const posArr = new Float32Array(total * 3);
   const nrmArr = new Float32Array(total * 3);
+  const uvArr  = new Float32Array(total * 2);
   let off = 0;
-  for(const g of arrays){
+  for(const g of parts){
     posArr.set(g.attributes.position.array, off * 3);
     nrmArr.set(g.attributes.normal.array, off * 3);
+    if(g.attributes.uv) uvArr.set(g.attributes.uv.array, off * 2);
     off += g.attributes.position.count;
     g.dispose();
   }
-  strands.forEach(g => g.dispose());
   const out = new THREE.BufferGeometry();
   out.setAttribute('position', new THREE.BufferAttribute(posArr, 3));
-  out.setAttribute('normal', new THREE.BufferAttribute(nrmArr, 3));
+  out.setAttribute('normal',   new THREE.BufferAttribute(nrmArr, 3));
+  out.setAttribute('uv',       new THREE.BufferAttribute(uvArr, 2));
   return out;
+}
+
+/* Раскладываем продукт в окне пачки */
+function buildContents(p){
+  const group = new THREE.Group();
+  if(p.form === 'doy' || !p.piece) return group;
+
+  const { w, h, d } = p.size;
+  const topY = h / 2 - p.win.t * h;
+  const botY = h / 2 - p.win.b * h;
+  const cy = (topY + botY) / 2;
+  const winH = topY - botY;
+
+  // Изнанка пакета: не плоскость, а короб внутренними гранями наружу —
+  // иначе по краю окна видна тёмная щель вместо стенки.
+  const backColor = new THREE.Color(p.base2).multiplyScalar(0.58);
+  const backing = new THREE.Mesh(
+    new THREE.BoxGeometry(w * 0.99, winH + 0.10, d * 0.9),
+    new THREE.MeshStandardMaterial({
+      color:backColor, roughness:0.95, metalness:0, side:THREE.BackSide,
+    })
+  );
+  backing.position.set(0, cy, 0);
+  backing.receiveShadow = true;
+  group.add(backing);
+
+  const pc = p.piece;
+  const rnd = mulberry(17);
+  let seed = 1;
+
+  if(pc.kind === 'braid'){
+    for(let i = 0; i < pc.cols; i++){
+      const m = new THREE.Mesh(pieceGeometry('braid', 1, seed), pieceMaterial('braid', pc.color, seed));
+      m.position.set((i - (pc.cols - 1) / 2) * pc.sx, cy, 0);
+      m.scale.set(1, winH / 1.55, 1);
+      m.rotation.y = (rnd() - .5) * .4;
+      m.castShadow = m.receiveShadow = true;
+      group.add(m);
+      seed++;
+    }
+    return group;
+  }
+
+  for(let r = 0; r < pc.rows; r++){
+    for(let c = 0; c < pc.cols; c++){
+      const m = new THREE.Mesh(
+        pieceGeometry(pc.kind, pc.s, seed),
+        pieceMaterial(pc.kind, pc.color, seed)
+      );
+      m.position.set(
+        (c - (pc.cols - 1) / 2) * pc.sx + (rnd() - .5) * pc.sx * 0.06,
+        (pc.kind === 'thin' ? cy : cy + ((pc.rows - 1) / 2 - r) * pc.sy) + (rnd() - .5) * 0.012,
+        (rnd() - 0.5) * d * 0.16
+      );
+      if(pc.kind === 'cube')       m.rotation.set((rnd() - .5) * .3, (rnd() - .5) * .34, (rnd() - .5) * .2);
+      else if(pc.kind === 'ball')  m.rotation.set(rnd() * 3, rnd() * 3, rnd() * 3);
+      else                          m.rotation.z = (rnd() - .5) * .06;
+      m.castShadow = m.receiveShadow = true;
+      group.add(m);
+      seed++;
+    }
+  }
+  return group;
 }
 
 /* Геометрия летающих кусочков вокруг пачки */
@@ -1469,67 +1708,6 @@ function snackGeometry(kind){
   return new THREE.CapsuleGeometry(0.028, 0.30, 4, 10);   // thin — сырная палочка
 }
 
-/* Раскладываем продукт в окне пачки */
-function buildContents(p){
-  const group = new THREE.Group();
-  if(p.form === 'doy' || !p.piece) return group;
-
-  const { w, h, d } = p.size;
-  const topY = h / 2 - p.win.t * h;
-  const botY = h / 2 - p.win.b * h;
-  const cy = (topY + botY) / 2;
-  const winH = topY - botY;
-
-  // Подложка: обратная сторона пачки. Без неё в окне видно тёмный фон
-  // страницы, а не продукт.
-  // Изнанка пакета: не плоскость, а короб внутренними гранями наружу —
-  // иначе по краю окна видна тёмная щель вместо стенки.
-  const backColor = new THREE.Color(p.base2).multiplyScalar(0.58);
-  const backing = new THREE.Mesh(
-    new THREE.BoxGeometry(w * 0.99, winH + 0.10, d * 0.9),
-    new THREE.MeshStandardMaterial({
-      color:backColor, roughness:0.95, metalness:0, side:THREE.BackSide,
-    })
-  );
-  backing.position.set(0, cy, 0);
-  group.add(backing);
-
-  const pc = p.piece;
-  const mat = new THREE.MeshStandardMaterial({
-    color: new THREE.Color(pc.color), roughness: 0.85, metalness: 0.02, envMapIntensity: .7,
-  });
-
-  if(pc.kind === 'braid'){
-    const geo = braidGeometry();
-    for(let i = 0; i < pc.cols; i++){
-      const m = new THREE.Mesh(geo, mat);
-      m.position.set((i - (pc.cols - 1) / 2) * pc.sx, cy, 0);
-      m.scale.set(1, winH / 1.6, 1);
-      group.add(m);
-    }
-    return group;
-  }
-
-  const geo = pieceGeometry(pc.kind, pc.s);
-  const rnd = mulberry(17);
-
-  for(let r = 0; r < pc.rows; r++){
-    for(let c = 0; c < pc.cols; c++){
-      const m = new THREE.Mesh(geo, mat);
-      m.position.set(
-        (c - (pc.cols - 1) / 2) * pc.sx,
-        cy + ((pc.rows - 1) / 2 - r) * pc.sy,
-        (rnd() - 0.5) * d * 0.16
-      );
-      // кубики и шарики лежат чуть по-разному — руками же лепили
-      if(pc.kind === 'cube')       m.rotation.set((rnd() - .5) * .28, (rnd() - .5) * .3, (rnd() - .5) * .18);
-      else if(pc.kind === 'ball')  m.rotation.set(rnd() * 3, rnd() * 3, rnd() * 3);
-      else                          m.rotation.z = (rnd() - .5) * .05;
-      group.add(m);
-    }
-  }
-  return group;
-}
 
 /* ============================================================
    Сцена
@@ -1586,6 +1764,8 @@ function buildScene(){
   renderer.setSize(innerWidth, innerHeight);
   renderer.toneMapping = THREE.ACESFilmicToneMapping;
   renderer.toneMappingExposure = 1.02;
+  renderer.shadowMap.enabled = true;
+  renderer.shadowMap.type = THREE.PCFSoftShadowMap;
   stageEl.appendChild(renderer.domElement);
 
   scene = new THREE.Scene();
@@ -1600,6 +1780,13 @@ function buildScene(){
 
   const key = new THREE.DirectionalLight(0xfff4e2, 1.7);
   key.position.set(4, 6, 6);
+  key.castShadow = true;
+  key.shadow.mapSize.set(1024, 1024);
+  key.shadow.camera.left = -3; key.shadow.camera.right = 3;
+  key.shadow.camera.top = 3;   key.shadow.camera.bottom = -3;
+  key.shadow.camera.near = 1;  key.shadow.camera.far = 18;
+  key.shadow.bias = -0.0012;
+  key.shadow.radius = 3;
   scene.add(key);
 
   const rimWarm = new THREE.PointLight(0xf5a623, 30, 24, 2);
