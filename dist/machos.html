@@ -499,8 +499,8 @@ footer{
         <p class="eyebrow">Снеки из Узбекистана</p>
         <h1>Хрустит<span class="l2">по-нашему</span></h1>
         <p class="lead hero-sub">
-          Солёные семечки, настоящий курт, сырные палочки и косичка.
-          Четыре продукта, за которыми возвращаются в магазин.
+          Солёные семечки, курт трёх форм, сырные палочки и косичка.
+          Шесть позиций, за которыми возвращаются в магазин.
         </p>
         <div class="hero-actions">
           <a href="#products" class="btn primary">Смотреть продукцию</a>
@@ -519,7 +519,7 @@ footer{
 
   <!-- ============ Факты ============ -->
   <div class="facts rv">
-    <div class="fact"><b>4</b><span>продукта в линейке</span></div>
+    <div class="fact"><b>6</b><span>позиций в линейке</span></div>
     <div class="fact"><b>100%</b><span>натуральный состав</span></div>
     <div class="fact"><b>UZ</b><span>своё производство</span></div>
     <div class="fact"><b>Опт</b><span>и розница</span></div>
@@ -565,7 +565,7 @@ footer{
       <div class="prod-panel">
         <div>
           <p class="eyebrow rv">Продукция</p>
-          <h2 class="rv">Четыре вкуса Machos</h2>
+          <h2 class="rv">Вся линейка Machos</h2>
           <p class="lead rv d1" style="margin-top:18px">
             Выберите продукт — пачка в сцене сменится вместе с ним.
           </p>
@@ -873,54 +873,85 @@ function createAreaLightMaterial( intensity ) {
 /* ============================================================
    ТОВАРЫ И КОНТАКТЫ — здесь меняется всё содержимое сайта
    ------------------------------------------------------------
-   Этикетки пачек рисуются в браузере по этим данным.
-   Если появятся студийные фото пачек (лицевая сторона, ровно,
-   без фона) — положите их в папку /assets и укажите путь в поле
-   `photo`, например photo:'assets/kurt.png'. Фото автоматически
-   заменит нарисованную этикетку.
+   Пачка собирается по этим данным: печатная шапка, прозрачное окно
+   и настоящий продукт внутри. `win` задаёт окно долями высоты пачки
+   (сверху вниз), `piece` — форму, размер и раскладку продукта.
    ============================================================ */
 const PRODUCTS = [
   {
     id:'seeds', photo:null,
     name:'Семечки Pista Tuzli',
     sub:'солёные, крупные',
-    style:'doy',                        // жёлтый дой-пак с блоком MACHOS.UZ
+    form:'doy',                                  // печать на всю сторону, окна нет
     title:'PISTA', titleSub:'TUZLI',
     weight:'200 g',
-    size:{ w:2.15, h:2.85, d:0.55 },
-    accent:'#f5d90a',
-    packA:'#f7e01c', packB:'#d8b400', ink:'#15130a',
-    snack:'seed', snackColor:'#33261a',
-    desc:'Крупная калиброванная семечка с солью. Та самая пачка 200 г, которую берут к вечеру и на дорогу.',
+    size:{ w:2.15, h:2.85, d:0.58, r:0.24 },
+    accent:'#f5d90a', base:'#f7e01c', base2:'#d8b400', ink:'#15130a',
+    fly:'seed', flyColor:'#33261a',
+    desc:'Крупная калиброванная семечка с солью. Пачка 200 г — та самая, которую берут к вечеру и в дорогу.',
     tags:['100% натурально','Солёные','200 г'],
     spec:{ weight:'200 г', comp:'Семена подсолнечника, соль', pack:'Дой-пак', life:'уточняется', box:'уточняется' },
   },
   {
-    id:'kurt', photo:null,
-    name:'Курт',
-    sub:'классический, солёный',
-    style:'flow',                       // жёлтый флоу-пак со скрипт-логотипом
-    title:'КУРТ', titleSub:'',
-    weight:'35 г',
-    size:{ w:1.95, h:2.70, d:0.46 },
-    accent:'#f5d90a',
-    packA:'#f6dc14', packB:'#d4ac00', ink:'#15130a',
-    snack:'ball', snackColor:'#f3efe4',
-    desc:'Тот самый курт: плотный, солёный, с настоящим кисломолочным вкусом. Четыре шарика в пачке — удобно взять с собой.',
-    tags:['Кисломолочный','Натуральный','В дорогу'],
-    spec:{ weight:'35 ± 5 г', comp:'Кисломолочное сырьё, соль', pack:'Флоу-пак с подвесом', life:'3 месяца', box:'уточняется' },
+    id:'kurt-cube', photo:null,
+    name:'Курт кубиками',
+    sub:'классический, 30 г',
+    form:'flow',
+    title:'КУРТ',
+    weight:'30 г',
+    size:{ w:1.90, h:2.75, d:0.44, r:0.16 },
+    win:{ t:0.40, b:0.775 },
+    piece:{ kind:'cube', s:0.42, cols:2, rows:2, sx:0.48, sy:0.48, color:'#f1eadb' },
+    accent:'#f5d90a', base:'#f6dc14', base2:'#d4ac00', ink:'#15130a',
+    fly:'cube', flyColor:'#f2ece0',
+    desc:'Тот самый курт кубиками: плотный, солёный, с настоящим кисломолочным вкусом. Четыре штуки в пачке — удобно взять с собой.',
+    tags:['Кисломолочный','120 ккал / 100 г','Белки 17 г'],
+    spec:{ weight:'30 ± 5 г', comp:'Молоко, йодированная соль', pack:'Флоу-пак с подвесом', life:'3 месяца', box:'уточняется' },
+  },
+  {
+    id:'kurt-ball', photo:null,
+    name:'Курт шариками',
+    sub:'классический, круглый',
+    form:'flow',
+    title:'КУРТ',
+    weight:'',
+    size:{ w:2.05, h:2.60, d:0.46, r:0.16 },
+    win:{ t:0.40, b:0.80 },
+    piece:{ kind:'ball', s:0.28, cols:4, rows:3, sx:0.33, sy:0.31, color:'#f1eadb' },
+    accent:'#f5d90a', base:'#f6dc14', base2:'#d4ac00', ink:'#15130a',
+    fly:'ball', flyColor:'#f3efe4',
+    desc:'Курт классической круглой формы. Двенадцать шариков в пачке — тот же вкус, привычный вид.',
+    tags:['Кисломолочный','Круглый','12 шт'],
+    spec:{ weight:'уточняется', comp:'Молоко, йодированная соль', pack:'Флоу-пак', life:'3 месяца', box:'уточняется' },
+  },
+  {
+    id:'kurt-stick', photo:null,
+    name:'Курт палочками',
+    sub:'классический, батончики',
+    form:'flow',
+    title:'КУРТ',
+    weight:'',
+    size:{ w:2.00, h:2.55, d:0.44, r:0.16 },
+    win:{ t:0.42, b:0.80 },
+    piece:{ kind:'baton', s:0.34, cols:6, rows:2, sx:0.17, sy:0.38, color:'#f0e9da' },
+    accent:'#f5d90a', base:'#f6dc14', base2:'#d4ac00', ink:'#15130a',
+    fly:'baton', flyColor:'#efe7d6',
+    desc:'Курт в форме палочек. Удобно есть на ходу и делить — двенадцать батончиков в пачке.',
+    tags:['Кисломолочный','Палочки','12 шт'],
+    spec:{ weight:'уточняется', comp:'Молоко, йодированная соль', pack:'Флоу-пак', life:'3 месяца', box:'уточняется' },
   },
   {
     id:'sticks', photo:null,
     name:'Сырные палочки',
     sub:'тонкие, солёные',
-    style:'flow',
+    form:'flow',
     title:'СЫРНЫЕ', titleSub:'ПАЛОЧКИ',
-    weight:'',                          // вес не указан — заполните в этом поле
-    size:{ w:1.55, h:3.15, d:0.36 },
-    accent:'#4ec8dd',
-    packA:'#4ec8dd', packB:'#2589a0', ink:'#0c2a31',
-    snack:'stick', snackColor:'#e8d9a8',
+    weight:'',
+    size:{ w:1.60, h:3.10, d:0.36, r:0.14 },
+    win:{ t:0.38, b:0.80 },
+    piece:{ kind:'thin', s:1.15, cols:9, rows:1, sx:0.105, sy:0, color:'#efe0b6' },
+    accent:'#4ec8dd', base:'#4ec8dd', base2:'#2589a0', ink:'#0c2a31',
+    fly:'thin', flyColor:'#e8d9a8',
     desc:'Тонкие сырные палочки в бирюзовой пачке. Солёные, тянущиеся — берут к чаю и к пиву.',
     tags:['Сыр чечил','Солёные','Тянущиеся'],
     spec:{ weight:'уточняется', comp:'Сыр, соль', pack:'Флоу-пак с подвесом', life:'уточняется', box:'уточняется' },
@@ -929,27 +960,29 @@ const PRODUCTS = [
     id:'braid', photo:null,
     name:'Сырная косичка',
     sub:'плетёный чечил',
-    style:'flow',
+    form:'flow',
     title:'СЫРНАЯ', titleSub:'КОСИЧКА',
     weight:'',
-    size:{ w:1.70, h:3.05, d:0.40 },
-    accent:'#f0d21a',
-    packA:'#f2da22', packB:'#cfae00', ink:'#15130a',
-    snack:'braid', snackColor:'#e9d7a2',
+    size:{ w:1.80, h:2.95, d:0.42, r:0.14 },
+    win:{ t:0.36, b:0.78 },
+    piece:{ kind:'braid', s:1.0, cols:2, rows:1, sx:0.46, sy:0, color:'#e8d5a6' },
+    accent:'#8fd14f', base:'#8ed24e', base2:'#5aa02a', ink:'#12290a',
+    fly:'braid', flyColor:'#e9d7a2',
     desc:'Классическая плетёная косичка из сыра чечил. Плотная, солёная, разбирается на нити — самый «долгий» снек из линейки.',
     tags:['Сыр чечил','Плетёная','Солёная'],
     spec:{ weight:'уточняется', comp:'Сыр, соль', pack:'Флоу-пак с подвесом', life:'уточняется', box:'уточняется' },
   },
 ];
 
-/* Контакты. Телефон, почта и сайт взяты с упаковки.
-   FACEBOOK: вставьте ссылку на страницу в поле url ниже — кнопка
-   сразу станет активной. То же самое для Instagram и Telegram. */
+/* Контакты. Телефон — основной номер компании, остальное с упаковки.
+   FACEBOOK: вставьте ссылку в поле url ниже — кнопка станет активной. */
 const CONTACTS = {
   company: 'ООО «FUN NUTS GROUP»',
-  city:    'Ташкент, Узбекистан',
-  phone:   '+998 95 194 55 15',
-  phoneRaw:'+998951945515',
+  city:    'Ташкент, Шайхантахурский район, пр. Гормонский, 3А',
+  phone:   '+998 90 949 00 00',
+  phoneRaw:'+998909490000',
+  phone2:  '+998 95 194 55 15',
+  phone2Raw:'+998951945515',
   email:   'info@machos.uz',
   site:    'machos.uz',
   socials: [
@@ -959,7 +992,7 @@ const CONTACTS = {
   ],
 };
 
-const TICKER = ['Семечки Pista Tuzli','Курт','Сырные палочки','Сырная косичка','Натуральный продукт','Оптом по Узбекистану','Machos.uz'];
+const TICKER = ['Семечки Pista Tuzli','Курт кубиками','Курт шариками','Курт палочками','Сырные палочки','Сырная косичка','Оптом по Узбекистану','Machos.uz'];
 
 /* ============================================================
    Утилиты
@@ -980,64 +1013,24 @@ function supportsWebGL(){
   }catch(e){ return false; }
 }
 
-/* Текст с трекингом — надёжнее, чем ctx.letterSpacing (нет в старых браузерах) */
-function trackedText(g, text, cx, y, spacing){
-  const chars = [...text];
-  let total = 0;
-  for(const ch of chars) total += g.measureText(ch).width + spacing;
-  total -= spacing;
-  let x = cx - total / 2;
-  for(const ch of chars){
-    g.fillText(ch, x, y);
-    x += g.measureText(ch).width + spacing;
-  }
-}
 
-function roundRectPath(g, x, y, w, h, r){
-  const rr = Math.min(r, w / 2, h / 2);
-  g.beginPath();
-  g.moveTo(x + rr, y);
-  g.arcTo(x + w, y,     x + w, y + h, rr);
-  g.arcTo(x + w, y + h, x,     y + h, rr);
-  g.arcTo(x,     y + h, x,     y,     rr);
-  g.arcTo(x,     y,     x + w, y,     rr);
-  g.closePath();
-}
 
 /* ============================================================
-   Этикетка пачки, нарисованная по реальной упаковке Machos.uz
+   Печать на упаковке
    ------------------------------------------------------------
-   style 'doy'  — жёлтый дой-пак семечек: блочный логотип MACHOS.UZ,
-                  чёрная плашка с названием, миска с продуктом, вес;
-   style 'flow' — флоу-пак курта / сыра: рукописный логотип, белая
-                  волна с продуктом, чёрная лента NATURAL PRODUCT.
+   Рисуем в canvas сразу с прозрачностью: там, где у настоящей
+   пачки прозрачная плёнка, пиксели остаются пустыми. Эта же
+   текстура работает и как карта прозрачности материала.
    ============================================================ */
 function packTexture(p){
   const W = 1024;
-  // высота холста повторяет пропорции пачки, иначе рисунок растягивается
   const H = Math.round(clamp(W * p.size.h / p.size.w, 1150, 2250));
   const c = document.createElement('canvas');
   c.width = W; c.height = H;
   const g = c.getContext('2d');
 
-  // фон пачки
-  const grd = g.createLinearGradient(0, 0, W * .35, H);
-  grd.addColorStop(0, p.packA);
-  grd.addColorStop(1, p.packB);
-  g.fillStyle = grd;
-  g.fillRect(0, 0, W, H);
-
-  // мягкий блик плёнки
-  const gl = g.createRadialGradient(W * .3, H * .1, 10, W * .3, H * .1, W * .9);
-  gl.addColorStop(0, 'rgba(255,255,255,.20)');
-  gl.addColorStop(1, 'rgba(255,255,255,0)');
-  g.fillStyle = gl; g.fillRect(0, 0, W, H);
-
-  g.textAlign = 'center';
-  g.textBaseline = 'alphabetic';
-
-  if(p.style === 'doy') drawDoyLabel(g, p, W, H);
-  else                  drawFlowLabel(g, p, W, H);
+  if(p.form === 'doy') drawDoyPrint(g, p, W, H);
+  else                 drawFlowPrint(g, p, W, H);
 
   const tex = new THREE.CanvasTexture(c);
   tex.colorSpace = THREE.SRGBColorSpace;
@@ -1045,15 +1038,100 @@ function packTexture(p){
   return tex;
 }
 
-/* ---------- жёлтый дой-пак семечек (Pista Tuzli) ---------- */
-function drawDoyLabel(g, p, W, H){
+/* Заливка плёнки с мягким блеском */
+function filmFill(g, p, x, yT, w, h){
+  const grd = g.createLinearGradient(x, yT, x + w * .4, yT + h);
+  grd.addColorStop(0, p.base);
+  grd.addColorStop(1, p.base2);
+  g.fillStyle = grd;
+  g.fillRect(x, yT, w, h);
+
+  const gl = g.createLinearGradient(x, yT, x + w, yT);
+  gl.addColorStop(0,   'rgba(255,255,255,0)');
+  gl.addColorStop(.30, 'rgba(255,255,255,.13)');
+  gl.addColorStop(.42, 'rgba(255,255,255,.03)');
+  gl.addColorStop(1,   'rgba(255,255,255,0)');
+  g.fillStyle = gl;
+  g.fillRect(x, yT, w, h);
+}
+
+/* ---------- флоу-пак: шапка, окно, лента, подвал ---------- */
+function drawFlowPrint(g, p, W, H){
+  const y = f => H * f;
+  const winT = y(p.win.t), winB = y(p.win.b);
+
+  g.clearRect(0, 0, W, H);
+  g.textAlign = 'center';
+  g.textBaseline = 'alphabetic';
+
+  /* --- печатная шапка --- */
+  g.save();
+  g.beginPath();
+  g.moveTo(0, 0); g.lineTo(W, 0); g.lineTo(W, winT);
+  // низ шапки — волной, как на пачке
+  g.bezierCurveTo(W * .66, winT + H * .045, W * .32, winT - H * .04, 0, winT + H * .02);
+  g.closePath();
+  g.clip();
+  filmFill(g, p, 0, 0, W, winT + H * .06);
+  g.restore();
+
+  // отверстие-подвес
+  drawHangHole(g, W / 2, y(.052), 54, 20);
+
+  // логотип и название
+  drawScriptLogo(g, p, W / 2, y(.175), W * .72);
+  g.fillStyle = p.ink;
+  const lines = [p.title, p.titleSub].filter(Boolean);
+  const size = lines.length > 1 ? 66 : 82;
+  lines.forEach((ln, i) => {
+    g.font = `800 ${size}px "Arial Black", Arial, sans-serif`;
+    fitText(g, ln, W / 2, y(.245) + i * (size + 6), W * .62, size);
+  });
+
+  // мелкий текст состава и штрихкод
+  const printBase = Math.min(winT - H * .015, y(.36));
+  finePrint(g, p.ink, W * .06, printBase - H * .055, W * .26, 5);
+  finePrint(g, p.ink, W * .37, printBase - H * .055, W * .26, 5);
+  drawBarcode(g, W * .70, printBase - H * .055, W * .24, H * .042);
+
+  /* --- печатный низ: лента NATURAL PRODUCT + подвал --- */
+  g.save();
+  g.beginPath();
+  g.moveTo(0, winB);
+  g.bezierCurveTo(W * .34, winB - H * .045, W * .66, winB + H * .04, W, winB - H * .02);
+  g.lineTo(W, H); g.lineTo(0, H);
+  g.closePath();
+  g.clip();
+  filmFill(g, p, 0, winB - H * .06, W, H - winB + H * .06);
+  g.restore();
+
+  const stripY = winB + H * .012, stripH = Math.max(46, H * .038);
+  g.fillStyle = p.ink;
+  g.fillRect(0, stripY, W, stripH);
+  g.fillStyle = '#ffffff';
+  g.font = '700 25px Arial, sans-serif';
+  trackedText(g, 'NATURAL PRODUCT · NATURAL PRODUCT · NATURAL', W / 2, stripY + stripH * .68, 2);
+
+  if(p.weight){
+    brushBadge(g, p.ink, W / 2, y(.895), 210, 68);
+    g.fillStyle = '#ffffff';
+    g.font = '800 40px Arial, sans-serif';
+    g.fillText(p.weight, W / 2, y(.895) + 14);
+  }
+  finePrint(g, p.ink, W * .14, y(.945), W * .72, 3);
+}
+
+/* ---------- дой-пак семечек: печать на всю сторону ---------- */
+function drawDoyPrint(g, p, W, H){
   const y = f => H * f;
   const art = clamp(H / 1400, 0.85, 1.45);
 
-  // декоративный вензель над логотипом
+  filmFill(g, p, 0, 0, W, H);
+  g.textAlign = 'center';
+  g.textBaseline = 'alphabetic';
+
   drawFlourish(g, p.ink, W / 2, y(.115), 34);
 
-  // MACHOS.UZ с «искрами» по бокам
   g.fillStyle = p.ink;
   g.font = '800 96px "Arial Black", Arial, sans-serif';
   fitText(g, 'MACHOS.UZ', W / 2, y(.205), W * .74);
@@ -1061,14 +1139,12 @@ function drawDoyLabel(g, p, W, H){
   drawSparks(g, p.ink, W / 2 - lw / 2 - 42, y(.19), -1);
   drawSparks(g, p.ink, W / 2 + lw / 2 + 42, y(.19),  1);
 
-  // чёрная кисть с названием линейки
   const bw = W * .50;
   brushBadge(g, p.ink, W / 2, y(.255), bw, 104);
-  g.fillStyle = p.packA;
+  g.fillStyle = p.base;
   g.font = '800 76px "Arial Black", Arial, sans-serif';
   fitText(g, p.title, W / 2, y(.255) + 28, bw - 70);
 
-  // TUZLI между чёрточками
   if(p.titleSub){
     const subY = y(.325);
     g.fillStyle = p.ink;
@@ -1080,16 +1156,10 @@ function drawDoyLabel(g, p, W, H){
     g.beginPath(); g.moveTo(W / 2 + tw - 44, subY - 13); g.lineTo(W / 2 + tw, subY - 13); g.stroke();
   }
 
-  // миска с семечками
   drawBowl(g, p, W / 2, y(.50), art * 1.12);
-
-  // штамп качества слева
   drawStamp(g, p, W * .155, y(.565), 92, ['100%', 'TABIIY'], 'SIFATLI MAHSULOT');
-
-  // стрелка с подписью справа
   drawArrowNote(g, p.ink, W * .80, y(.425), ['TABIIY', 'va MAZALI']);
 
-  // вес — чёрная кисть
   if(p.weight){
     brushBadge(g, p.ink, W / 2, y(.655), 250, 76);
     g.fillStyle = '#ffffff';
@@ -1097,7 +1167,6 @@ function drawDoyLabel(g, p, W, H){
     g.fillText(p.weight, W / 2, y(.655) + 17);
   }
 
-  // нижний ряд иконок с разделителями
   const cols = [
     { icon:'sun',  t:['TABIIY','QURITILGAN'] },
     { icon:'heart',t:['FAYDALI VA','MAZALI'] },
@@ -1117,95 +1186,11 @@ function drawDoyLabel(g, p, W, H){
     }
   });
 
-  // мелкий текст состава внизу
   finePrint(g, p.ink, W * .12, y(.905), W * .76, 5);
 }
 
-/* ---------- флоу-пак курта и сыра ---------- */
-function drawFlowLabel(g, p, W, H){
-  const y = f => H * f;
-  const art = clamp(H / 1400, 0.85, 1.45);
+/* ---------- элементы печати ---------- */
 
-  // отверстие-подвес в шапке
-  drawHangHole(g, W / 2, y(.045), 46, 16);
-
-  // рукописный логотип
-  drawScriptLogo(g, p, W / 2, y(.155), W * .70);
-
-  // название продукта под логотипом
-  g.fillStyle = p.ink;
-  const lines = [p.title, p.titleSub].filter(Boolean);
-  const size = lines.length > 1 ? 62 : 76;
-  lines.forEach((ln, i) => {
-    g.font = `800 ${size}px "Arial Black", Arial, sans-serif`;
-    fitText(g, ln, W / 2, y(.225) + i * (size + 4), W * .66, size);
-  });
-
-  // мелкий текст состава и штрихкод в шапке
-  finePrint(g, p.ink, W * .07, y(.285), W * .34, 4);
-  finePrint(g, p.ink, W * .59, y(.285), W * .34, 4);
-  drawBarcode(g, W * .62, y(.072), W * .22, H * .038);
-
-  // прозрачное окно с продуктом
-  const wTop = y(.335), wBot = y(.80);
-  g.save();
-  g.beginPath();
-  if(p.snack === 'ball'){
-    // у курта плёнка просто прозрачная, без волны
-    g.rect(0, wTop, W, wBot - wTop);
-  }else{
-    // у сыра окно обрамлено белой волной, как на пачке
-    g.moveTo(0, wTop);
-    g.bezierCurveTo(W * .34, wTop - H * .055, W * .66, wTop + H * .055, W, wTop - H * .02);
-    g.lineTo(W, wBot - H * .02);
-    g.bezierCurveTo(W * .64, wBot + H * .055, W * .34, wBot - H * .05, 0, wBot);
-    g.closePath();
-  }
-  g.clip();
-
-  const win = g.createLinearGradient(0, wTop, 0, wBot);
-  win.addColorStop(0,  '#f7f6f2');
-  win.addColorStop(.5, '#eceae3');
-  win.addColorStop(1,  '#f5f3ee');
-  g.fillStyle = win;
-  g.fillRect(0, wTop - H * .06, W, (wBot - wTop) + H * .12);
-
-  drawSnackArt(g, p, W / 2, (wTop + wBot) / 2, art);
-
-  // блики на плёнке
-  g.globalAlpha = .16;
-  g.fillStyle = 'rgba(255,255,255,.9)';
-  g.save();
-  g.translate(W * .2, wTop); g.rotate(-.22);
-  g.fillRect(0, 0, W * .10, (wBot - wTop) * 1.5);
-  g.translate(W * .5, 0);
-  g.fillRect(0, 0, W * .05, (wBot - wTop) * 1.5);
-  g.restore();
-  g.globalAlpha = 1;
-  g.restore();
-
-  // чёрная лента NATURAL PRODUCT
-  const stripH = Math.max(54, H * .042);
-  g.fillStyle = p.ink;
-  g.fillRect(0, y(.805), W, stripH);
-  g.fillStyle = '#ffffff';
-  g.font = '700 26px Arial, sans-serif';
-  trackedText(g, 'NATURAL PRODUCT · NATURAL PRODUCT · NATURAL', W / 2, y(.805) + stripH * .68, 2);
-
-  // вес
-  if(p.weight){
-    brushBadge(g, p.ink, W / 2, y(.885), 220, 72);
-    g.fillStyle = '#ffffff';
-    g.font = '800 42px Arial, sans-serif';
-    g.fillText(p.weight, W / 2, y(.885) + 15);
-  }
-
-  finePrint(g, p.ink, W * .12, y(.945), W * .76, 3);
-}
-
-/* ---------- элементы упаковки ---------- */
-
-/* Чёрная плашка «мазком кисти» */
 function brushBadge(g, ink, cx, cy, w, h){
   g.save();
   g.fillStyle = ink;
@@ -1221,21 +1206,18 @@ function brushBadge(g, ink, cx, cy, w, h){
   g.restore();
 }
 
-/* «Искры» по бокам логотипа */
 function drawSparks(g, ink, x, yc, dir){
   g.save();
   g.strokeStyle = ink; g.lineWidth = 8; g.lineCap = 'round';
-  const rays = [[-38, -26], [0, -34], [34, -20]];
-  rays.forEach(([dy, len], i) => {
+  [[-38, 26], [0, 34], [34, 20]].forEach(([dy, len], i) => {
     g.beginPath();
     g.moveTo(x, yc + dy);
-    g.lineTo(x + dir * Math.abs(len), yc + dy - 6 + i * 4);
+    g.lineTo(x + dir * len, yc + dy - 6 + i * 4);
     g.stroke();
   });
   g.restore();
 }
 
-/* Вензель-снежинка над логотипом */
 function drawFlourish(g, ink, cx, cy, r){
   g.save();
   g.translate(cx, cy);
@@ -1252,17 +1234,15 @@ function drawFlourish(g, ink, cx, cy, r){
   g.restore();
 }
 
-/* Отверстие-подвес (еврослот) */
+/* Отверстие-подвес: вырезаем печать насквозь */
 function drawHangHole(g, cx, cy, w, h){
   g.save();
-  g.fillStyle = 'rgba(0,0,0,.32)';
-  roundRectPath(g, cx - w / 2, cy - h / 2, w, h, h / 2); g.fill();
-  g.fillStyle = 'rgba(255,255,255,.35)';
-  roundRectPath(g, cx - w / 2, cy - h / 2 - 3, w, h, h / 2); g.fill();
+  g.globalCompositeOperation = 'destination-out';
+  roundRectPath(g, cx - w / 2, cy - h / 2, w, h, h / 2);
+  g.fill();
   g.restore();
 }
 
-/* Штрихкод */
 function drawBarcode(g, x, yT, w, h){
   g.save();
   g.fillStyle = '#ffffff';
@@ -1278,18 +1258,14 @@ function drawBarcode(g, x, yT, w, h){
   g.restore();
 }
 
-/* Мелкий текст состава — читается как блок печати */
 function finePrint(g, ink, x, yT, w, lines){
   g.save();
-  g.fillStyle = ink; g.globalAlpha = .55;
+  g.fillStyle = ink; g.globalAlpha = .5;
   const rnd = mulberry(3);
-  for(let i = 0; i < lines; i++){
-    g.fillRect(x, yT + i * 16, w * (0.55 + rnd() * 0.45), 5);
-  }
+  for(let i = 0; i < lines; i++) g.fillRect(x, yT + i * 15, w * (0.5 + rnd() * 0.5), 5);
   g.restore();
 }
 
-/* Стрелка с подписью */
 function drawArrowNote(g, ink, x, yc, lines){
   g.save();
   g.fillStyle = ink;
@@ -1308,7 +1284,6 @@ function drawArrowNote(g, ink, x, yc, lines){
   g.restore();
 }
 
-/* Иконки в нижнем ряду */
 function drawIcon(g, kind, ink, cx, cy, r){
   g.save();
   g.translate(cx, cy);
@@ -1335,8 +1310,6 @@ function drawIcon(g, kind, ink, cx, cy, r){
     g.bezierCurveTo(-r * .5, -r * .5, r * .2, -r * .6, r * .48, -r * .42);
     g.bezierCurveTo(r * .5, r * .3, -r * .1, r * .58, -r * .42, r * .42);
     g.fill();
-    g.strokeStyle = '#ffffff'; g.lineWidth = 3;
-    g.beginPath(); g.moveTo(-r * .3, r * .3); g.lineTo(r * .32, -r * .3); g.stroke();
   }
   g.restore();
 }
@@ -1345,30 +1318,26 @@ function drawIcon(g, kind, ink, cx, cy, r){
 function drawScriptLogo(g, p, cx, cy, maxW){
   g.save();
   g.translate(cx, cy);
-  g.rotate(-0.045);
+  g.rotate(-0.04);
   g.fillStyle = p.ink;
-  g.font = 'italic 900 104px Georgia, "Times New Roman", serif';
+  g.font = 'italic 900 108px Georgia, "Times New Roman", serif';
   const t = 'Machos.uz';
   const w = g.measureText(t).width;
-  if(w > maxW) g.scale(maxW / w, maxW / w);
+  const k = w > maxW ? maxW / w : 1;
+  g.scale(k, k);
   g.fillText(t, 0, 0);
   g.font = '700 26px Arial, sans-serif';
-  g.fillText('®', (Math.min(w, maxW)) / 2 + 26, -52);
+  g.fillText('®', w / 2 + 26, -54);
   g.restore();
 }
 
-/* Миска с семечками */
 function drawBowl(g, p, cx, cy, sc){
   const rnd = mulberry(11);
   g.save(); g.translate(cx, cy); g.scale(sc || 1, sc || 1);
-
-  // семечки горкой над миской
   for(let i = 0; i < 34; i++){
-    const a = Math.PI + rnd() * Math.PI;
-    const r = rnd() * 150;
+    const a = Math.PI + rnd() * Math.PI, r = rnd() * 150;
     seedShape(g, Math.cos(a) * r, -40 + Math.sin(a) * 46, 26 + rnd() * 8, rnd() * Math.PI);
   }
-  // миска
   g.fillStyle = '#9c6a3c';
   g.beginPath(); g.ellipse(0, -22, 170, 46, 0, 0, Math.PI * 2); g.fill();
   g.fillStyle = '#b07c47';
@@ -1380,15 +1349,10 @@ function drawBowl(g, p, cx, cy, sc){
   g.beginPath();
   g.moveTo(40, -14); g.bezierCurveTo(70, 80, 120, 60, 168, -22);
   g.lineTo(40, -22); g.closePath(); g.fill();
-
-  // рассыпанные семечки рядом
-  for(let i = 0; i < 9; i++){
-    seedShape(g, 190 + rnd() * 120, 20 + rnd() * 90, 26, rnd() * Math.PI);
-  }
+  for(let i = 0; i < 9; i++) seedShape(g, 190 + rnd() * 120, 20 + rnd() * 90, 26, rnd() * Math.PI);
   g.restore();
 }
 
-/* Круглый штамп качества */
 function drawStamp(g, p, cx, cy, r, lines, footer){
   g.save(); g.translate(cx, cy);
   g.strokeStyle = p.ink; g.lineWidth = 5; g.globalAlpha = .85;
@@ -1409,76 +1373,6 @@ function drawStamp(g, p, cx, cy, r, lines, footer){
   g.restore();
 }
 
-/* Иллюстрация продукта */
-function drawSnackArt(g, p, cx, cy, sc){
-  const rnd = mulberry(7);
-  g.save(); g.translate(cx, cy); g.scale(sc || 1, sc || 1);
-
-  if(p.snack === 'ball'){
-    // четыре шарика курта, как в пачке
-    const pos = [[-92,-92],[92,-92],[-92,92],[92,92]];
-    pos.forEach(([x, y]) => {
-      g.fillStyle = 'rgba(55,45,25,.34)';                 // тень, иначе белое на белом
-      g.beginPath(); g.ellipse(x + 10, y + 78, 78, 22, 0, 0, Math.PI * 2); g.fill();
-
-      const sh = g.createRadialGradient(x - 30, y - 34, 10, x, y, 100);
-      sh.addColorStop(0, '#ffffff');
-      sh.addColorStop(.45, '#efe7d3');
-      sh.addColorStop(1, '#b8ab8c');
-      g.fillStyle = sh;
-      g.beginPath(); g.arc(x, y, 86, 0, Math.PI * 2); g.fill();
-      g.strokeStyle = 'rgba(85,72,45,.7)'; g.lineWidth = 5; g.stroke();
-
-      g.fillStyle = 'rgba(120,105,70,.20)';               // крапинки сушёного курта
-      for(let i = 0; i < 7; i++){
-        const a = rnd() * Math.PI * 2, r = rnd() * 62;
-        g.beginPath(); g.arc(x + Math.cos(a) * r, y + Math.sin(a) * r, 3 + rnd() * 3, 0, Math.PI * 2); g.fill();
-      }
-    });
-  }else if(p.snack === 'stick'){
-    // пучок тонких палочек
-    for(let i = 0; i < 9; i++){
-      const x = -160 + i * 40 + (rnd() - .5) * 10;
-      g.save(); g.translate(x, 0); g.rotate((rnd() - .5) * .06);
-      g.fillStyle = 'rgba(60,50,30,.16)';
-      roundRectPath(g, -9, -226, 26, 460, 13); g.fill();
-      const sg = g.createLinearGradient(-13, 0, 13, 0);
-      sg.addColorStop(0, '#e3cd8e');
-      sg.addColorStop(.45, '#f6ecc9');
-      sg.addColorStop(1, '#d9bf78');
-      g.fillStyle = sg;
-      roundRectPath(g, -13, -230, 26, 460, 13); g.fill();
-      g.strokeStyle = 'rgba(110,85,35,.5)'; g.lineWidth = 3; g.stroke();
-      g.restore();
-    }
-  }else if(p.snack === 'braid'){
-    // сырная косичка: три переплетённые нити
-    for(let s = 0; s < 3; s++){
-      const x0 = -100 + s * 100;
-      for(let i = 0; i < 12; i++){
-        const y = -220 + i * 40;
-        const off = Math.sin((i + s * 1.6) * .9) * 26;
-        g.save();
-        g.translate(x0 + off, y);
-        g.rotate(Math.cos((i + s * 1.6) * .9) * .5);
-        const bg = g.createLinearGradient(0, -22, 0, 22);
-        bg.addColorStop(0, i % 2 ? '#f3e4bb' : '#fbf3dc');
-        bg.addColorStop(1, i % 2 ? '#d9be7e' : '#e6d3a4');
-        g.fillStyle = bg;
-        g.beginPath(); g.ellipse(0, 0, 44, 22, 0, 0, Math.PI * 2); g.fill();
-        g.strokeStyle = 'rgba(110,85,35,.45)'; g.lineWidth = 3; g.stroke();
-        g.restore();
-      }
-    }
-  }else{
-    for(let i = 0; i < 26; i++){
-      const a = rnd() * Math.PI * 2, r = 40 + rnd() * 150;
-      seedShape(g, Math.cos(a) * r, Math.sin(a) * r * .8, 28 + rnd() * 12, rnd() * Math.PI);
-    }
-  }
-  g.restore();
-}
-
 function seedShape(g, x, y, size, rot){
   g.save();
   g.translate(x, y); g.rotate(rot);
@@ -1495,7 +1389,6 @@ function seedShape(g, x, y, size, rot){
   g.restore();
 }
 
-/* Подгоняем кегль под доступную ширину */
 function fitText(g, text, cx, y, maxW, startSize){
   const m = g.font.match(/^(.*?)(\d+(?:\.\d+)?)px\s*(.*)$/);
   const head = m ? m[1] : '800 ';
@@ -1509,7 +1402,29 @@ function fitText(g, text, cx, y, maxW, startSize){
   g.fillText(text, cx, y);
 }
 
-/* детерминированный ГПСЧ — картинка не «прыгает» между перерисовками */
+function trackedText(g, text, cx, y, spacing){
+  const chars = [...text];
+  let total = 0;
+  for(const ch of chars) total += g.measureText(ch).width + spacing;
+  total -= spacing;
+  let x = cx - total / 2;
+  for(const ch of chars){
+    g.fillText(ch, x, y);
+    x += g.measureText(ch).width + spacing;
+  }
+}
+
+function roundRectPath(g, x, y, w, h, r){
+  const rr = Math.min(r, w / 2, h / 2);
+  g.beginPath();
+  g.moveTo(x + rr, y);
+  g.arcTo(x + w, y,     x + w, y + h, rr);
+  g.arcTo(x + w, y + h, x,     y + h, rr);
+  g.arcTo(x,     y + h, x,     y,     rr);
+  g.arcTo(x,     y,     x + w, y,     rr);
+  g.closePath();
+}
+
 function mulberry(seed){
   let a = seed >>> 0;
   return function(){
@@ -1521,94 +1436,213 @@ function mulberry(seed){
 }
 
 /* ============================================================
-   Геометрия пачки (дой-пак)
+   Геометрия упаковки
+   ------------------------------------------------------------
+   Флоу-пак — плоский пакет: по краям плоский шов, к центру
+   «подушка». Печать лежит на лицевой и обратной стороне, в окне
+   она прозрачная, поэтому виден продукт внутри.
    ============================================================ */
-function packGeometry(size){
-  const w = size.w, h = size.h, r = Math.min(0.26, size.w * 0.16);
+function pouchGeometry(size){
+  const w = size.w, h = size.h, r = size.r || 0.16;
 
   const shape = new THREE.Shape();
-  const x = -w / 2, y = -h / 2;
-  shape.moveTo(x + r, y);
-  shape.lineTo(x + w - r, y);
-  shape.quadraticCurveTo(x + w, y, x + w, y + r);
-  shape.lineTo(x + w, y + h - r);
-  shape.quadraticCurveTo(x + w, y + h, x + w - r, y + h);
-  shape.lineTo(x + r, y + h);
-  shape.quadraticCurveTo(x, y + h, x, y + h - r);
-  shape.lineTo(x, y + r);
-  shape.quadraticCurveTo(x, y, x + r, y);
+  const x0 = -w / 2, y0 = -h / 2;
+  shape.moveTo(x0 + r, y0);
+  shape.lineTo(x0 + w - r, y0);
+  shape.quadraticCurveTo(x0 + w, y0, x0 + w, y0 + r);
+  shape.lineTo(x0 + w, y0 + h - r);
+  shape.quadraticCurveTo(x0 + w, y0 + h, x0 + w - r, y0 + h);
+  shape.lineTo(x0 + r, y0 + h);
+  shape.quadraticCurveTo(x0, y0 + h, x0, y0 + h - r);
+  shape.lineTo(x0, y0 + r);
+  shape.quadraticCurveTo(x0, y0, x0 + r, y0);
 
   const geo = new THREE.ExtrudeGeometry(shape, {
     depth: size.d, bevelEnabled: true,
-    bevelThickness: 0.17, bevelSize: 0.17, bevelSegments: 8, curveSegments: 22,
+    bevelThickness: size.d * 0.22, bevelSize: 0.05, bevelSegments: 4, curveSegments: 20,
   });
   geo.center();
 
-  // UV: планарная проекция на лицевую сторону, чтобы этикетка легла ровно
   const pos = geo.attributes.position;
-  geo.computeBoundingBox();
-  const bb = geo.boundingBox;
-  // считаем по размеру самой грани (без фаски), иначе края этикетки срезаются
   const uv = geo.attributes.uv;
   for(let i = 0; i < pos.count; i++){
-    uv.setXY(i, (pos.getX(i) + w / 2) / w, (pos.getY(i) + h / 2) / h);
+    const px = pos.getX(i), py = pos.getY(i);
+    uv.setXY(i, (px + w / 2) / w, (py + h / 2) / h);
+
+    // «подушка»: у шва плоско, к центру полная толщина
+    const ex = 1 - Math.min(1, Math.abs(px) / (w / 2));
+    const ey = 1 - Math.min(1, Math.abs(py) / (h / 2));
+    const edge = clamp(Math.min(ex, ey) / 0.20, 0, 1);
+    pos.setZ(i, pos.getZ(i) * (0.10 + 0.90 * Math.sin(edge * Math.PI / 2)));
   }
   uv.needsUpdate = true;
+  pos.needsUpdate = true;
+  geo.computeVertexNormals();
+  return geo;
+}
 
-  // Сжимаем пачку сверху и снизу — получаются швы, как у настоящего дой-пака
-  const spanY = bb.max.y - bb.min.y;
+/* Дой-пак семечек: та же форма, но со сжатием сверху и снизу */
+function doyGeometry(size){
+  const geo = pouchGeometry(size);
+  const pos = geo.attributes.position;
+  geo.computeBoundingBox();
+  const bb = geo.boundingBox, span = bb.max.y - bb.min.y;
   for(let i = 0; i < pos.count; i++){
-    const py = pos.getY(i);
-    const t = (py - bb.min.y) / spanY;           // 0 — низ, 1 — верх
+    const t = (pos.getY(i) - bb.min.y) / span;
     let f = 1;
-    if(t > 0.76) f = lerp(1, 0.16, (t - 0.76) / 0.24);
-    else if(t < 0.10) f = lerp(0.62, 1, t / 0.10);
-    else f = 1 + 0.14 * Math.sin(Math.PI * ((t - 0.10) / 0.66));  // лёгкий «живот»
+    if(t > 0.80) f = lerp(1, 0.30, (t - 0.80) / 0.20);
+    else if(t < 0.10) f = lerp(0.70, 1, t / 0.10);
     pos.setZ(i, pos.getZ(i) * f);
-    if(t > 0.86) pos.setX(i, pos.getX(i) * lerp(1, 0.985, (t - 0.86) / 0.14));
   }
   pos.needsUpdate = true;
   geo.computeVertexNormals();
   return geo;
 }
 
-/* Геометрия летающих снеков */
+/* ============================================================
+   Продукт внутри пачки
+   ============================================================ */
+function pieceGeometry(kind, s){
+  if(kind === 'cube'){
+    const g = new THREE.BoxGeometry(s, s, s * 0.62, 4, 4, 3);
+    const pos = g.attributes.position;
+    for(let i = 0; i < pos.count; i++){           // скругляем рёбра — курт лепят руками
+      const v = new THREE.Vector3().fromBufferAttribute(pos, i);
+      const n = v.clone().normalize();
+      v.lerp(n.multiplyScalar(s * 0.52), 0.22);
+      pos.setXYZ(i, v.x, v.y, v.z);
+    }
+    g.computeVertexNormals();
+    return g;
+  }
+  if(kind === 'ball')  return new THREE.SphereGeometry(s * 0.5, 20, 14);
+  if(kind === 'baton') return new THREE.CapsuleGeometry(s * 0.20, s * 0.62, 4, 14);
+  if(kind === 'thin')  return new THREE.CapsuleGeometry(0.035, s * 1.5, 3, 10);
+  if(kind === 'braid') return braidGeometry();
+  return new THREE.SphereGeometry(s * 0.5, 16, 12);
+}
+
+/* Косичка: три пряди, свитые между собой */
+function braidGeometry(){
+  const strands = [];
+  for(let k = 0; k < 3; k++){
+    const pts = [];
+    for(let i = 0; i <= 40; i++){
+      const t = i / 40;
+      const a = t * Math.PI * 4 + k * Math.PI * 2 / 3;
+      pts.push(new THREE.Vector3(Math.cos(a) * 0.105, (t - 0.5) * 1.5, Math.sin(a) * 0.06));
+    }
+    strands.push(new THREE.TubeGeometry(new THREE.CatmullRomCurve3(pts), 64, 0.078, 10, false));
+  }
+  // сводим три пряди в одну геометрию
+  const merged = strands[0];
+  const arrays = strands.map(g => g.toNonIndexed());
+  const total = arrays.reduce((n, g) => n + g.attributes.position.count, 0);
+  const posArr = new Float32Array(total * 3);
+  const nrmArr = new Float32Array(total * 3);
+  let off = 0;
+  for(const g of arrays){
+    posArr.set(g.attributes.position.array, off * 3);
+    nrmArr.set(g.attributes.normal.array, off * 3);
+    off += g.attributes.position.count;
+    g.dispose();
+  }
+  strands.forEach(g => g.dispose());
+  const out = new THREE.BufferGeometry();
+  out.setAttribute('position', new THREE.BufferAttribute(posArr, 3));
+  out.setAttribute('normal', new THREE.BufferAttribute(nrmArr, 3));
+  return out;
+}
+
+/* Геометрия летающих кусочков вокруг пачки */
 function snackGeometry(kind){
+  if(kind === 'cube')  return pieceGeometry('cube', 0.12);
+  if(kind === 'baton') return pieceGeometry('baton', 0.22);
+  if(kind === 'ball')  return new THREE.SphereGeometry(0.085, 16, 12);
+  if(kind === 'braid') return new THREE.TorusKnotGeometry(0.085, 0.032, 64, 8, 2, 3);
   if(kind === 'seed'){
     const g = new THREE.SphereGeometry(1, 14, 10);
-    const p = g.attributes.position;
-    for(let i = 0; i < p.count; i++){
-      const y = p.getY(i);
-      const taper = 1 - 0.42 * Math.max(0, y);      // сверху сужается — форма семечки
-      p.setX(i, p.getX(i) * 0.60 * taper);
-      p.setY(i, y * 1.30);
-      p.setZ(i, p.getZ(i) * 0.34 * taper);
+    const pos = g.attributes.position;
+    for(let i = 0; i < pos.count; i++){
+      const yv = pos.getY(i);
+      const taper = 1 - 0.42 * Math.max(0, yv);      // сверху сужается — форма семечки
+      pos.setX(i, pos.getX(i) * 0.60 * taper);
+      pos.setY(i, yv * 1.30);
+      pos.setZ(i, pos.getZ(i) * 0.34 * taper);
     }
     g.computeVertexNormals();
     g.scale(0.085, 0.085, 0.085);
     return g;
   }
-  if(kind === 'ball'){
-    const g = new THREE.SphereGeometry(0.082, 16, 12);
-    const p = g.attributes.position, rnd = mulberry(21);
-    for(let i = 0; i < p.count; i++){
-      const k = 1 + (rnd() - 0.5) * 0.14;           // неровный, как настоящий курт
-      p.setXYZ(i, p.getX(i) * k, p.getY(i) * k, p.getZ(i) * k);
+  return new THREE.CapsuleGeometry(0.028, 0.30, 4, 10);   // thin — сырная палочка
+}
+
+/* Раскладываем продукт в окне пачки */
+function buildContents(p){
+  const group = new THREE.Group();
+  if(p.form === 'doy' || !p.piece) return group;
+
+  const { w, h, d } = p.size;
+  const topY = h / 2 - p.win.t * h;
+  const botY = h / 2 - p.win.b * h;
+  const cy = (topY + botY) / 2;
+  const winH = topY - botY;
+
+  // Подложка: обратная сторона пачки. Без неё в окне видно тёмный фон
+  // страницы, а не продукт.
+  // Изнанка пакета: не плоскость, а короб внутренними гранями наружу —
+  // иначе по краю окна видна тёмная щель вместо стенки.
+  const backColor = new THREE.Color(p.base2).multiplyScalar(0.58);
+  const backing = new THREE.Mesh(
+    new THREE.BoxGeometry(w * 0.99, winH + 0.10, d * 0.9),
+    new THREE.MeshStandardMaterial({
+      color:backColor, roughness:0.95, metalness:0, side:THREE.BackSide,
+    })
+  );
+  backing.position.set(0, cy, 0);
+  group.add(backing);
+
+  const pc = p.piece;
+  const mat = new THREE.MeshStandardMaterial({
+    color: new THREE.Color(pc.color), roughness: 0.85, metalness: 0.02, envMapIntensity: .7,
+  });
+
+  if(pc.kind === 'braid'){
+    const geo = braidGeometry();
+    for(let i = 0; i < pc.cols; i++){
+      const m = new THREE.Mesh(geo, mat);
+      m.position.set((i - (pc.cols - 1) / 2) * pc.sx, cy, 0);
+      m.scale.set(1, winH / 1.6, 1);
+      group.add(m);
     }
-    g.computeVertexNormals();
-    return g;
+    return group;
   }
-  if(kind === 'braid'){
-    // витой узелок читается как плетёный сыр
-    return new THREE.TorusKnotGeometry(0.085, 0.032, 64, 8, 2, 3);
+
+  const geo = pieceGeometry(pc.kind, pc.s);
+  const rnd = mulberry(17);
+
+  for(let r = 0; r < pc.rows; r++){
+    for(let c = 0; c < pc.cols; c++){
+      const m = new THREE.Mesh(geo, mat);
+      m.position.set(
+        (c - (pc.cols - 1) / 2) * pc.sx,
+        cy + ((pc.rows - 1) / 2 - r) * pc.sy,
+        (rnd() - 0.5) * d * 0.16
+      );
+      // кубики и шарики лежат чуть по-разному — руками же лепили
+      if(pc.kind === 'cube')       m.rotation.set((rnd() - .5) * .28, (rnd() - .5) * .3, (rnd() - .5) * .18);
+      else if(pc.kind === 'ball')  m.rotation.set(rnd() * 3, rnd() * 3, rnd() * 3);
+      else                          m.rotation.z = (rnd() - .5) * .05;
+      group.add(m);
+    }
   }
-  return new THREE.CapsuleGeometry(0.028, 0.30, 4, 10);
+  return group;
 }
 
 /* ============================================================
    Сцена
    ============================================================ */
-let renderer, scene, camera, holder, pack, labelMat, foilMat, snacks, halo;
+let renderer, scene, camera, holder, packGroup, pack, contents, film, labelMat, foilMat, filmMat, snacks, halo;
 let activeIndex = 0, baseRotY = 0;
 const pointer = { x:0, y:0, tx:0, ty:0 };
 const snackParams = [];
@@ -1670,9 +1704,9 @@ function buildScene(){
   const pmrem = new THREE.PMREMGenerator(renderer);
   scene.environment = pmrem.fromScene(new RoomEnvironment(), 0.04).texture;
 
-  scene.add(new THREE.AmbientLight(0xffffff, 0.4));
+  scene.add(new THREE.AmbientLight(0xffffff, 0.55));
 
-  const key = new THREE.DirectionalLight(0xfff4e2, 2.4);
+  const key = new THREE.DirectionalLight(0xfff4e2, 1.7);
   key.position.set(4, 6, 6);
   scene.add(key);
 
@@ -1688,12 +1722,29 @@ function buildScene(){
   holder = new THREE.Group();
   scene.add(holder);
 
-  labelMat = new THREE.MeshStandardMaterial({ metalness:0.16, roughness:0.52, envMapIntensity:0.85 });
-  foilMat  = new THREE.MeshStandardMaterial({ metalness:0.72, roughness:0.34, envMapIntensity:1.25 });
+  // Печать: прозрачные места текстуры вырезаются, поэтому в окне
+  // виден продукт внутри пачки, а не заливка.
+  labelMat = new THREE.MeshStandardMaterial({
+    metalness:0.12, roughness:0.50, envMapIntensity:0.75,
+    transparent:true, alphaTest:0.5, side:THREE.DoubleSide,
+  });
+  foilMat = new THREE.MeshStandardMaterial({
+    metalness:0.5, roughness:0.4, envMapIntensity:1.1,
+    transparent:true, alphaTest:0.5, side:THREE.DoubleSide,
+  });
 
-  // группа 0 — лицо и оборот (этикетка), группа 1 — боковины (фольга)
-  pack = new THREE.Mesh(packGeometry(PRODUCTS[0].size), [labelMat, foilMat]);
-  holder.add(pack);
+  packGroup = new THREE.Group();
+  pack = new THREE.Mesh(doyGeometry(PRODUCTS[0].size), [labelMat, foilMat]);
+  packGroup.add(pack);
+
+  // плёнка поверх окна — ловит блики, как настоящий пакет
+  filmMat = new THREE.MeshPhysicalMaterial({
+    color:0xffffff, transparent:true, opacity:0.10,
+    roughness:0.06, metalness:0, clearcoat:1, clearcoatRoughness:0.04,
+    side:THREE.DoubleSide, depthWrite:false,
+  });
+
+  holder.add(packGroup);
 
   /* --- свечение под пачкой --- */
   halo = new THREE.Mesh(
@@ -1718,14 +1769,14 @@ function buildSnacks(p){
     snacks.geometry.dispose();
     snacks.material.dispose();
   }
-  const N = (p.snack === 'stick' || p.snack === 'braid') ? 32 : 46;
+  const N = (p.fly === 'thin' || p.fly === 'braid') ? 26 : 32;
   const mat = new THREE.MeshStandardMaterial({
-    color:new THREE.Color(p.snackColor),
-    roughness: p.snack === 'ball' ? 0.85 : 0.55,
+    color:new THREE.Color(p.flyColor),
+    roughness: 0.78,
     metalness: 0.05,
     envMapIntensity: 1.0,
   });
-  snacks = new THREE.InstancedMesh(snackGeometry(p.snack), mat, N);
+  snacks = new THREE.InstancedMesh(snackGeometry(p.fly), mat, N);
   snacks.instanceMatrix.setUsage(THREE.DynamicDrawUsage);
 
   snackParams.length = 0;
@@ -1968,14 +2019,36 @@ function selectProduct(i){
 
   document.documentElement.style.setProperty('--accent', p.accent);
 
-  if(renderer){
-    pack.geometry.dispose();
-    pack.geometry = packGeometry(p.size);
-    applyLabel(p);
-    foilMat.color.set(p.packB);
-    accentColor.goal.set(p.accent);
-    buildSnacks(p);
+  if(renderer) buildPack(p);
+}
+
+/* Собирает пачку целиком: форма, печать, продукт внутри, плёнка */
+function buildPack(p){
+  pack.geometry.dispose();
+  pack.geometry = p.form === 'doy' ? doyGeometry(p.size) : pouchGeometry(p.size);
+
+  applyLabel(p);
+  foilMat.color.set(p.base2);
+  accentColor.goal.set(p.accent);
+
+  if(contents){
+    packGroup.remove(contents);
+    contents.traverse(o => { if(o.isMesh){ o.geometry.dispose(); o.material.dispose(); } });
   }
+  contents = buildContents(p);
+  packGroup.add(contents);
+
+  if(film){ packGroup.remove(film); film.geometry.dispose(); }
+  if(p.form === 'flow'){
+    const winH = (p.win.b - p.win.t) * p.size.h;
+    film = new THREE.Mesh(new THREE.PlaneGeometry(p.size.w * 0.94, winH), filmMat);
+    film.position.set(0, p.size.h / 2 - (p.win.t + p.win.b) / 2 * p.size.h, p.size.d * 0.42);
+    packGroup.add(film);
+  }else{
+    film = null;
+  }
+
+  buildSnacks(p);
 }
 
 /* Этикетка на 3D-пачке.
