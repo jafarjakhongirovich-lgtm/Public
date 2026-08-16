@@ -907,58 +907,80 @@ function packTexture(p){
   return tex;
 }
 
-/* ---------- жёлтый дой-пак семечек ---------- */
+/* ---------- жёлтый дой-пак семечек (Pista Tuzli) ---------- */
 function drawDoyLabel(g, p, W, H){
-  const y = f => H * f;                       // все отступы — доли высоты
+  const y = f => H * f;
   const art = clamp(H / 1400, 0.85, 1.45);
 
-  g.fillStyle = p.ink;
-  g.font = '800 92px "Arial Black", Arial, sans-serif';
-  fitText(g, 'MACHOS.UZ', W / 2, y(.215), W * .78);
+  // декоративный вензель над логотипом
+  drawFlourish(g, p.ink, W / 2, y(.115), 34);
 
-  // чёрная плашка с названием
-  const bw = W * .56, bx = (W - bw) / 2;
+  // MACHOS.UZ с «искрами» по бокам
   g.fillStyle = p.ink;
-  roundRectPath(g, bx, y(.236), bw, 104, 16); g.fill();
+  g.font = '800 96px "Arial Black", Arial, sans-serif';
+  fitText(g, 'MACHOS.UZ', W / 2, y(.205), W * .74);
+  const lw = Math.min(g.measureText('MACHOS.UZ').width, W * .74);
+  drawSparks(g, p.ink, W / 2 - lw / 2 - 42, y(.19), -1);
+  drawSparks(g, p.ink, W / 2 + lw / 2 + 42, y(.19),  1);
+
+  // чёрная кисть с названием линейки
+  const bw = W * .50;
+  brushBadge(g, p.ink, W / 2, y(.255), bw, 104);
   g.fillStyle = p.packA;
-  g.font = '800 74px "Arial Black", Arial, sans-serif';
-  fitText(g, p.title, W / 2, y(.236) + 78, bw - 50);
+  g.font = '800 76px "Arial Black", Arial, sans-serif';
+  fitText(g, p.title, W / 2, y(.255) + 28, bw - 70);
 
-  // подпись под плашкой
-  g.fillStyle = p.ink;
-  g.font = '700 40px Arial, sans-serif';
-  const subY = y(.236) + 156;
-  trackedText(g, p.titleSub || '', W / 2, subY, 8);
+  // TUZLI между чёрточками
   if(p.titleSub){
-    g.strokeStyle = p.ink; g.lineWidth = 5;
-    const tw = g.measureText(p.titleSub).width + 60;
-    g.beginPath(); g.moveTo(W / 2 - tw, subY - 14); g.lineTo(W / 2 - tw + 46, subY - 14); g.stroke();
-    g.beginPath(); g.moveTo(W / 2 + tw - 46, subY - 14); g.lineTo(W / 2 + tw, subY - 14); g.stroke();
+    const subY = y(.325);
+    g.fillStyle = p.ink;
+    g.font = '700 40px Arial, sans-serif';
+    trackedText(g, p.titleSub, W / 2, subY, 9);
+    const tw = g.measureText(p.titleSub).width + 78;
+    g.strokeStyle = p.ink; g.lineWidth = 5; g.lineCap = 'round';
+    g.beginPath(); g.moveTo(W / 2 - tw, subY - 13); g.lineTo(W / 2 - tw + 44, subY - 13); g.stroke();
+    g.beginPath(); g.moveTo(W / 2 + tw - 44, subY - 13); g.lineTo(W / 2 + tw, subY - 13); g.stroke();
   }
 
-  drawBowl(g, p, W / 2, y(.565), art);
-  drawStamp(g, p, W * .17, y(.645), 96, ['100%', 'ТАБИИЙ']);
+  // миска с семечками
+  drawBowl(g, p, W / 2, y(.50), art * 1.12);
 
+  // штамп качества слева
+  drawStamp(g, p, W * .155, y(.565), 92, ['100%', 'TABIIY'], 'SIFATLI MAHSULOT');
+
+  // стрелка с подписью справа
+  drawArrowNote(g, p.ink, W * .80, y(.425), ['TABIIY', 'va MAZALI']);
+
+  // вес — чёрная кисть
   if(p.weight){
-    g.fillStyle = p.ink;
-    roundRectPath(g, W / 2 - 130, y(.715), 260, 80, 40); g.fill();
-    g.fillStyle = p.packA;
+    brushBadge(g, p.ink, W / 2, y(.655), 250, 76);
+    g.fillStyle = '#ffffff';
     g.font = '800 46px Arial, sans-serif';
-    g.fillText(p.weight, W / 2, y(.715) + 56);
+    g.fillText(p.weight, W / 2, y(.655) + 17);
   }
 
-  // три иконки-преимущества внизу
-  const labels = [['TABIIY','QURITILGAN'], ['FAYDALI VA','MAZALI'], ['SIFATLI','MAHSULOT']];
-  labels.forEach((tx, i) => {
+  // нижний ряд иконок с разделителями
+  const cols = [
+    { icon:'sun',  t:['TABIIY','QURITILGAN'] },
+    { icon:'heart',t:['FAYDALI VA','MAZALI'] },
+    { icon:'leaf', t:['SIFATLI','MAHSULOT'] },
+  ];
+  cols.forEach((col, i) => {
     const x = W * (0.22 + i * 0.28);
-    g.strokeStyle = p.ink; g.globalAlpha = .8; g.lineWidth = 5;
-    g.beginPath(); g.arc(x, y(.845), 40, 0, Math.PI * 2); g.stroke();
-    g.globalAlpha = 1;
+    drawIcon(g, col.icon, p.ink, x, y(.775), 40);
     g.fillStyle = p.ink;
-    g.font = '700 22px Arial, sans-serif';
-    g.fillText(tx[0], x, y(.905));
-    g.fillText(tx[1], x, y(.925));
+    g.font = '700 23px Arial, sans-serif';
+    g.fillText(col.t[0], x, y(.835));
+    g.fillText(col.t[1], x, y(.858));
+    if(i < 2){
+      g.strokeStyle = p.ink; g.globalAlpha = .35; g.lineWidth = 3;
+      g.beginPath(); g.moveTo(x + W * .14, y(.745)); g.lineTo(x + W * .14, y(.865)); g.stroke();
+      g.globalAlpha = 1;
+    }
   });
+
+  // мелкий текст состава внизу
+  finePrint(g, p.ink, W * .12, y(.905), W * .76, 5);
 }
 
 /* ---------- флоу-пак курта и сыра ---------- */
@@ -966,43 +988,219 @@ function drawFlowLabel(g, p, W, H){
   const y = f => H * f;
   const art = clamp(H / 1400, 0.85, 1.45);
 
-  // белая волна по центру — как на реальной упаковке
-  g.fillStyle = 'rgba(255,255,255,.93)';
-  g.beginPath();
-  g.moveTo(0, y(.37));
-  g.bezierCurveTo(W * .35, y(.30), W * .65, y(.44), W, y(.355));
-  g.lineTo(W, y(.80));
-  g.bezierCurveTo(W * .62, y(.865), W * .34, y(.735), 0, y(.80));
-  g.closePath();
-  g.fill();
+  // отверстие-подвес в шапке
+  drawHangHole(g, W / 2, y(.045), 46, 16);
 
-  drawScriptLogo(g, p, W / 2, y(.215), W * .74);
+  // рукописный логотип
+  drawScriptLogo(g, p, W / 2, y(.155), W * .70);
 
-  // название продукта
+  // название продукта под логотипом
   g.fillStyle = p.ink;
   const lines = [p.title, p.titleSub].filter(Boolean);
-  const size = lines.length > 1 ? 74 : 92;
+  const size = lines.length > 1 ? 62 : 76;
   lines.forEach((ln, i) => {
     g.font = `800 ${size}px "Arial Black", Arial, sans-serif`;
-    fitText(g, ln, W / 2, y(.285) + i * (size + 6), W * .72, size);
+    fitText(g, ln, W / 2, y(.225) + i * (size + 4), W * .66, size);
   });
 
-  drawSnackArt(g, p, W / 2, y(.585), art);
+  // мелкий текст состава и штрихкод в шапке
+  finePrint(g, p.ink, W * .07, y(.285), W * .34, 4);
+  finePrint(g, p.ink, W * .59, y(.285), W * .34, 4);
+  drawBarcode(g, W * .62, y(.072), W * .22, H * .038);
 
-  if(p.weight){
-    g.fillStyle = p.ink;
-    roundRectPath(g, W / 2 - 110, y(.822), 220, 74, 37); g.fill();
-    g.fillStyle = p.packA;
-    g.font = '800 42px Arial, sans-serif';
-    g.fillText(p.weight, W / 2, y(.822) + 52);
+  // прозрачное окно с продуктом
+  const wTop = y(.335), wBot = y(.80);
+  g.save();
+  g.beginPath();
+  if(p.snack === 'ball'){
+    // у курта плёнка просто прозрачная, без волны
+    g.rect(0, wTop, W, wBot - wTop);
+  }else{
+    // у сыра окно обрамлено белой волной, как на пачке
+    g.moveTo(0, wTop);
+    g.bezierCurveTo(W * .34, wTop - H * .055, W * .66, wTop + H * .055, W, wTop - H * .02);
+    g.lineTo(W, wBot - H * .02);
+    g.bezierCurveTo(W * .64, wBot + H * .055, W * .34, wBot - H * .05, 0, wBot);
+    g.closePath();
   }
+  g.clip();
+
+  const win = g.createLinearGradient(0, wTop, 0, wBot);
+  win.addColorStop(0,  '#f7f6f2');
+  win.addColorStop(.5, '#eceae3');
+  win.addColorStop(1,  '#f5f3ee');
+  g.fillStyle = win;
+  g.fillRect(0, wTop - H * .06, W, (wBot - wTop) + H * .12);
+
+  drawSnackArt(g, p, W / 2, (wTop + wBot) / 2, art);
+
+  // блики на плёнке
+  g.globalAlpha = .16;
+  g.fillStyle = 'rgba(255,255,255,.9)';
+  g.save();
+  g.translate(W * .2, wTop); g.rotate(-.22);
+  g.fillRect(0, 0, W * .10, (wBot - wTop) * 1.5);
+  g.translate(W * .5, 0);
+  g.fillRect(0, 0, W * .05, (wBot - wTop) * 1.5);
+  g.restore();
+  g.globalAlpha = 1;
+  g.restore();
 
   // чёрная лента NATURAL PRODUCT
+  const stripH = Math.max(54, H * .042);
   g.fillStyle = p.ink;
-  g.fillRect(0, y(.905), W, Math.max(52, H * .045));
+  g.fillRect(0, y(.805), W, stripH);
   g.fillStyle = '#ffffff';
-  g.font = '700 27px Arial, sans-serif';
-  trackedText(g, 'NATURAL PRODUCT · NATURAL PRODUCT', W / 2, y(.905) + Math.max(36, H * .031), 3);
+  g.font = '700 26px Arial, sans-serif';
+  trackedText(g, 'NATURAL PRODUCT · NATURAL PRODUCT · NATURAL', W / 2, y(.805) + stripH * .68, 2);
+
+  // вес
+  if(p.weight){
+    brushBadge(g, p.ink, W / 2, y(.885), 220, 72);
+    g.fillStyle = '#ffffff';
+    g.font = '800 42px Arial, sans-serif';
+    g.fillText(p.weight, W / 2, y(.885) + 15);
+  }
+
+  finePrint(g, p.ink, W * .12, y(.945), W * .76, 3);
+}
+
+/* ---------- элементы упаковки ---------- */
+
+/* Чёрная плашка «мазком кисти» */
+function brushBadge(g, ink, cx, cy, w, h){
+  g.save();
+  g.fillStyle = ink;
+  g.beginPath();
+  const x = cx - w / 2, yT = cy - h / 2, r = h * .28;
+  g.moveTo(x + r, yT);
+  g.lineTo(x + w - r, yT - h * .08);
+  g.quadraticCurveTo(x + w + h * .12, cy, x + w - r, yT + h + h * .05);
+  g.lineTo(x + r, yT + h);
+  g.quadraticCurveTo(x - h * .12, cy, x + r, yT);
+  g.closePath();
+  g.fill();
+  g.restore();
+}
+
+/* «Искры» по бокам логотипа */
+function drawSparks(g, ink, x, yc, dir){
+  g.save();
+  g.strokeStyle = ink; g.lineWidth = 8; g.lineCap = 'round';
+  const rays = [[-38, -26], [0, -34], [34, -20]];
+  rays.forEach(([dy, len], i) => {
+    g.beginPath();
+    g.moveTo(x, yc + dy);
+    g.lineTo(x + dir * Math.abs(len), yc + dy - 6 + i * 4);
+    g.stroke();
+  });
+  g.restore();
+}
+
+/* Вензель-снежинка над логотипом */
+function drawFlourish(g, ink, cx, cy, r){
+  g.save();
+  g.translate(cx, cy);
+  g.strokeStyle = ink; g.lineWidth = 5; g.lineCap = 'round';
+  for(let i = 0; i < 8; i++){
+    g.rotate(Math.PI / 4);
+    g.beginPath(); g.moveTo(0, -r * .35); g.lineTo(0, -r); g.stroke();
+    g.beginPath();
+    g.moveTo(-r * .16, -r * .72); g.lineTo(0, -r * .9); g.lineTo(r * .16, -r * .72);
+    g.stroke();
+  }
+  g.fillStyle = ink;
+  g.beginPath(); g.arc(0, 0, r * .17, 0, Math.PI * 2); g.fill();
+  g.restore();
+}
+
+/* Отверстие-подвес (еврослот) */
+function drawHangHole(g, cx, cy, w, h){
+  g.save();
+  g.fillStyle = 'rgba(0,0,0,.32)';
+  roundRectPath(g, cx - w / 2, cy - h / 2, w, h, h / 2); g.fill();
+  g.fillStyle = 'rgba(255,255,255,.35)';
+  roundRectPath(g, cx - w / 2, cy - h / 2 - 3, w, h, h / 2); g.fill();
+  g.restore();
+}
+
+/* Штрихкод */
+function drawBarcode(g, x, yT, w, h){
+  g.save();
+  g.fillStyle = '#ffffff';
+  roundRectPath(g, x - 8, yT - 8, w + 16, h + 16, 6); g.fill();
+  g.fillStyle = '#111';
+  const rnd = mulberry(5);
+  let cx = x;
+  while(cx < x + w - 4){
+    const bw = 2 + rnd() * 6;
+    g.fillRect(cx, yT, bw, h);
+    cx += bw + 2 + rnd() * 5;
+  }
+  g.restore();
+}
+
+/* Мелкий текст состава — читается как блок печати */
+function finePrint(g, ink, x, yT, w, lines){
+  g.save();
+  g.fillStyle = ink; g.globalAlpha = .55;
+  const rnd = mulberry(3);
+  for(let i = 0; i < lines; i++){
+    g.fillRect(x, yT + i * 16, w * (0.55 + rnd() * 0.45), 5);
+  }
+  g.restore();
+}
+
+/* Стрелка с подписью */
+function drawArrowNote(g, ink, x, yc, lines){
+  g.save();
+  g.fillStyle = ink;
+  g.font = '700 25px Arial, sans-serif';
+  g.fillText(lines[0], x, yc);
+  g.fillText(lines[1], x, yc + 28);
+  g.strokeStyle = ink; g.lineWidth = 4; g.lineCap = 'round';
+  g.beginPath();
+  g.moveTo(x - 40, yc + 42);
+  g.quadraticCurveTo(x - 70, yc + 70, x - 96, yc + 78);
+  g.stroke();
+  g.beginPath();
+  g.moveTo(x - 96, yc + 78); g.lineTo(x - 78, yc + 74);
+  g.moveTo(x - 96, yc + 78); g.lineTo(x - 86, yc + 60);
+  g.stroke();
+  g.restore();
+}
+
+/* Иконки в нижнем ряду */
+function drawIcon(g, kind, ink, cx, cy, r){
+  g.save();
+  g.translate(cx, cy);
+  g.strokeStyle = ink; g.fillStyle = ink; g.lineWidth = 4; g.lineCap = 'round';
+  g.globalAlpha = .85;
+  g.beginPath(); g.arc(0, 0, r, 0, Math.PI * 2); g.stroke();
+  g.globalAlpha = 1;
+
+  if(kind === 'sun'){
+    g.beginPath(); g.arc(0, 0, r * .34, 0, Math.PI * 2); g.fill();
+    for(let i = 0; i < 8; i++){
+      g.rotate(Math.PI / 4);
+      g.beginPath(); g.moveTo(0, -r * .5); g.lineTo(0, -r * .68); g.stroke();
+    }
+  }else if(kind === 'heart'){
+    g.beginPath();
+    g.moveTo(0, r * .42);
+    g.bezierCurveTo(-r * .9, -r * .1, -r * .38, -r * .72, 0, -r * .26);
+    g.bezierCurveTo(r * .38, -r * .72, r * .9, -r * .1, 0, r * .42);
+    g.fill();
+  }else{
+    g.beginPath();
+    g.moveTo(-r * .42, r * .42);
+    g.bezierCurveTo(-r * .5, -r * .5, r * .2, -r * .6, r * .48, -r * .42);
+    g.bezierCurveTo(r * .5, r * .3, -r * .1, r * .58, -r * .42, r * .42);
+    g.fill();
+    g.strokeStyle = '#ffffff'; g.lineWidth = 3;
+    g.beginPath(); g.moveTo(-r * .3, r * .3); g.lineTo(r * .32, -r * .3); g.stroke();
+  }
+  g.restore();
 }
 
 /* Приближение рукописного логотипа Machos.uz */
@@ -1053,17 +1251,23 @@ function drawBowl(g, p, cx, cy, sc){
 }
 
 /* Круглый штамп качества */
-function drawStamp(g, p, cx, cy, r, lines){
+function drawStamp(g, p, cx, cy, r, lines, footer){
   g.save(); g.translate(cx, cy);
   g.strokeStyle = p.ink; g.lineWidth = 5; g.globalAlpha = .85;
   g.beginPath(); g.arc(0, 0, r, 0, Math.PI * 2); g.stroke();
   g.beginPath(); g.arc(0, 0, r - 12, 0, Math.PI * 2); g.stroke();
   g.globalAlpha = 1;
   g.fillStyle = p.ink;
-  g.font = '800 30px Arial, sans-serif';
-  g.fillText(lines[0], 0, -2);
+  g.font = '800 32px Arial, sans-serif';
+  g.fillText(lines[0], 0, -4);
   g.font = '700 22px Arial, sans-serif';
-  g.fillText(lines[1], 0, 30);
+  g.fillText(lines[1], 0, 26);
+  if(footer){
+    g.globalAlpha = .7;
+    g.font = '600 13px Arial, sans-serif';
+    g.fillText(footer, 0, 54);
+    g.globalAlpha = 1;
+  }
   g.restore();
 }
 
@@ -1076,16 +1280,16 @@ function drawSnackArt(g, p, cx, cy, sc){
     // четыре шарика курта, как в пачке
     const pos = [[-92,-92],[92,-92],[-92,92],[92,92]];
     pos.forEach(([x, y]) => {
-      g.fillStyle = 'rgba(60,50,30,.22)';                 // тень, иначе белое на белом
-      g.beginPath(); g.ellipse(x + 8, y + 74, 74, 20, 0, 0, Math.PI * 2); g.fill();
+      g.fillStyle = 'rgba(55,45,25,.34)';                 // тень, иначе белое на белом
+      g.beginPath(); g.ellipse(x + 10, y + 78, 78, 22, 0, 0, Math.PI * 2); g.fill();
 
-      const sh = g.createRadialGradient(x - 30, y - 34, 10, x, y, 96);
+      const sh = g.createRadialGradient(x - 30, y - 34, 10, x, y, 100);
       sh.addColorStop(0, '#ffffff');
-      sh.addColorStop(.55, '#f2ecdc');
-      sh.addColorStop(1, '#cfc5ac');
+      sh.addColorStop(.45, '#efe7d3');
+      sh.addColorStop(1, '#b8ab8c');
       g.fillStyle = sh;
       g.beginPath(); g.arc(x, y, 86, 0, Math.PI * 2); g.fill();
-      g.strokeStyle = 'rgba(105,92,62,.55)'; g.lineWidth = 4; g.stroke();
+      g.strokeStyle = 'rgba(85,72,45,.7)'; g.lineWidth = 5; g.stroke();
 
       g.fillStyle = 'rgba(120,105,70,.20)';               // крапинки сушёного курта
       for(let i = 0; i < 7; i++){
@@ -1278,7 +1482,7 @@ const accentColor = { cur:new THREE.Color(PRODUCTS[0].accent), goal:new THREE.Co
 const POSES = {
   hero:      { x: 2.10, y: 0.00, rot:-0.44, scale:0.94 },
   about:     { x:-2.30, y: 0.05, rot: 0.62, scale:0.70 },
-  products:  { x:-2.15, y: 0.00, rot:-0.26, scale:0.94 },
+  products:  { x:-2.28, y: 0.00, rot:-0.26, scale:0.86 },
   process:   { x: 2.30, y: 0.05, rot: 0.60, scale:0.70 },
   wholesale: { x:-2.25, y: 0.00, rot:-0.58, scale:0.72 },
   contacts:  { x: 2.15, y: 0.00, rot: 0.48, scale:0.74 },
@@ -1641,25 +1845,40 @@ function selectProduct(i){
    иначе рисуем макет на canvas. Фото должно быть лицевой стороной,
    снятой ровно, без фона (вертикальное, примерно 3:4). */
 const texLoader = new THREE.TextureLoader();
+const labelCache = new Map();       // готовая текстура на продукт — ищем файл один раз
+
 function applyLabel(p){
-  const setMap = (tex) => {
-    if(labelMat.map) labelMat.map.dispose();
+  const use = (tex) => {
     tex.colorSpace = THREE.SRGBColorSpace;
     tex.anisotropy = 8;
+    labelCache.set(p.id, tex);
+    if(PRODUCTS[activeIndex].id !== p.id) return;   // пользователь успел переключиться
     labelMat.map = tex;
     labelMat.needsUpdate = true;
   };
 
-  if(p.photo){
-    texLoader.load(
-      p.photo,
-      setMap,
-      undefined,
-      () => { console.warn('Не удалось загрузить фото пачки:', p.photo); setMap(packTexture(p)); }
-    );
-  }else{
-    setMap(packTexture(p));
-  }
+  const cached = labelCache.get(p.id);
+  if(cached){ labelMat.map = cached; labelMat.needsUpdate = true; return; }
+
+  // Порядок поиска: явно указанный photo → assets/<id>.(png|jpg|jpeg|webp)
+  // → нарисованная этикетка. Так фото достаточно просто положить в папку.
+  const candidates = p.photo
+    ? [p.photo]
+    : ['png','jpg'].map(ext => `assets/${p.id}.${ext}`);
+
+  // пока файл ищется, показываем нарисованную этикетку — без пустой пачки
+  const drawn = packTexture(p);
+  drawn.colorSpace = THREE.SRGBColorSpace;
+  drawn.anisotropy = 8;
+  labelMat.map = drawn;
+  labelMat.needsUpdate = true;
+
+  let i = 0;
+  const tryNext = () => {
+    if(i >= candidates.length){ labelCache.set(p.id, drawn); return; }
+    texLoader.load(candidates[i++], (tex) => { drawn.dispose(); use(tex); }, undefined, tryNext);
+  };
+  tryNext();
 }
 
 /* форма */
