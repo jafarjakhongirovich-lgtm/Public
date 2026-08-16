@@ -1,0 +1,1725 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
+<title>Machos.Uz — семечки, курт, сырные палочки</title>
+<meta name="description" content="Machos.Uz — снеки из Узбекистана: семечки свежей обжарки, настоящий курт и сырные палочки. Интерактивная 3D-презентация продукции, оптовые поставки." />
+<meta name="theme-color" content="#0a0908" />
+
+<meta property="og:type" content="website" />
+<meta property="og:title" content="Machos.Uz — снеки из Узбекистана" />
+<meta property="og:description" content="Семечки, курт и сырные палочки. Хрустит по-нашему." />
+<meta property="og:locale" content="ru_RU" />
+
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+<link href="https://fonts.googleapis.com/css2?family=Unbounded:wght@400;600;800&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet" />
+
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='24' fill='%230a0908'/><text x='50' y='70' font-size='58' font-family='Arial,sans-serif' font-weight='bold' fill='%23f5a623' text-anchor='middle'>M</text></svg>" />
+
+<style>
+/* ============================================================
+   Machos.Uz — дизайн-система
+   Акцент (--accent) переключается вместе с выбранным продуктом
+   ============================================================ */
+:root{
+  --bg:        #0a0908;
+  --bg-2:      #100e0c;
+  --line:      rgba(255,255,255,.11);
+  --line-soft: rgba(255,255,255,.06);
+
+  --text:  #f7f3ec;
+  --muted: #a49c90;
+  --dim:   #6e675d;
+
+  --accent: #f5a623;
+
+  --display: "Unbounded", "Arial Black", system-ui, sans-serif;
+  --sans: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+
+  --pad: clamp(20px, 5vw, 72px);
+  --maxw: 1280px;
+  --r: 18px;
+  --ease: cubic-bezier(.22,.61,.36,1);
+}
+
+*,*::before,*::after{ box-sizing:border-box; }
+html{ scroll-behavior:smooth; -webkit-text-size-adjust:100%; }
+@media (prefers-reduced-motion: reduce){ html{ scroll-behavior:auto; } }
+
+body{
+  margin:0; background:var(--bg); color:var(--text);
+  font-family:var(--sans); font-weight:300; font-size:16px; line-height:1.65;
+  -webkit-font-smoothing:antialiased; overflow-x:hidden;
+}
+img,canvas{ display:block; max-width:100%; }
+a{ color:inherit; text-decoration:none; }
+button{ font:inherit; color:inherit; }
+:focus-visible{ outline:2px solid var(--accent); outline-offset:3px; border-radius:6px; }
+::selection{ background:var(--accent); color:#12100c; }
+
+/* фоновая заливка */
+body::before{
+  content:""; position:fixed; inset:0; z-index:0; pointer-events:none;
+  background:
+    radial-gradient(85vw 65vh at 50% -12%, color-mix(in srgb, var(--accent) 14%, transparent), transparent 62%),
+    radial-gradient(55vw 55vh at 100% 45%, rgba(255,255,255,.05), transparent 60%),
+    linear-gradient(180deg, #0a0908 0%, #12100d 48%, #0a0908 100%);
+  transition:background .9s var(--ease);
+}
+/* зерно */
+body::after{
+  content:""; position:fixed; inset:0; z-index:60; pointer-events:none;
+  opacity:.26; mix-blend-mode:overlay;
+  background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='140' height='140'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3'/></filter><rect width='140' height='140' filter='url(%23n)' opacity='.5'/></svg>");
+}
+
+/* ============================================================
+   3D-сцена и запасной вариант
+   ============================================================ */
+#stage{ position:fixed; inset:0; z-index:1; pointer-events:none; transition:opacity .6s var(--ease); }
+#stage canvas{ width:100%; height:100%; }
+
+#fallback{ position:fixed; inset:0; z-index:1; display:none; place-items:center; pointer-events:none; }
+#fallback.on{ display:grid; }
+.fb-pack{
+  width:min(34vw,260px); aspect-ratio:.7; border-radius:16px 16px 26px 26px;
+  background:linear-gradient(165deg, color-mix(in srgb, var(--accent) 85%, #fff), color-mix(in srgb, var(--accent) 40%, #000));
+  box-shadow:0 60px 130px rgba(0,0,0,.65), inset 0 0 70px rgba(255,255,255,.14);
+  display:grid; place-content:center;
+  font-family:var(--display); font-weight:800; color:#1a1206; letter-spacing:.16em;
+}
+
+#glow{
+  position:fixed; z-index:2; width:520px; height:520px; margin:-260px 0 0 -260px;
+  border-radius:50%; pointer-events:none; opacity:0; will-change:transform;
+  background:radial-gradient(circle, color-mix(in srgb, var(--accent) 20%, transparent), transparent 66%);
+  transition:opacity .6s var(--ease), background .8s var(--ease);
+}
+@media (hover:hover) and (pointer:fine){ #glow.on{ opacity:.55; } }
+
+/* ============================================================
+   Прелоадер
+   ============================================================ */
+#preloader{
+  position:fixed; inset:0; z-index:100; display:grid; place-content:center; justify-items:center;
+  gap:22px; background:var(--bg); transition:opacity .8s var(--ease), visibility .8s;
+}
+#preloader.done{ opacity:0; visibility:hidden; }
+.pre-mark{
+  font-family:var(--display); font-weight:800; font-size:clamp(30px,6vw,52px);
+  letter-spacing:.14em; text-indent:.14em;
+}
+.pre-mark i{ color:var(--accent); font-style:normal; }
+.pre-bar{ width:min(220px,52vw); height:2px; background:var(--line); overflow:hidden; border-radius:2px; }
+.pre-bar i{ display:block; height:100%; width:0; background:var(--accent); transition:width .35s var(--ease); }
+.pre-txt{ font-size:11px; letter-spacing:.26em; text-transform:uppercase; color:var(--dim); }
+
+/* ============================================================
+   Навигация
+   ============================================================ */
+.skip{ position:absolute; left:-9999px; top:0; z-index:120; background:var(--accent); color:#12100c; padding:12px 18px; }
+.skip:focus{ left:0; }
+
+header.nav{
+  position:fixed; inset:0 0 auto 0; z-index:50;
+  display:flex; align-items:center; justify-content:space-between; gap:20px;
+  padding:18px var(--pad); border-bottom:1px solid transparent;
+  transition:background .4s var(--ease), backdrop-filter .4s var(--ease), border-color .4s var(--ease), padding .4s var(--ease);
+}
+header.nav.solid{
+  background:rgba(10,9,8,.74); backdrop-filter:blur(14px) saturate(140%);
+  -webkit-backdrop-filter:blur(14px) saturate(140%);
+  border-bottom-color:var(--line-soft); padding-block:12px;
+}
+.brand{
+  font-family:var(--display); font-weight:800; font-size:19px;
+  letter-spacing:.10em; white-space:nowrap; display:flex; align-items:baseline; gap:2px;
+}
+.brand i{ color:var(--accent); font-style:normal; transition:color .6s var(--ease); }
+
+.nav-links{ display:flex; gap:30px; align-items:center; }
+.nav-links a{
+  font-size:13px; letter-spacing:.06em; color:var(--muted);
+  position:relative; padding:6px 0; transition:color .3s var(--ease);
+}
+.nav-links a::after{
+  content:""; position:absolute; left:0; bottom:0; height:1px; width:0;
+  background:var(--accent); transition:width .35s var(--ease);
+}
+.nav-links a:hover{ color:var(--text); }
+.nav-links a:hover::after{ width:100%; }
+
+.btn{
+  display:inline-flex; align-items:center; justify-content:center; gap:10px;
+  padding:14px 26px; border-radius:100px; border:1px solid var(--line);
+  font-size:12px; font-weight:500; letter-spacing:.10em; text-transform:uppercase;
+  cursor:pointer; background:transparent;
+  transition:background .35s var(--ease), color .35s var(--ease), border-color .35s var(--ease), transform .18s var(--ease);
+}
+.btn:hover{ border-color:var(--accent); color:var(--accent); }
+.btn:active{ transform:translateY(1px); }
+.btn.primary{ background:var(--accent); border-color:var(--accent); color:#12100c; font-weight:600; }
+.btn.primary:hover{ background:transparent; color:var(--accent); }
+.nav .btn{ padding:11px 22px; }
+
+.burger{
+  display:none; width:44px; height:44px; border:1px solid var(--line);
+  border-radius:50%; background:transparent; cursor:pointer; position:relative;
+}
+.burger span{ position:absolute; left:13px; width:18px; height:1.5px; background:var(--text); transition:transform .35s var(--ease); }
+.burger span:nth-child(1){ top:18px; }
+.burger span:nth-child(2){ top:25px; }
+.burger.open span:nth-child(1){ transform:translateY(3.5px) rotate(45deg); }
+.burger.open span:nth-child(2){ transform:translateY(-3.5px) rotate(-45deg); }
+
+@media (max-width:900px){
+  .nav-links{
+    position:fixed; inset:0; flex-direction:column; justify-content:center; gap:26px;
+    background:rgba(10,9,8,.97); backdrop-filter:blur(20px);
+    opacity:0; visibility:hidden; transition:opacity .4s var(--ease), visibility .4s;
+  }
+  .nav-links.open{ opacity:1; visibility:visible; }
+  .nav-links a{ font-size:20px; font-family:var(--display); font-weight:400; }
+  .nav .btn{ display:none; }
+  .burger{ display:block; z-index:51; }
+}
+
+/* ============================================================
+   Секции
+   ============================================================ */
+main{ position:relative; z-index:3; }
+section{ padding:clamp(84px,13vh,150px) var(--pad); position:relative; }
+.wrap{ max-width:var(--maxw); margin-inline:auto; width:100%; }
+
+.eyebrow{
+  display:inline-flex; align-items:center; gap:10px; margin:0 0 20px;
+  font-size:11px; letter-spacing:.26em; text-transform:uppercase; color:var(--accent);
+  transition:color .6s var(--ease);
+}
+.eyebrow::before{ content:""; width:26px; height:1px; background:currentColor; opacity:.75; }
+
+h1,h2,h3{ font-family:var(--display); margin:0; line-height:1.05; font-weight:800; }
+h1{ font-size:clamp(40px,8.4vw,104px); letter-spacing:-.02em; }
+h2{ font-size:clamp(28px,4.6vw,56px); letter-spacing:-.015em; }
+h3{ font-size:clamp(17px,2vw,21px); letter-spacing:-.005em; font-weight:600; line-height:1.3; }
+.lead{ color:var(--muted); font-size:clamp(15px,1.6vw,18px); max-width:54ch; }
+.hl{ color:var(--accent); transition:color .6s var(--ease); }
+
+.rv{ opacity:0; transform:translateY(26px); transition:opacity .9s var(--ease), transform .9s var(--ease); }
+.rv.in{ opacity:1; transform:none; }
+.rv.d1{ transition-delay:.10s } .rv.d2{ transition-delay:.20s }
+.rv.d3{ transition-delay:.30s } .rv.d4{ transition-delay:.40s }
+@media (prefers-reduced-motion: reduce){
+  .rv{ opacity:1 !important; transform:none !important; transition:none !important; }
+}
+
+/* ============================================================
+   Hero
+   ============================================================ */
+#hero{ min-height:100svh; display:grid; align-content:center; padding-top:clamp(120px,17vh,180px); }
+.hero-grid{ display:grid; grid-template-columns:1fr auto; gap:40px; align-items:end; }
+.hero-title .l2{ display:block; padding-left:clamp(0px,9vw,150px); color:var(--accent); transition:color .6s var(--ease); }
+.hero-sub{ margin-top:32px; }
+.hero-actions{ display:flex; flex-wrap:wrap; gap:14px; margin-top:36px; }
+.hero-side{
+  writing-mode:vertical-rl; font-size:11px; letter-spacing:.26em;
+  text-transform:uppercase; color:var(--dim); padding-bottom:8px;
+}
+@media (max-width:900px){ .hero-side{ display:none; } .hero-grid{ grid-template-columns:1fr; } }
+/* на узком экране пачка занимает верх экрана, текст уходит под неё */
+@media (max-aspect-ratio:85/100){
+  #hero{ align-content:end; padding-top:46svh; padding-bottom:14svh; }
+  #products .prod-stage{ min-height:38svh; }
+}
+
+.scroll-hint{
+  position:absolute; left:var(--pad); bottom:30px;
+  display:flex; align-items:center; gap:12px;
+  font-size:10px; letter-spacing:.26em; text-transform:uppercase; color:var(--dim);
+}
+.scroll-hint i{ display:block; width:52px; height:1px; background:var(--line); position:relative; overflow:hidden; }
+.scroll-hint i::after{ content:""; position:absolute; inset:0; background:var(--accent); animation:slide 2.6s var(--ease) infinite; }
+@keyframes slide{ 0%{transform:translateX(-100%)} 60%,100%{transform:translateX(100%)} }
+@media (prefers-reduced-motion: reduce){ .scroll-hint i::after{ animation:none; opacity:.4 } }
+
+/* ============================================================
+   Бегущая строка
+   ============================================================ */
+.ticker{
+  position:relative; z-index:3; overflow:hidden; border-block:1px solid var(--line-soft);
+  background:rgba(10,9,8,.55); backdrop-filter:blur(8px); padding:16px 0;
+  -webkit-mask-image:linear-gradient(90deg,transparent,#000 8%,#000 92%,transparent);
+          mask-image:linear-gradient(90deg,transparent,#000 8%,#000 92%,transparent);
+}
+.ticker ul{
+  list-style:none; margin:0; padding:0; display:flex; gap:52px; width:max-content;
+  animation:marquee 34s linear infinite;
+}
+.ticker li{
+  font-family:var(--display); font-weight:400; font-size:clamp(14px,1.7vw,19px);
+  letter-spacing:.06em; color:var(--muted); display:flex; align-items:center; gap:52px; white-space:nowrap;
+}
+.ticker li::after{ content:"◆"; color:var(--accent); font-size:.6em; }
+@keyframes marquee{ from{ transform:translateX(0) } to{ transform:translateX(-50%) } }
+@media (prefers-reduced-motion: reduce){ .ticker ul{ animation:none } }
+
+/* ============================================================
+   Факты
+   ============================================================ */
+.facts{ display:grid; grid-template-columns:repeat(4,1fr); gap:1px; background:var(--line-soft); }
+.fact{ background:var(--bg); padding:32px 26px; }
+.fact b{ display:block; font-family:var(--display); font-weight:800; font-size:clamp(28px,3.8vw,44px); letter-spacing:-.02em; }
+.fact span{ font-size:12px; letter-spacing:.10em; color:var(--dim); text-transform:uppercase; }
+@media (max-width:760px){ .facts{ grid-template-columns:repeat(2,1fr); } }
+
+/* ============================================================
+   Карточки
+   ============================================================ */
+.cards{ display:grid; grid-template-columns:repeat(3,1fr); gap:20px; margin-top:60px; }
+@media (max-width:900px){ .cards{ grid-template-columns:1fr; } }
+.card{
+  padding:34px 30px 38px; border:1px solid var(--line-soft); border-radius:var(--r);
+  background:
+    linear-gradient(180deg, rgba(255,255,255,.05), rgba(255,255,255,.015)),
+    rgba(13,12,10,.66);
+  backdrop-filter:blur(10px); -webkit-backdrop-filter:blur(10px);
+  transition:border-color .4s var(--ease), transform .4s var(--ease);
+}
+.card:hover{ border-color:color-mix(in srgb, var(--accent) 45%, transparent); transform:translateY(-4px); }
+.card .num{ font-family:var(--display); font-weight:600; font-size:12px; letter-spacing:.16em; color:var(--accent); display:block; margin-bottom:20px; }
+.card p{ color:var(--muted); margin:12px 0 0; font-size:15px; }
+
+/* ============================================================
+   Продукты
+   ============================================================ */
+/* Левая колонка — намеренно пустая: в ней «стоит» 3D-пачка */
+#products{ min-height:100svh; display:grid; align-content:center; }
+#products .wrap{
+  display:grid; grid-template-columns:.82fr 1.18fr; gap:clamp(24px,5vw,70px); align-items:center;
+}
+.prod-stage{ min-height:64vh; }
+.prod-panel{ display:grid; gap:30px; }
+@media (max-width:980px){
+  #products .wrap{ grid-template-columns:1fr; }
+  .prod-stage{ min-height:44vh; }
+}
+
+.swatches{ display:grid; gap:10px; }
+.sw{
+  position:relative; text-align:left; cursor:pointer; overflow:hidden;
+  display:grid; grid-template-columns:auto 1fr auto; align-items:center; gap:16px;
+  border:1px solid var(--line-soft); border-radius:14px; padding:16px 20px;
+  background:rgba(13,12,10,.72); backdrop-filter:blur(10px); -webkit-backdrop-filter:blur(10px);
+  transition:border-color .4s var(--ease), background .4s var(--ease), transform .3s var(--ease);
+}
+.sw .txt{ display:grid; gap:2px; min-width:0; }
+.sw:hover{ transform:translateX(4px); }
+.sw[aria-pressed="true"]{ border-color:var(--sw-color); background:rgba(22,20,17,.86); }
+.sw::after{
+  content:""; position:absolute; inset:-40% auto -40% -10%; width:120px; opacity:0;
+  background:radial-gradient(closest-side, var(--sw-color), transparent);
+  transition:opacity .5s var(--ease);
+}
+.sw[aria-pressed="true"]::after{ opacity:.30; }
+.sw .dot{
+  width:26px; height:26px; border-radius:50%; display:block; flex:none;
+  background:var(--sw-color); box-shadow:inset 0 -5px 12px rgba(0,0,0,.4), 0 0 26px -6px var(--sw-color);
+}
+.sw .nm{ font-family:var(--display); font-weight:600; font-size:17px; display:block; letter-spacing:-.01em; }
+.sw .ds{ font-size:13px; color:var(--dim); }
+.sw .badge{
+  font-size:9px; letter-spacing:.18em; text-transform:uppercase;
+  color:var(--sw-color); opacity:0; transition:opacity .3s; white-space:nowrap;
+}
+.sw[aria-pressed="true"] .badge{ opacity:1; }
+
+.prod-detail{
+  display:grid; gap:24px;
+  border:1px solid var(--line-soft); border-radius:var(--r); padding:clamp(24px,3vw,34px);
+  background:
+    linear-gradient(135deg, rgba(255,255,255,.05), rgba(255,255,255,.012)),
+    rgba(13,12,10,.74);
+  backdrop-filter:blur(12px); -webkit-backdrop-filter:blur(12px);
+}
+.spec{ display:grid; gap:1px; background:var(--line-soft); border-radius:12px; overflow:hidden; align-content:start; }
+.spec div{ background:#0e0d0b; display:flex; justify-content:space-between; gap:16px; padding:15px 20px; font-size:14px; }
+.spec span:first-child{ color:var(--dim); }
+.tags{ display:flex; flex-wrap:wrap; gap:8px; margin:22px 0 0; padding:0; list-style:none; }
+.tags li{
+  font-size:12px; letter-spacing:.04em; padding:7px 14px; border-radius:100px;
+  border:1px solid var(--line); color:var(--muted);
+}
+
+/* ============================================================
+   Процесс
+   ============================================================ */
+.steps{ display:grid; grid-template-columns:repeat(4,1fr); gap:20px; margin-top:56px; counter-reset:s; }
+@media (max-width:900px){ .steps{ grid-template-columns:repeat(2,1fr); } }
+@media (max-width:560px){ .steps{ grid-template-columns:1fr; } }
+.step{ border-top:1px solid var(--line); padding-top:22px; }
+.step b{
+  font-family:var(--display); font-weight:800; font-size:36px; color:var(--accent);
+  display:block; line-height:1; margin-bottom:14px; transition:color .6s var(--ease);
+}
+.step p{ color:var(--muted); font-size:14px; margin:8px 0 0; }
+
+/* ============================================================
+   Опт
+   ============================================================ */
+#wholesale .wrap{
+  display:grid; grid-template-columns:1fr 1fr; gap:clamp(28px,5vw,64px); align-items:center;
+  border:1px solid var(--line-soft); border-radius:var(--r); padding:clamp(30px,5vw,64px);
+  background:
+    radial-gradient(75% 120% at 0% 0%, color-mix(in srgb, var(--accent) 14%, transparent), transparent 62%),
+    linear-gradient(180deg, rgba(255,255,255,.05), rgba(255,255,255,.012));
+  backdrop-filter:blur(12px); -webkit-backdrop-filter:blur(12px);
+}
+@media (max-width:900px){ #wholesale .wrap{ grid-template-columns:1fr; } }
+.checks{ list-style:none; margin:26px 0 0; padding:0; display:grid; gap:13px; }
+.checks li{ display:grid; grid-template-columns:auto 1fr; gap:13px; align-items:start; color:var(--muted); font-size:15px; }
+.checks li::before{
+  content:"✓"; color:var(--accent); font-size:12px; line-height:1;
+  border:1px solid color-mix(in srgb, var(--accent) 50%, transparent);
+  width:22px; height:22px; border-radius:50%; display:grid; place-items:center; margin-top:3px;
+}
+
+form{ display:grid; gap:13px; }
+.field input{
+  width:100%; padding:17px 18px; background:rgba(0,0,0,.4);
+  border:1px solid var(--line); border-radius:12px; color:var(--text);
+  font-family:var(--sans); font-size:15px; font-weight:300;
+  transition:border-color .3s var(--ease), background .3s var(--ease);
+}
+.field input::placeholder{ color:var(--dim); }
+.field input:focus{ outline:none; border-color:var(--accent); background:rgba(0,0,0,.55); }
+form .btn{ justify-self:start; margin-top:4px; }
+.form-note{ font-size:12px; color:var(--dim); margin:2px 0 0; line-height:1.5; }
+.form-ok{
+  display:none; align-items:center; gap:10px; font-size:14px; color:var(--accent);
+  border:1px dashed color-mix(in srgb, var(--accent) 50%, transparent);
+  border-radius:12px; padding:14px 16px;
+}
+.form-ok.on{ display:flex; }
+
+/* ============================================================
+   Контакты
+   ============================================================ */
+#contacts .wrap{ display:grid; grid-template-columns:1fr 1fr; gap:clamp(28px,5vw,70px); align-items:start; }
+@media (max-width:900px){ #contacts .wrap{ grid-template-columns:1fr; } }
+
+.contact-card{
+  border:1px solid var(--line-soft); border-radius:var(--r); padding:clamp(26px,4vw,42px);
+  background:linear-gradient(160deg, rgba(255,255,255,.05), rgba(255,255,255,.012)), rgba(13,12,10,.74);
+  backdrop-filter:blur(12px); -webkit-backdrop-filter:blur(12px);
+  display:grid; gap:26px; align-content:start;
+}
+.phone-big{
+  font-family:var(--display); font-weight:800; letter-spacing:-.02em;
+  font-size:clamp(26px,3.6vw,42px); display:inline-block; line-height:1.1;
+  transition:color .3s var(--ease);
+}
+.phone-big:hover{ color:var(--accent); }
+.contact-row{ display:grid; gap:6px; }
+.contact-row .k{ font-size:11px; letter-spacing:.22em; text-transform:uppercase; color:var(--dim); }
+.contact-row a, .contact-row span.v{ font-size:16px; color:var(--text); }
+.contact-row a:hover{ color:var(--accent); }
+
+.socials{ display:flex; flex-wrap:wrap; gap:10px; }
+.social{
+  display:inline-flex; align-items:center; gap:10px;
+  padding:12px 20px; border-radius:100px; border:1px solid var(--line);
+  font-size:13px; letter-spacing:.03em; color:var(--text);
+  transition:border-color .3s var(--ease), color .3s var(--ease), background .3s var(--ease);
+}
+.social:hover{ border-color:var(--accent); color:var(--accent); }
+.social svg{ width:17px; height:17px; fill:currentColor; flex:none; }
+/* ссылка ещё не заполнена — кнопка приглушена */
+.social[data-empty="1"]{ opacity:.45; cursor:default; }
+.social[data-empty="1"]:hover{ border-color:var(--line); color:var(--text); }
+
+/* ============================================================
+   Подвал
+   ============================================================ */
+footer{
+  position:relative; z-index:3; border-top:1px solid var(--line-soft);
+  padding:54px var(--pad) 38px; background:rgba(10,9,8,.62); backdrop-filter:blur(10px);
+}
+.foot{ max-width:var(--maxw); margin-inline:auto; display:grid; grid-template-columns:1.5fr 1fr 1fr; gap:34px; }
+@media (max-width:760px){ .foot{ grid-template-columns:1fr; } }
+.foot h4{ font:500 11px/1 var(--sans); letter-spacing:.22em; text-transform:uppercase; color:var(--dim); margin:0 0 18px; }
+.foot ul{ list-style:none; padding:0; margin:0; display:grid; gap:11px; }
+.foot a{ color:var(--muted); font-size:14px; transition:color .3s; }
+.foot a:hover{ color:var(--accent); }
+.copy{
+  max-width:var(--maxw); margin:42px auto 0; padding-top:22px; border-top:1px solid var(--line-soft);
+  display:flex; flex-wrap:wrap; gap:14px; justify-content:space-between; font-size:12px; color:var(--dim);
+}
+</style>
+</head>
+
+<body>
+<a class="skip" href="#main">Перейти к содержимому</a>
+
+<!-- ============ Прелоадер ============ -->
+<div id="preloader">
+  <div class="pre-mark">MACHOS<i>.UZ</i></div>
+  <div class="pre-bar"><i id="preBar"></i></div>
+  <div class="pre-txt">Пакуем</div>
+</div>
+
+<!-- ============ 3D ============ -->
+<div id="stage" aria-hidden="true"></div>
+<div id="fallback" aria-hidden="true"><div class="fb-pack">MACHOS</div></div>
+<div id="glow" aria-hidden="true"></div>
+
+<!-- ============ Навигация ============ -->
+<header class="nav" id="nav">
+  <a href="#hero" class="brand">MACHOS<i>.UZ</i></a>
+  <nav class="nav-links" id="navLinks" aria-label="Основная навигация">
+    <a href="#about">О бренде</a>
+    <a href="#products">Продукция</a>
+    <a href="#process">Производство</a>
+    <a href="#wholesale">Оптом</a>
+    <a href="#contacts">Контакты</a>
+  </nav>
+  <a href="#contacts" class="btn primary" id="navPhone">Стать партнёром</a>
+  <button class="burger" id="burger" aria-label="Меню" aria-expanded="false" aria-controls="navLinks">
+    <span></span><span></span>
+  </button>
+</header>
+
+<main id="main">
+
+  <!-- ============ HERO ============ -->
+  <section id="hero" data-pose="hero">
+    <div class="wrap hero-grid">
+      <div class="hero-title rv in">
+        <p class="eyebrow">Снеки из Узбекистана</p>
+        <h1>Хрустит<span class="l2">по-нашему</span></h1>
+        <p class="lead hero-sub">
+          Солёные семечки, настоящий курт, сырные палочки и косичка.
+          Четыре продукта, за которыми возвращаются в магазин.
+        </p>
+        <div class="hero-actions">
+          <a href="#products" class="btn primary">Смотреть продукцию</a>
+          <a href="#wholesale" class="btn">Оптовые поставки</a>
+        </div>
+      </div>
+      <div class="hero-side">Покрутите пачку мышью</div>
+    </div>
+    <div class="scroll-hint"><i></i> Листайте</div>
+  </section>
+
+  <!-- ============ Бегущая строка ============ -->
+  <div class="ticker" aria-hidden="true">
+    <ul id="ticker"></ul>
+  </div>
+
+  <!-- ============ Факты ============ -->
+  <div class="facts rv">
+    <div class="fact"><b>4</b><span>продукта в линейке</span></div>
+    <div class="fact"><b>100%</b><span>натуральный состав</span></div>
+    <div class="fact"><b>UZ</b><span>своё производство</span></div>
+    <div class="fact"><b>Опт</b><span>и розница</span></div>
+  </div>
+
+  <!-- ============ О бренде ============ -->
+  <section id="about" data-pose="about">
+    <div class="wrap">
+      <p class="eyebrow rv">О бренде</p>
+      <h2 class="rv">Снек должен быть <span class="hl">простым</span><br>и честным.</h2>
+      <p class="lead rv d1" style="margin-top:24px">
+        Machos.Uz — это привычный вкус, к которому у нас дома привыкли с детства:
+        семечки к вечеру, курт в дорогу и сыр к чаю. Мы просто делаем
+        их так, как надо: свежими, без лишнего и в упаковке, которая держит хруст.
+      </p>
+
+      <div class="cards">
+        <article class="card rv d1">
+          <span class="num">01</span>
+          <h3>Свежая партия</h3>
+          <p>Готовим небольшими партиями и фасуем в тот же день. Пачка на полке — такая же, как в цеху.</p>
+        </article>
+        <article class="card rv d2">
+          <span class="num">02</span>
+          <h3>Чистый состав</h3>
+          <p>Сырьё, соль и больше ничего лишнего. Полный состав напечатан на обороте каждой пачки.</p>
+        </article>
+        <article class="card rv d3">
+          <span class="num">03</span>
+          <h3>Упаковка держит хруст</h3>
+          <p>Многослойный дой-пак с плотным швом: не пропускает влагу и свет, продукт остаётся хрустящим до последней горсти.</p>
+        </article>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ Продукция ============ -->
+  <section id="products" data-pose="products">
+    <div class="wrap">
+      <!-- место для 3D-пачки -->
+      <div class="prod-stage" aria-hidden="true"></div>
+
+      <div class="prod-panel">
+        <div>
+          <p class="eyebrow rv">Продукция</p>
+          <h2 class="rv">Четыре вкуса Machos</h2>
+          <p class="lead rv d1" style="margin-top:18px">
+            Выберите продукт — пачка в сцене сменится вместе с ним.
+          </p>
+        </div>
+
+        <div class="swatches rv d1" id="swatches" role="group" aria-label="Выбор продукта"></div>
+
+        <div class="prod-detail rv d2">
+          <div>
+            <h3 id="pName" style="font-size:clamp(22px,2.6vw,30px)">—</h3>
+            <p class="lead" id="pDesc" style="margin-top:12px"></p>
+            <ul class="tags" id="pTags"></ul>
+          </div>
+          <div class="spec">
+            <div><span>Формат</span><span id="sWeight">—</span></div>
+            <div><span>Состав</span><span id="sComp">—</span></div>
+            <div><span>Упаковка</span><span id="sPack">—</span></div>
+            <div><span>Срок годности</span><span id="sLife">—</span></div>
+            <div><span>В коробе</span><span id="sBox">—</span></div>
+          </div>
+          <a href="#wholesale" class="btn primary" style="justify-self:start">Заказать оптом</a>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ Производство ============ -->
+  <section id="process" data-pose="process">
+    <div class="wrap">
+      <p class="eyebrow rv">Производство</p>
+      <h2 class="rv">Путь до пачки —<br><span class="hl">четыре шага</span></h2>
+
+      <div class="steps">
+        <div class="step rv d1"><b>01</b><h3>Отбор сырья</h3><p>Работаем с местными хозяйствами. Калибруем семечку по размеру, сырьё для курта и сыра принимаем по своим требованиям.</p></div>
+        <div class="step rv d2"><b>02</b><h3>Обжарка и сушка</h3><p>Свой режим для каждого продукта: семечки — обжарка, курт и сыр — сушка и посол.</p></div>
+        <div class="step rv d3"><b>03</b><h3>Контроль</h3><p>Влажность, вес, вкус. Партия не уходит на фасовку, пока не пройдёт проверку.</p></div>
+        <div class="step rv d4"><b>04</b><h3>Упаковка</h3><p>Фасовка в тот же день, шов под контролем, дата партии на каждой пачке.</p></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ Опт ============ -->
+  <section id="wholesale" data-pose="wholesale">
+    <div class="wrap rv">
+      <div>
+        <p class="eyebrow">Партнёрам</p>
+        <h2>Поставки в магазины,<br>кафе и на маркетплейсы</h2>
+        <ul class="checks">
+          <li>Отгрузка от одного короба, доставка по регионам</li>
+          <li>Гибкие цены и отсрочка для постоянных партнёров</li>
+          <li>Все документы и сертификаты на продукцию</li>
+          <li>Готовые фото и описания для карточек товара</li>
+        </ul>
+      </div>
+
+      <form id="leadForm" novalidate>
+        <div class="field">
+          <label for="fName" style="position:absolute;left:-9999px">Имя</label>
+          <input id="fName" name="name" type="text" placeholder="Имя" autocomplete="name" required />
+        </div>
+        <div class="field">
+          <label for="fComp" style="position:absolute;left:-9999px">Компания</label>
+          <input id="fComp" name="company" type="text" placeholder="Компания или магазин" autocomplete="organization" />
+        </div>
+        <div class="field">
+          <label for="fTel" style="position:absolute;left:-9999px">Телефон</label>
+          <input id="fTel" name="phone" type="tel" placeholder="Телефон" autocomplete="tel" required />
+        </div>
+        <button class="btn primary" type="submit">Отправить заявку</button>
+        <p class="form-note">
+          Перезвоним в рабочее время и пришлём прайс.
+          <br>Демо-режим: форма пока не подключена к серверу.
+        </p>
+        <p class="form-ok" id="formOk" role="status">✓ Заявка принята. Подключите endpoint, чтобы получать её на почту или в Telegram.</p>
+      </form>
+    </div>
+  </section>
+  <!-- ============ Контакты ============ -->
+  <section id="contacts" data-pose="contacts">
+    <div class="wrap">
+      <div>
+        <p class="eyebrow rv">Контакты</p>
+        <h2 class="rv">Позвоните<br>или напишите</h2>
+        <p class="lead rv d1" style="margin-top:20px">
+          Отдел продаж отвечает в рабочее время. Пишите в мессенджеры —
+          пришлём прайс, фото продукции и условия отгрузки.
+        </p>
+        <div class="rv d2" style="margin-top:28px">
+          <p class="eyebrow" style="margin-bottom:12px">Мы в соцсетях</p>
+          <div class="socials" id="socials"></div>
+        </div>
+      </div>
+
+      <div class="contact-card rv d1">
+        <div class="contact-row">
+          <span class="k">Телефон</span>
+          <a class="phone-big" id="cPhone" href="#">—</a>
+        </div>
+        <div class="contact-row">
+          <span class="k">Почта</span>
+          <a id="cMail" href="#">—</a>
+        </div>
+        <div class="contact-row">
+          <span class="k">Сайт</span>
+          <a id="cSite" href="#">—</a>
+        </div>
+        <div class="contact-row">
+          <span class="k">Производитель</span>
+          <span class="v" id="cComp">—</span>
+          <span class="v" id="cCity" style="color:var(--muted)">—</span>
+        </div>
+        <a href="#wholesale" class="btn primary" style="justify-self:start">Оставить заявку</a>
+      </div>
+    </div>
+  </section>
+</main>
+
+<!-- ============ Подвал ============ -->
+<footer data-pose="footer">
+  <div class="foot">
+    <div>
+      <div class="brand" style="font-size:18px">MACHOS<i>.UZ</i></div>
+      <p class="lead" style="font-size:14px;margin-top:16px;max-width:34ch">
+        Производство снеков: семечки, курт, сырные палочки и косичка. Ташкент, Узбекистан.
+      </p>
+    </div>
+    <div>
+      <h4>Разделы</h4>
+      <ul>
+        <li><a href="#about">О бренде</a></li>
+        <li><a href="#products">Продукция</a></li>
+        <li><a href="#process">Производство</a></li>
+        <li><a href="#wholesale">Оптом</a></li>
+        <li><a href="#contacts">Контакты</a></li>
+      </ul>
+    </div>
+    <div>
+      <h4>Контакты</h4>
+      <ul id="footContacts"></ul>
+    </div>
+  </div>
+  <div class="copy">
+    <span>© <span id="year">2026</span> Machos.uz · ООО «FUN NUTS GROUP»</span>
+    <span>Сцена собрана на Three.js</span>
+  </div>
+</footer>
+
+<!-- ============================================================
+     Three.js — процедурная сцена (пачка + летающие снеки)
+     ============================================================ -->
+<script type="importmap">
+{
+  "imports": {
+    "three": "./vendor/three/three.module.min.js",
+    "three/addons/": "./vendor/three/addons/"
+  }
+}
+</script>
+
+<script type="module">
+import * as THREE from 'three';
+import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
+
+/* ============================================================
+   КОНТЕНТ — всё, что меняется при обновлении сайта, лежит здесь
+   ============================================================ */
+/* ============================================================
+   ТОВАРЫ И КОНТАКТЫ — здесь меняется всё содержимое сайта
+   ------------------------------------------------------------
+   Этикетки пачек рисуются в браузере по этим данным.
+   Если появятся студийные фото пачек (лицевая сторона, ровно,
+   без фона) — положите их в папку /assets и укажите путь в поле
+   `photo`, например photo:'assets/kurt.png'. Фото автоматически
+   заменит нарисованную этикетку.
+   ============================================================ */
+const PRODUCTS = [
+  {
+    id:'seeds', photo:null,
+    name:'Семечки Pista Tuzli',
+    sub:'солёные, крупные',
+    style:'doy',                        // жёлтый дой-пак с блоком MACHOS.UZ
+    title:'PISTA', titleSub:'TUZLI',
+    weight:'200 g',
+    size:{ w:2.15, h:2.85, d:0.55 },
+    accent:'#f5d90a',
+    packA:'#f7e01c', packB:'#d8b400', ink:'#15130a',
+    snack:'seed', snackColor:'#33261a',
+    desc:'Крупная калиброванная семечка с солью. Та самая пачка 200 г, которую берут к вечеру и на дорогу.',
+    tags:['100% натурально','Солёные','200 г'],
+    spec:{ weight:'200 г', comp:'Семена подсолнечника, соль', pack:'Дой-пак', life:'уточняется', box:'уточняется' },
+  },
+  {
+    id:'kurt', photo:null,
+    name:'Курт',
+    sub:'классический, солёный',
+    style:'flow',                       // жёлтый флоу-пак со скрипт-логотипом
+    title:'КУРТ', titleSub:'',
+    weight:'35 г',
+    size:{ w:1.95, h:2.70, d:0.46 },
+    accent:'#f5d90a',
+    packA:'#f6dc14', packB:'#d4ac00', ink:'#15130a',
+    snack:'ball', snackColor:'#f3efe4',
+    desc:'Тот самый курт: плотный, солёный, с настоящим кисломолочным вкусом. Четыре шарика в пачке — удобно взять с собой.',
+    tags:['Кисломолочный','Натуральный','В дорогу'],
+    spec:{ weight:'35 ± 5 г', comp:'Кисломолочное сырьё, соль', pack:'Флоу-пак с подвесом', life:'3 месяца', box:'уточняется' },
+  },
+  {
+    id:'sticks', photo:null,
+    name:'Сырные палочки',
+    sub:'тонкие, солёные',
+    style:'flow',
+    title:'СЫРНЫЕ', titleSub:'ПАЛОЧКИ',
+    weight:'',                          // вес не указан — заполните в этом поле
+    size:{ w:1.55, h:3.15, d:0.36 },
+    accent:'#4ec8dd',
+    packA:'#4ec8dd', packB:'#2589a0', ink:'#0c2a31',
+    snack:'stick', snackColor:'#e8d9a8',
+    desc:'Тонкие сырные палочки в бирюзовой пачке. Солёные, тянущиеся — берут к чаю и к пиву.',
+    tags:['Сыр чечил','Солёные','Тянущиеся'],
+    spec:{ weight:'уточняется', comp:'Сыр, соль', pack:'Флоу-пак с подвесом', life:'уточняется', box:'уточняется' },
+  },
+  {
+    id:'braid', photo:null,
+    name:'Сырная косичка',
+    sub:'плетёный чечил',
+    style:'flow',
+    title:'СЫРНАЯ', titleSub:'КОСИЧКА',
+    weight:'',
+    size:{ w:1.70, h:3.05, d:0.40 },
+    accent:'#f0d21a',
+    packA:'#f2da22', packB:'#cfae00', ink:'#15130a',
+    snack:'braid', snackColor:'#e9d7a2',
+    desc:'Классическая плетёная косичка из сыра чечил. Плотная, солёная, разбирается на нити — самый «долгий» снек из линейки.',
+    tags:['Сыр чечил','Плетёная','Солёная'],
+    spec:{ weight:'уточняется', comp:'Сыр, соль', pack:'Флоу-пак с подвесом', life:'уточняется', box:'уточняется' },
+  },
+];
+
+/* Контакты. Телефон, почта и сайт взяты с упаковки.
+   FACEBOOK: вставьте ссылку на страницу в поле url ниже — кнопка
+   сразу станет активной. То же самое для Instagram и Telegram. */
+const CONTACTS = {
+  company: 'ООО «FUN NUTS GROUP»',
+  city:    'Ташкент, Узбекистан',
+  phone:   '+998 95 194 55 15',
+  phoneRaw:'+998951945515',
+  email:   'info@machos.uz',
+  site:    'machos.uz',
+  socials: [
+    { name:'Facebook',  url:'' },   // ← сюда ссылку на Facebook-канал
+    { name:'Instagram', url:'' },
+    { name:'Telegram',  url:'' },
+  ],
+};
+
+const TICKER = ['Семечки Pista Tuzli','Курт','Сырные палочки','Сырная косичка','Натуральный продукт','Оптом по Узбекистану','Machos.uz'];
+
+/* ============================================================
+   Утилиты
+   ============================================================ */
+const reduceMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
+const stageEl   = document.getElementById('stage');
+const preloader = document.getElementById('preloader');
+const preBar    = document.getElementById('preBar');
+
+const clamp = (v,a,b) => Math.min(b, Math.max(a, v));
+const lerp  = (a,b,t) => a + (b - a) * t;
+const damp  = (a,b,l,dt) => lerp(a, b, 1 - Math.exp(-l * dt));   // сглаживание, независимое от FPS
+
+function supportsWebGL(){
+  try{
+    const c = document.createElement('canvas');
+    return !!(window.WebGLRenderingContext && (c.getContext('webgl2') || c.getContext('webgl')));
+  }catch(e){ return false; }
+}
+
+/* Текст с трекингом — надёжнее, чем ctx.letterSpacing (нет в старых браузерах) */
+function trackedText(g, text, cx, y, spacing){
+  const chars = [...text];
+  let total = 0;
+  for(const ch of chars) total += g.measureText(ch).width + spacing;
+  total -= spacing;
+  let x = cx - total / 2;
+  for(const ch of chars){
+    g.fillText(ch, x, y);
+    x += g.measureText(ch).width + spacing;
+  }
+}
+
+function roundRectPath(g, x, y, w, h, r){
+  const rr = Math.min(r, w / 2, h / 2);
+  g.beginPath();
+  g.moveTo(x + rr, y);
+  g.arcTo(x + w, y,     x + w, y + h, rr);
+  g.arcTo(x + w, y + h, x,     y + h, rr);
+  g.arcTo(x,     y + h, x,     y,     rr);
+  g.arcTo(x,     y,     x + w, y,     rr);
+  g.closePath();
+}
+
+/* ============================================================
+   Этикетка пачки, нарисованная по реальной упаковке Machos.uz
+   ------------------------------------------------------------
+   style 'doy'  — жёлтый дой-пак семечек: блочный логотип MACHOS.UZ,
+                  чёрная плашка с названием, миска с продуктом, вес;
+   style 'flow' — флоу-пак курта / сыра: рукописный логотип, белая
+                  волна с продуктом, чёрная лента NATURAL PRODUCT.
+   ============================================================ */
+function packTexture(p){
+  const W = 1024;
+  // высота холста повторяет пропорции пачки, иначе рисунок растягивается
+  const H = Math.round(clamp(W * p.size.h / p.size.w, 1150, 2250));
+  const c = document.createElement('canvas');
+  c.width = W; c.height = H;
+  const g = c.getContext('2d');
+
+  // фон пачки
+  const grd = g.createLinearGradient(0, 0, W * .35, H);
+  grd.addColorStop(0, p.packA);
+  grd.addColorStop(1, p.packB);
+  g.fillStyle = grd;
+  g.fillRect(0, 0, W, H);
+
+  // мягкий блик плёнки
+  const gl = g.createRadialGradient(W * .3, H * .1, 10, W * .3, H * .1, W * .9);
+  gl.addColorStop(0, 'rgba(255,255,255,.20)');
+  gl.addColorStop(1, 'rgba(255,255,255,0)');
+  g.fillStyle = gl; g.fillRect(0, 0, W, H);
+
+  g.textAlign = 'center';
+  g.textBaseline = 'alphabetic';
+
+  if(p.style === 'doy') drawDoyLabel(g, p, W, H);
+  else                  drawFlowLabel(g, p, W, H);
+
+  const tex = new THREE.CanvasTexture(c);
+  tex.colorSpace = THREE.SRGBColorSpace;
+  tex.anisotropy = 8;
+  return tex;
+}
+
+/* ---------- жёлтый дой-пак семечек ---------- */
+function drawDoyLabel(g, p, W, H){
+  const y = f => H * f;                       // все отступы — доли высоты
+  const art = clamp(H / 1400, 0.85, 1.45);
+
+  g.fillStyle = p.ink;
+  g.font = '800 92px "Arial Black", Arial, sans-serif';
+  fitText(g, 'MACHOS.UZ', W / 2, y(.215), W * .78);
+
+  // чёрная плашка с названием
+  const bw = W * .56, bx = (W - bw) / 2;
+  g.fillStyle = p.ink;
+  roundRectPath(g, bx, y(.236), bw, 104, 16); g.fill();
+  g.fillStyle = p.packA;
+  g.font = '800 74px "Arial Black", Arial, sans-serif';
+  fitText(g, p.title, W / 2, y(.236) + 78, bw - 50);
+
+  // подпись под плашкой
+  g.fillStyle = p.ink;
+  g.font = '700 40px Arial, sans-serif';
+  const subY = y(.236) + 156;
+  trackedText(g, p.titleSub || '', W / 2, subY, 8);
+  if(p.titleSub){
+    g.strokeStyle = p.ink; g.lineWidth = 5;
+    const tw = g.measureText(p.titleSub).width + 60;
+    g.beginPath(); g.moveTo(W / 2 - tw, subY - 14); g.lineTo(W / 2 - tw + 46, subY - 14); g.stroke();
+    g.beginPath(); g.moveTo(W / 2 + tw - 46, subY - 14); g.lineTo(W / 2 + tw, subY - 14); g.stroke();
+  }
+
+  drawBowl(g, p, W / 2, y(.565), art);
+  drawStamp(g, p, W * .17, y(.645), 96, ['100%', 'ТАБИИЙ']);
+
+  if(p.weight){
+    g.fillStyle = p.ink;
+    roundRectPath(g, W / 2 - 130, y(.715), 260, 80, 40); g.fill();
+    g.fillStyle = p.packA;
+    g.font = '800 46px Arial, sans-serif';
+    g.fillText(p.weight, W / 2, y(.715) + 56);
+  }
+
+  // три иконки-преимущества внизу
+  const labels = [['TABIIY','QURITILGAN'], ['FAYDALI VA','MAZALI'], ['SIFATLI','MAHSULOT']];
+  labels.forEach((tx, i) => {
+    const x = W * (0.22 + i * 0.28);
+    g.strokeStyle = p.ink; g.globalAlpha = .8; g.lineWidth = 5;
+    g.beginPath(); g.arc(x, y(.845), 40, 0, Math.PI * 2); g.stroke();
+    g.globalAlpha = 1;
+    g.fillStyle = p.ink;
+    g.font = '700 22px Arial, sans-serif';
+    g.fillText(tx[0], x, y(.905));
+    g.fillText(tx[1], x, y(.925));
+  });
+}
+
+/* ---------- флоу-пак курта и сыра ---------- */
+function drawFlowLabel(g, p, W, H){
+  const y = f => H * f;
+  const art = clamp(H / 1400, 0.85, 1.45);
+
+  // белая волна по центру — как на реальной упаковке
+  g.fillStyle = 'rgba(255,255,255,.93)';
+  g.beginPath();
+  g.moveTo(0, y(.37));
+  g.bezierCurveTo(W * .35, y(.30), W * .65, y(.44), W, y(.355));
+  g.lineTo(W, y(.80));
+  g.bezierCurveTo(W * .62, y(.865), W * .34, y(.735), 0, y(.80));
+  g.closePath();
+  g.fill();
+
+  drawScriptLogo(g, p, W / 2, y(.215), W * .74);
+
+  // название продукта
+  g.fillStyle = p.ink;
+  const lines = [p.title, p.titleSub].filter(Boolean);
+  const size = lines.length > 1 ? 74 : 92;
+  lines.forEach((ln, i) => {
+    g.font = `800 ${size}px "Arial Black", Arial, sans-serif`;
+    fitText(g, ln, W / 2, y(.285) + i * (size + 6), W * .72, size);
+  });
+
+  drawSnackArt(g, p, W / 2, y(.585), art);
+
+  if(p.weight){
+    g.fillStyle = p.ink;
+    roundRectPath(g, W / 2 - 110, y(.822), 220, 74, 37); g.fill();
+    g.fillStyle = p.packA;
+    g.font = '800 42px Arial, sans-serif';
+    g.fillText(p.weight, W / 2, y(.822) + 52);
+  }
+
+  // чёрная лента NATURAL PRODUCT
+  g.fillStyle = p.ink;
+  g.fillRect(0, y(.905), W, Math.max(52, H * .045));
+  g.fillStyle = '#ffffff';
+  g.font = '700 27px Arial, sans-serif';
+  trackedText(g, 'NATURAL PRODUCT · NATURAL PRODUCT', W / 2, y(.905) + Math.max(36, H * .031), 3);
+}
+
+/* Приближение рукописного логотипа Machos.uz */
+function drawScriptLogo(g, p, cx, cy, maxW){
+  g.save();
+  g.translate(cx, cy);
+  g.rotate(-0.045);
+  g.fillStyle = p.ink;
+  g.font = 'italic 900 104px Georgia, "Times New Roman", serif';
+  const t = 'Machos.uz';
+  const w = g.measureText(t).width;
+  if(w > maxW) g.scale(maxW / w, maxW / w);
+  g.fillText(t, 0, 0);
+  g.font = '700 26px Arial, sans-serif';
+  g.fillText('®', (Math.min(w, maxW)) / 2 + 26, -52);
+  g.restore();
+}
+
+/* Миска с семечками */
+function drawBowl(g, p, cx, cy, sc){
+  const rnd = mulberry(11);
+  g.save(); g.translate(cx, cy); g.scale(sc || 1, sc || 1);
+
+  // семечки горкой над миской
+  for(let i = 0; i < 34; i++){
+    const a = Math.PI + rnd() * Math.PI;
+    const r = rnd() * 150;
+    seedShape(g, Math.cos(a) * r, -40 + Math.sin(a) * 46, 26 + rnd() * 8, rnd() * Math.PI);
+  }
+  // миска
+  g.fillStyle = '#9c6a3c';
+  g.beginPath(); g.ellipse(0, -22, 170, 46, 0, 0, Math.PI * 2); g.fill();
+  g.fillStyle = '#b07c47';
+  g.beginPath();
+  g.moveTo(-170, -22);
+  g.bezierCurveTo(-150, 108, 150, 108, 170, -22);
+  g.closePath(); g.fill();
+  g.fillStyle = 'rgba(0,0,0,.16)';
+  g.beginPath();
+  g.moveTo(40, -14); g.bezierCurveTo(70, 80, 120, 60, 168, -22);
+  g.lineTo(40, -22); g.closePath(); g.fill();
+
+  // рассыпанные семечки рядом
+  for(let i = 0; i < 9; i++){
+    seedShape(g, 190 + rnd() * 120, 20 + rnd() * 90, 26, rnd() * Math.PI);
+  }
+  g.restore();
+}
+
+/* Круглый штамп качества */
+function drawStamp(g, p, cx, cy, r, lines){
+  g.save(); g.translate(cx, cy);
+  g.strokeStyle = p.ink; g.lineWidth = 5; g.globalAlpha = .85;
+  g.beginPath(); g.arc(0, 0, r, 0, Math.PI * 2); g.stroke();
+  g.beginPath(); g.arc(0, 0, r - 12, 0, Math.PI * 2); g.stroke();
+  g.globalAlpha = 1;
+  g.fillStyle = p.ink;
+  g.font = '800 30px Arial, sans-serif';
+  g.fillText(lines[0], 0, -2);
+  g.font = '700 22px Arial, sans-serif';
+  g.fillText(lines[1], 0, 30);
+  g.restore();
+}
+
+/* Иллюстрация продукта */
+function drawSnackArt(g, p, cx, cy, sc){
+  const rnd = mulberry(7);
+  g.save(); g.translate(cx, cy); g.scale(sc || 1, sc || 1);
+
+  if(p.snack === 'ball'){
+    // четыре шарика курта, как в пачке
+    const pos = [[-92,-92],[92,-92],[-92,92],[92,92]];
+    pos.forEach(([x, y]) => {
+      g.fillStyle = 'rgba(60,50,30,.22)';                 // тень, иначе белое на белом
+      g.beginPath(); g.ellipse(x + 8, y + 74, 74, 20, 0, 0, Math.PI * 2); g.fill();
+
+      const sh = g.createRadialGradient(x - 30, y - 34, 10, x, y, 96);
+      sh.addColorStop(0, '#ffffff');
+      sh.addColorStop(.55, '#f2ecdc');
+      sh.addColorStop(1, '#cfc5ac');
+      g.fillStyle = sh;
+      g.beginPath(); g.arc(x, y, 86, 0, Math.PI * 2); g.fill();
+      g.strokeStyle = 'rgba(105,92,62,.55)'; g.lineWidth = 4; g.stroke();
+
+      g.fillStyle = 'rgba(120,105,70,.20)';               // крапинки сушёного курта
+      for(let i = 0; i < 7; i++){
+        const a = rnd() * Math.PI * 2, r = rnd() * 62;
+        g.beginPath(); g.arc(x + Math.cos(a) * r, y + Math.sin(a) * r, 3 + rnd() * 3, 0, Math.PI * 2); g.fill();
+      }
+    });
+  }else if(p.snack === 'stick'){
+    // пучок тонких палочек
+    for(let i = 0; i < 9; i++){
+      const x = -160 + i * 40 + (rnd() - .5) * 10;
+      g.save(); g.translate(x, 0); g.rotate((rnd() - .5) * .06);
+      g.fillStyle = 'rgba(60,50,30,.16)';
+      roundRectPath(g, -9, -226, 26, 460, 13); g.fill();
+      const sg = g.createLinearGradient(-13, 0, 13, 0);
+      sg.addColorStop(0, '#e3cd8e');
+      sg.addColorStop(.45, '#f6ecc9');
+      sg.addColorStop(1, '#d9bf78');
+      g.fillStyle = sg;
+      roundRectPath(g, -13, -230, 26, 460, 13); g.fill();
+      g.strokeStyle = 'rgba(110,85,35,.5)'; g.lineWidth = 3; g.stroke();
+      g.restore();
+    }
+  }else if(p.snack === 'braid'){
+    // сырная косичка: три переплетённые нити
+    for(let s = 0; s < 3; s++){
+      const x0 = -100 + s * 100;
+      for(let i = 0; i < 12; i++){
+        const y = -220 + i * 40;
+        const off = Math.sin((i + s * 1.6) * .9) * 26;
+        g.save();
+        g.translate(x0 + off, y);
+        g.rotate(Math.cos((i + s * 1.6) * .9) * .5);
+        const bg = g.createLinearGradient(0, -22, 0, 22);
+        bg.addColorStop(0, i % 2 ? '#f3e4bb' : '#fbf3dc');
+        bg.addColorStop(1, i % 2 ? '#d9be7e' : '#e6d3a4');
+        g.fillStyle = bg;
+        g.beginPath(); g.ellipse(0, 0, 44, 22, 0, 0, Math.PI * 2); g.fill();
+        g.strokeStyle = 'rgba(110,85,35,.45)'; g.lineWidth = 3; g.stroke();
+        g.restore();
+      }
+    }
+  }else{
+    for(let i = 0; i < 26; i++){
+      const a = rnd() * Math.PI * 2, r = 40 + rnd() * 150;
+      seedShape(g, Math.cos(a) * r, Math.sin(a) * r * .8, 28 + rnd() * 12, rnd() * Math.PI);
+    }
+  }
+  g.restore();
+}
+
+function seedShape(g, x, y, size, rot){
+  g.save();
+  g.translate(x, y); g.rotate(rot);
+  g.fillStyle = '#2f2113';
+  g.beginPath();
+  g.moveTo(0, -size);
+  g.bezierCurveTo(size * .78, -size * .5, size * .78, size * .55, 0, size);
+  g.bezierCurveTo(-size * .78, size * .55, -size * .78, -size * .5, 0, -size);
+  g.fill();
+  g.strokeStyle = 'rgba(235,225,205,.7)';
+  g.lineWidth = size * .11;
+  g.beginPath(); g.moveTo(-size * .22, -size * .42); g.lineTo(-size * .22, size * .5); g.stroke();
+  g.beginPath(); g.moveTo(size * .18, -size * .42);  g.lineTo(size * .18, size * .5);  g.stroke();
+  g.restore();
+}
+
+/* Подгоняем кегль под доступную ширину */
+function fitText(g, text, cx, y, maxW, startSize){
+  const m = g.font.match(/^(.*?)(\d+(?:\.\d+)?)px\s*(.*)$/);
+  const head = m ? m[1] : '800 ';
+  const tail = m ? m[3] : 'Arial, sans-serif';
+  let size = startSize || (m ? parseFloat(m[2]) : 80);
+  while(size > 20){
+    g.font = `${head}${size}px ${tail}`;
+    if(g.measureText(text).width <= maxW) break;
+    size -= 4;
+  }
+  g.fillText(text, cx, y);
+}
+
+/* детерминированный ГПСЧ — картинка не «прыгает» между перерисовками */
+function mulberry(seed){
+  let a = seed >>> 0;
+  return function(){
+    a |= 0; a = a + 0x6D2B79F5 | 0;
+    let t = Math.imul(a ^ a >>> 15, 1 | a);
+    t = t + Math.imul(t ^ t >>> 7, 61 | t) ^ t;
+    return ((t ^ t >>> 14) >>> 0) / 4294967296;
+  };
+}
+
+/* ============================================================
+   Геометрия пачки (дой-пак)
+   ============================================================ */
+function packGeometry(size){
+  const w = size.w, h = size.h, r = Math.min(0.26, size.w * 0.16);
+
+  const shape = new THREE.Shape();
+  const x = -w / 2, y = -h / 2;
+  shape.moveTo(x + r, y);
+  shape.lineTo(x + w - r, y);
+  shape.quadraticCurveTo(x + w, y, x + w, y + r);
+  shape.lineTo(x + w, y + h - r);
+  shape.quadraticCurveTo(x + w, y + h, x + w - r, y + h);
+  shape.lineTo(x + r, y + h);
+  shape.quadraticCurveTo(x, y + h, x, y + h - r);
+  shape.lineTo(x, y + r);
+  shape.quadraticCurveTo(x, y, x + r, y);
+
+  const geo = new THREE.ExtrudeGeometry(shape, {
+    depth: size.d, bevelEnabled: true,
+    bevelThickness: 0.17, bevelSize: 0.17, bevelSegments: 8, curveSegments: 22,
+  });
+  geo.center();
+
+  // UV: планарная проекция на лицевую сторону, чтобы этикетка легла ровно
+  const pos = geo.attributes.position;
+  geo.computeBoundingBox();
+  const bb = geo.boundingBox;
+  // считаем по размеру самой грани (без фаски), иначе края этикетки срезаются
+  const uv = geo.attributes.uv;
+  for(let i = 0; i < pos.count; i++){
+    uv.setXY(i, (pos.getX(i) + w / 2) / w, (pos.getY(i) + h / 2) / h);
+  }
+  uv.needsUpdate = true;
+
+  // Сжимаем пачку сверху и снизу — получаются швы, как у настоящего дой-пака
+  const spanY = bb.max.y - bb.min.y;
+  for(let i = 0; i < pos.count; i++){
+    const py = pos.getY(i);
+    const t = (py - bb.min.y) / spanY;           // 0 — низ, 1 — верх
+    let f = 1;
+    if(t > 0.76) f = lerp(1, 0.16, (t - 0.76) / 0.24);
+    else if(t < 0.10) f = lerp(0.62, 1, t / 0.10);
+    else f = 1 + 0.14 * Math.sin(Math.PI * ((t - 0.10) / 0.66));  // лёгкий «живот»
+    pos.setZ(i, pos.getZ(i) * f);
+    if(t > 0.86) pos.setX(i, pos.getX(i) * lerp(1, 0.985, (t - 0.86) / 0.14));
+  }
+  pos.needsUpdate = true;
+  geo.computeVertexNormals();
+  return geo;
+}
+
+/* Геометрия летающих снеков */
+function snackGeometry(kind){
+  if(kind === 'seed'){
+    const g = new THREE.SphereGeometry(1, 14, 10);
+    const p = g.attributes.position;
+    for(let i = 0; i < p.count; i++){
+      const y = p.getY(i);
+      const taper = 1 - 0.42 * Math.max(0, y);      // сверху сужается — форма семечки
+      p.setX(i, p.getX(i) * 0.60 * taper);
+      p.setY(i, y * 1.30);
+      p.setZ(i, p.getZ(i) * 0.34 * taper);
+    }
+    g.computeVertexNormals();
+    g.scale(0.085, 0.085, 0.085);
+    return g;
+  }
+  if(kind === 'ball'){
+    const g = new THREE.SphereGeometry(0.082, 16, 12);
+    const p = g.attributes.position, rnd = mulberry(21);
+    for(let i = 0; i < p.count; i++){
+      const k = 1 + (rnd() - 0.5) * 0.14;           // неровный, как настоящий курт
+      p.setXYZ(i, p.getX(i) * k, p.getY(i) * k, p.getZ(i) * k);
+    }
+    g.computeVertexNormals();
+    return g;
+  }
+  if(kind === 'braid'){
+    // витой узелок читается как плетёный сыр
+    return new THREE.TorusKnotGeometry(0.085, 0.032, 64, 8, 2, 3);
+  }
+  return new THREE.CapsuleGeometry(0.028, 0.30, 4, 10);
+}
+
+/* ============================================================
+   Сцена
+   ============================================================ */
+let renderer, scene, camera, holder, pack, labelMat, foilMat, snacks, halo;
+let activeIndex = 0, baseRotY = 0;
+const pointer = { x:0, y:0, tx:0, ty:0 };
+const snackParams = [];
+const dummy = new THREE.Object3D();
+const accentColor = { cur:new THREE.Color(PRODUCTS[0].accent), goal:new THREE.Color(PRODUCTS[0].accent) };
+
+/* Положение пачки для каждой секции. Углы держим в пределах ±0.7 рад,
+   чтобы этикетка всегда оставалась читаемой. */
+const POSES = {
+  hero:      { x: 2.10, y: 0.00, rot:-0.44, scale:0.94 },
+  about:     { x:-2.30, y: 0.05, rot: 0.62, scale:0.70 },
+  products:  { x:-2.15, y: 0.00, rot:-0.26, scale:0.94 },
+  process:   { x: 2.30, y: 0.05, rot: 0.60, scale:0.70 },
+  wholesale: { x:-2.25, y: 0.00, rot:-0.58, scale:0.72 },
+  contacts:  { x: 2.15, y: 0.00, rot: 0.48, scale:0.74 },
+  footer:    { x: 0.00, y:-0.25, rot: 0.30, scale:0.60 },
+};
+/* На узких экранах колонок нет — пачку поднимаем над текстом */
+const POSES_NARROW = {
+  hero:      { x:0, y: 1.55, rot:-0.30, scale:0.60 },
+  about:     { x:0, y: 0.30, rot: 0.45, scale:0.46 },
+  products:  { x:0, y: 1.60, rot:-0.20, scale:0.62 },
+  process:   { x:0, y: 0.30, rot: 0.45, scale:0.46 },
+  wholesale: { x:0, y: 0.30, rot:-0.40, scale:0.46 },
+  contacts:  { x:0, y: 0.40, rot: 0.40, scale:0.46 },
+  footer:    { x:0, y: 0.00, rot: 0.25, scale:0.42 },
+};
+let pose = POSES.hero, poseName = 'hero';
+const isNarrow = () => innerWidth / innerHeight < 0.85;
+const currentPose = () => (isNarrow() ? POSES_NARROW[poseName] : POSES[poseName]) || POSES.hero;
+
+function haloTexture(){
+  const c = document.createElement('canvas');
+  c.width = c.height = 256;
+  const g = c.getContext('2d');
+  const grd = g.createRadialGradient(128, 128, 0, 128, 128, 128);
+  grd.addColorStop(0,   'rgba(255,255,255,.6)');
+  grd.addColorStop(.35, 'rgba(255,255,255,.18)');
+  grd.addColorStop(1,   'rgba(255,255,255,0)');
+  g.fillStyle = grd; g.fillRect(0, 0, 256, 256);
+  const t = new THREE.CanvasTexture(c);
+  t.colorSpace = THREE.SRGBColorSpace;
+  return t;
+}
+
+function buildScene(){
+  renderer = new THREE.WebGLRenderer({ antialias:true, alpha:true, powerPreference:'high-performance' });
+  renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
+  renderer.setSize(innerWidth, innerHeight);
+  renderer.toneMapping = THREE.ACESFilmicToneMapping;
+  renderer.toneMappingExposure = 1.02;
+  stageEl.appendChild(renderer.domElement);
+
+  scene = new THREE.Scene();
+  camera = new THREE.PerspectiveCamera(34, innerWidth / innerHeight, 0.1, 100);
+  camera.position.set(0, 0, 8);
+
+  // студийное окружение — даёт отражения на плёнке пачки
+  const pmrem = new THREE.PMREMGenerator(renderer);
+  scene.environment = pmrem.fromScene(new RoomEnvironment(), 0.04).texture;
+
+  scene.add(new THREE.AmbientLight(0xffffff, 0.4));
+
+  const key = new THREE.DirectionalLight(0xfff4e2, 2.4);
+  key.position.set(4, 6, 6);
+  scene.add(key);
+
+  const rimWarm = new THREE.PointLight(0xf5a623, 30, 24, 2);
+  rimWarm.position.set(-3.6, 1.8, -2.4);
+  scene.add(rimWarm);
+
+  const rimCool = new THREE.PointLight(0x88a8ff, 18, 24, 2);
+  rimCool.position.set(3.8, -1.6, -3.0);
+  scene.add(rimCool);
+
+  /* --- пачка --- */
+  holder = new THREE.Group();
+  scene.add(holder);
+
+  labelMat = new THREE.MeshStandardMaterial({ metalness:0.16, roughness:0.52, envMapIntensity:0.85 });
+  foilMat  = new THREE.MeshStandardMaterial({ metalness:0.72, roughness:0.34, envMapIntensity:1.25 });
+
+  // группа 0 — лицо и оборот (этикетка), группа 1 — боковины (фольга)
+  pack = new THREE.Mesh(packGeometry(PRODUCTS[0].size), [labelMat, foilMat]);
+  holder.add(pack);
+
+  /* --- свечение под пачкой --- */
+  halo = new THREE.Mesh(
+    new THREE.PlaneGeometry(7.5, 7.5),
+    new THREE.MeshBasicMaterial({
+      map:haloTexture(), transparent:true, opacity:0.32,
+      blending:THREE.AdditiveBlending, depthWrite:false, toneMapped:false,
+    })
+  );
+  halo.rotation.x = -Math.PI / 2;
+  halo.position.y = -1.95;
+  holder.add(halo);
+
+  addEventListener('resize', onResize);
+  onResize();
+}
+
+/* Летающие снеки — пересобираются при смене продукта */
+function buildSnacks(p){
+  if(snacks){
+    holder.remove(snacks);
+    snacks.geometry.dispose();
+    snacks.material.dispose();
+  }
+  const N = (p.snack === 'stick' || p.snack === 'braid') ? 32 : 46;
+  const mat = new THREE.MeshStandardMaterial({
+    color:new THREE.Color(p.snackColor),
+    roughness: p.snack === 'ball' ? 0.85 : 0.55,
+    metalness: 0.05,
+    envMapIntensity: 1.0,
+  });
+  snacks = new THREE.InstancedMesh(snackGeometry(p.snack), mat, N);
+  snacks.instanceMatrix.setUsage(THREE.DynamicDrawUsage);
+
+  snackParams.length = 0;
+  const rnd = mulberry(1337);
+  for(let i = 0; i < N; i++){
+    snackParams.push({
+      radius: 1.45 + rnd() * 1.25,
+      yBase: (rnd() - 0.5) * 3.8,
+      speed: (0.18 + rnd() * 0.5) * (rnd() > .5 ? 1 : -1),
+      phase: rnd() * Math.PI * 2,
+      bob: 0.18 + rnd() * 0.4,
+      spin: new THREE.Vector3(rnd() * 2, rnd() * 2, rnd() * 2),
+      squash: 0.75 + rnd() * 0.6,
+    });
+  }
+  holder.add(snacks);
+}
+
+function onResize(){
+  const w = innerWidth, h = innerHeight;
+  camera.aspect = w / h;
+  camera.position.z = w / h < 0.85 ? 10.2 : 8;   // на узких экранах отодвигаем камеру
+  camera.updateProjectionMatrix();
+  renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
+  renderer.setSize(w, h);
+}
+
+const clock = new THREE.Clock();
+let firstFrame = true;
+
+function tick(){
+  requestAnimationFrame(tick);
+  const dt = Math.min(clock.getDelta(), 0.05);
+  const el = clock.elapsedTime;
+
+  const narrow = isNarrow();
+  const k = currentPose();
+
+  pointer.x = damp(pointer.x, pointer.tx, 4, dt);
+  pointer.y = damp(pointer.y, pointer.ty, 4, dt);
+
+  holder.position.x = damp(holder.position.x, k.x, 3.2, dt);
+  holder.position.y = damp(holder.position.y, k.y + (reduceMotion ? 0 : Math.sin(el * 0.7) * 0.08), 3.2, dt);
+  holder.scale.setScalar(damp(holder.scale.x, k.scale, 3.2, dt));
+
+  // лёгкое покачивание вместо непрерывного вращения — этикетку видно всегда
+  const sway = reduceMotion ? 0 : Math.sin(el * 0.42) * 0.20;
+  baseRotY = damp(baseRotY, k.rot, 3.2, dt);
+  holder.rotation.y = baseRotY + sway + pointer.x * 0.35;
+  holder.rotation.x = damp(holder.rotation.x, -pointer.y * 0.14 + (reduceMotion ? 0 : Math.sin(el * 0.33) * 0.05), 4, dt);
+  holder.rotation.z = damp(holder.rotation.z, pointer.x * 0.04, 4, dt);
+
+  // орбиты снеков
+  if(snacks){
+    for(let i = 0; i < snackParams.length; i++){
+      const s = snackParams[i];
+      const a = s.phase + el * s.speed * (reduceMotion ? 0 : 1);
+      dummy.position.set(
+        Math.cos(a) * s.radius,
+        s.yBase + (reduceMotion ? 0 : Math.sin(el * 0.5 + s.phase) * s.bob),
+        Math.sin(a) * s.radius * 0.75
+      );
+      dummy.rotation.set(
+        s.spin.x + el * s.speed * 1.4,
+        s.spin.y + el * s.speed * 1.1,
+        s.spin.z + el * s.speed * 0.7
+      );
+      dummy.scale.setScalar(s.squash);
+      dummy.updateMatrix();
+      snacks.setMatrixAt(i, dummy.matrix);
+    }
+    snacks.instanceMatrix.needsUpdate = true;
+  }
+
+  // перелив акцента при смене продукта
+  accentColor.cur.lerp(accentColor.goal, 1 - Math.exp(-3 * dt));
+  halo.material.color.copy(accentColor.cur).lerp(new THREE.Color(0xffffff), 0.4);
+
+  camera.position.x = damp(camera.position.x, pointer.x * 0.4, 3, dt);
+  camera.position.y = damp(camera.position.y, -pointer.y * 0.3, 3, dt);
+  camera.lookAt(0, 0, 0);
+
+  renderer.render(scene, camera);
+
+  if(firstFrame){ firstFrame = false; finishLoading(); }
+}
+
+/* ============================================================
+   Интерфейс
+   ============================================================ */
+let preValue = 0;
+const preTimer = setInterval(() => {
+  preValue = Math.min(preValue + Math.random() * 18, 92);
+  preBar.style.width = preValue + '%';
+}, 140);
+
+function finishLoading(){
+  clearInterval(preTimer);
+  preBar.style.width = '100%';
+  setTimeout(() => {
+    preloader.classList.add('done');
+    document.querySelectorAll('#hero .rv').forEach(n => n.classList.add('in'));
+  }, 420);
+}
+
+function onScroll(){
+  document.getElementById('nav').classList.toggle('solid', scrollY > 40);
+}
+addEventListener('scroll', onScroll, { passive:true });
+
+/* Пачка привязана к секциям, а не к проценту прокрутки: так позиция не
+   разъезжается при любых правках контента. */
+const poseRatios = new Map();
+const poseIO = new IntersectionObserver((entries) => {
+  entries.forEach(en => poseRatios.set(en.target, en.isIntersecting ? en.intersectionRatio : 0));
+
+  let best = null, bestRatio = 0;
+  poseRatios.forEach((ratio, el) => { if(ratio > bestRatio){ bestRatio = ratio; best = el; } });
+  if(!best) return;
+
+  const name = best.dataset.pose;
+  if(name === poseName) return;
+  poseName = name;
+
+  // на узких экранах приглушаем сцену за текстом, чтобы он читался
+  if(stageEl) stageEl.style.opacity = (isNarrow() && name !== 'hero') ? '0.45' : '1';
+}, { threshold:[0, .15, .3, .5, .75, 1] });
+document.querySelectorAll('[data-pose]').forEach(el => poseIO.observe(el));
+
+const glow = document.getElementById('glow');
+addEventListener('pointermove', (e) => {
+  pointer.tx = (e.clientX / innerWidth) * 2 - 1;
+  pointer.ty = (e.clientY / innerHeight) * 2 - 1;
+  glow.style.transform = `translate(${e.clientX}px, ${e.clientY}px)`;
+  glow.classList.add('on');
+}, { passive:true });
+addEventListener('pointerleave', () => glow.classList.remove('on'));
+
+const io = new IntersectionObserver((entries) => {
+  entries.forEach(en => { if(en.isIntersecting){ en.target.classList.add('in'); io.unobserve(en.target); } });
+}, { threshold:0.14, rootMargin:'0px 0px -8% 0px' });
+document.querySelectorAll('.rv').forEach(n => io.observe(n));
+
+/* меню */
+const burger = document.getElementById('burger');
+const navLinks = document.getElementById('navLinks');
+burger.addEventListener('click', () => {
+  const open = navLinks.classList.toggle('open');
+  burger.classList.toggle('open', open);
+  burger.setAttribute('aria-expanded', String(open));
+  document.body.style.overflow = open ? 'hidden' : '';
+});
+navLinks.addEventListener('click', (e) => {
+  if(e.target.tagName === 'A'){
+    navLinks.classList.remove('open');
+    burger.classList.remove('open');
+    burger.setAttribute('aria-expanded', 'false');
+    document.body.style.overflow = '';
+  }
+});
+
+/* бегущая строка — дублируем список, чтобы шов был незаметен */
+const tickerEl = document.getElementById('ticker');
+tickerEl.innerHTML = [...TICKER, ...TICKER].map(t => `<li>${t}</li>`).join('');
+
+/* ---------- контакты: телефон, почта и соцсети из CONTACTS ---------- */
+const SOCIAL_ICONS = {
+  Facebook:'<svg viewBox="0 0 24 24"><path d="M13.5 22v-8h2.7l.4-3.1h-3.1V8.9c0-.9.25-1.5 1.55-1.5H16.7V4.6A21 21 0 0 0 14.3 4.5c-2.4 0-4 1.45-4 4.1v2.3H7.6V14h2.7v8h3.2z"/></svg>',
+  Instagram:'<svg viewBox="0 0 24 24"><path d="M12 2.2c3.2 0 3.6 0 4.85.07 1.17.05 1.8.25 2.23.42.56.22.96.48 1.38.9.42.42.68.82.9 1.38.16.42.36 1.06.41 2.23.06 1.25.07 1.62.07 4.8s0 3.56-.07 4.81c-.05 1.17-.25 1.8-.41 2.23-.22.56-.48.96-.9 1.38-.42.42-.82.68-1.38.9-.43.16-1.06.36-2.23.41-1.25.06-1.62.07-4.85.07s-3.6 0-4.85-.07c-1.17-.05-1.8-.25-2.23-.41a3.8 3.8 0 0 1-1.38-.9 3.8 3.8 0 0 1-.9-1.38c-.16-.43-.36-1.06-.41-2.23C2.21 15.56 2.2 15.2 2.2 12s0-3.55.07-4.8c.05-1.17.25-1.81.41-2.23.22-.56.48-.96.9-1.38.42-.42.82-.68 1.38-.9.43-.17 1.06-.37 2.23-.42C8.44 2.2 8.8 2.2 12 2.2zm0 1.98c-3.14 0-3.5.01-4.74.07-1.14.05-1.76.24-2.17.4-.55.21-.94.47-1.35.88-.41.41-.67.8-.88 1.35-.16.41-.35 1.03-.4 2.17-.06 1.24-.07 1.6-.07 4.74s.01 3.5.07 4.74c.05 1.14.24 1.76.4 2.17.21.55.47.94.88 1.35.41.41.8.67 1.35.88.41.16 1.03.35 2.17.4 1.24.06 1.6.07 4.74.07s3.5-.01 4.74-.07c1.14-.05 1.76-.24 2.17-.4.55-.21.94-.47 1.35-.88.41-.41.67-.8.88-1.35.16-.41.35-1.03.4-2.17.06-1.24.07-1.6.07-4.74s-.01-3.5-.07-4.74c-.05-1.14-.24-1.76-.4-2.17a3.6 3.6 0 0 0-.88-1.35 3.6 3.6 0 0 0-1.35-.88c-.41-.16-1.03-.35-2.17-.4-1.24-.06-1.6-.07-4.74-.07zm0 3.37a5.45 5.45 0 1 1 0 10.9 5.45 5.45 0 0 1 0-10.9zm0 8.99a3.54 3.54 0 1 0 0-7.08 3.54 3.54 0 0 0 0 7.08zm6.94-9.2a1.27 1.27 0 1 1-2.55 0 1.27 1.27 0 0 1 2.55 0z"/></svg>',
+  Telegram:'<svg viewBox="0 0 24 24"><path d="M21.7 4.1 18.9 19c-.2.9-.8 1.1-1.6.7l-4.4-3.2-2.1 2c-.24.24-.43.43-.87.43l.3-4.4 8.1-7.3c.35-.3-.08-.48-.55-.18L7.8 12.3l-4.3-1.35c-.94-.3-.95-.94.2-1.4l16.8-6.5c.78-.28 1.46.18 1.2 1.05z"/></svg>',
+};
+
+(function renderContacts(){
+  const phone = document.getElementById('cPhone');
+  phone.textContent = CONTACTS.phone;
+  phone.href = 'tel:' + CONTACTS.phoneRaw;
+
+  const mail = document.getElementById('cMail');
+  mail.textContent = CONTACTS.email;
+  mail.href = 'mailto:' + CONTACTS.email;
+
+  const site = document.getElementById('cSite');
+  site.textContent = CONTACTS.site;
+  site.href = 'https://' + CONTACTS.site;
+  site.rel = 'noopener';
+
+  document.getElementById('cComp').textContent = CONTACTS.company;
+  document.getElementById('cCity').textContent = CONTACTS.city;
+
+  // соцсети: пустой url оставляет кнопку-заглушку, чтобы было куда вставить ссылку
+  document.getElementById('socials').innerHTML = CONTACTS.socials.map(sn => {
+    const icon = SOCIAL_ICONS[sn.name] || '';
+    return sn.url
+      ? `<a class="social" href="${sn.url}" target="_blank" rel="noopener">${icon}${sn.name}</a>`
+      : `<span class="social" data-empty="1" title="Ссылка ещё не указана">${icon}${sn.name}</span>`;
+  }).join('');
+
+  document.getElementById('footContacts').innerHTML = `
+    <li><a href="tel:${CONTACTS.phoneRaw}">${CONTACTS.phone}</a></li>
+    <li><a href="mailto:${CONTACTS.email}">${CONTACTS.email}</a></li>
+    <li><a href="https://${CONTACTS.site}" rel="noopener">${CONTACTS.site}</a></li>
+    <li><a href="#wholesale">Заявка на поставку</a></li>`;
+
+  // в шапке показываем телефон — это главный путь к заказу
+  const navBtn = document.getElementById('navPhone');
+  navBtn.textContent = CONTACTS.phone;
+  navBtn.href = 'tel:' + CONTACTS.phoneRaw;
+})();
+
+/* карточки продуктов */
+const swWrap = document.getElementById('swatches');
+PRODUCTS.forEach((p, i) => {
+  const b = document.createElement('button');
+  b.type = 'button';
+  b.className = 'sw';
+  b.style.setProperty('--sw-color', p.accent);
+  b.setAttribute('aria-pressed', String(i === 0));
+  b.innerHTML = `
+    <span class="dot"></span>
+    <span class="txt"><span class="nm">${p.name}</span><span class="ds">${p.sub}</span></span>
+    <span class="badge">Выбрано</span>`;
+  b.addEventListener('click', () => selectProduct(i));
+  swWrap.appendChild(b);
+});
+
+function selectProduct(i){
+  activeIndex = i;
+  const p = PRODUCTS[i];
+
+  document.querySelectorAll('.sw').forEach((el, idx) => el.setAttribute('aria-pressed', String(idx === i)));
+
+  document.getElementById('pName').textContent = p.name;
+  document.getElementById('pDesc').textContent = p.desc;
+  document.getElementById('pTags').innerHTML = p.tags.map(t => `<li>${t}</li>`).join('');
+  document.getElementById('sWeight').textContent = p.spec.weight;
+  document.getElementById('sComp').textContent   = p.spec.comp;
+  document.getElementById('sPack').textContent   = p.spec.pack;
+  document.getElementById('sLife').textContent   = p.spec.life;
+  document.getElementById('sBox').textContent    = p.spec.box;
+
+  document.documentElement.style.setProperty('--accent', p.accent);
+
+  if(renderer){
+    pack.geometry.dispose();
+    pack.geometry = packGeometry(p.size);
+    applyLabel(p);
+    foilMat.color.set(p.packB);
+    accentColor.goal.set(p.accent);
+    buildSnacks(p);
+  }
+}
+
+/* Этикетка на 3D-пачке.
+   Если у продукта задан `photo` — берём настоящее фото/развёртку пачки,
+   иначе рисуем макет на canvas. Фото должно быть лицевой стороной,
+   снятой ровно, без фона (вертикальное, примерно 3:4). */
+const texLoader = new THREE.TextureLoader();
+function applyLabel(p){
+  const setMap = (tex) => {
+    if(labelMat.map) labelMat.map.dispose();
+    tex.colorSpace = THREE.SRGBColorSpace;
+    tex.anisotropy = 8;
+    labelMat.map = tex;
+    labelMat.needsUpdate = true;
+  };
+
+  if(p.photo){
+    texLoader.load(
+      p.photo,
+      setMap,
+      undefined,
+      () => { console.warn('Не удалось загрузить фото пачки:', p.photo); setMap(packTexture(p)); }
+    );
+  }else{
+    setMap(packTexture(p));
+  }
+}
+
+/* форма */
+const form = document.getElementById('leadForm');
+form.addEventListener('submit', (e) => {
+  e.preventDefault();
+  const name = form.name.value.trim();
+  const phone = form.phone.value.trim();
+  if(!name){ form.name.focus(); return; }
+  if(phone.replace(/\D/g, '').length < 7){ form.phone.focus(); return; }
+
+  // TODO: подключить отправку —
+  // fetch('/api/lead', { method:'POST', body:new FormData(form) })
+  console.info('lead:', Object.fromEntries(new FormData(form)), 'product:', PRODUCTS[activeIndex].id);
+  document.getElementById('formOk').classList.add('on');
+  form.reset();
+});
+
+document.getElementById('year').textContent = new Date().getFullYear();
+
+/* ============================================================
+   Запуск
+   ============================================================ */
+window.__machosBooted = true;   // сигнал сторожевому таймеру ниже
+
+if(supportsWebGL()){
+  try{
+    buildScene();
+    selectProduct(0);
+    onScroll();
+    tick();
+  }catch(err){
+    console.error('Сцена не собралась:', err);
+    document.getElementById('fallback').classList.add('on');
+    selectProduct(0);
+    finishLoading();
+  }
+}else{
+  document.getElementById('fallback').classList.add('on');
+  selectProduct(0);
+  onScroll();
+  finishLoading();
+}
+</script>
+
+<!-- Сторожевой таймер: если модуль не загрузился (нет ES-модулей, заблокирован
+     скрипт, оборвалась сеть) — снимаем прелоадер и показываем плоскую версию,
+     чтобы посетитель не остался перед пустым экраном. -->
+<script>
+(function(){
+  var LIMIT = 7000;
+  setTimeout(function(){
+    if(window.__machosBooted) return;
+    document.getElementById('preloader').classList.add('done');
+    document.getElementById('fallback').classList.add('on');
+    document.querySelectorAll('.rv').forEach(function(n){ n.classList.add('in'); });
+    var y = document.getElementById('year');
+    if(y) y.textContent = new Date().getFullYear();
+  }, LIMIT);
+})();
+</script>
+</body>
+</html>
