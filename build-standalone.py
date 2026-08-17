@@ -33,6 +33,25 @@ room_body = re.sub(r'\bexport\s+(class|const|function)\b', r'\1', room_body)
 
 html = re.sub(r'<script type="importmap">.*?</script>\s*', '', html, flags=re.S)
 
+# Фотографии кладём внутрь файла: одиночная страница не может дотянуться
+# до папки assets, и вместо картинок остаются пустые рамки.
+import base64, glob
+assets = {}
+for f in sorted(glob.glob('assets/*')):
+    ext = os.path.splitext(f)[1].lower()
+    mime = {'.jpg':'image/jpeg', '.jpeg':'image/jpeg',
+            '.png':'image/png', '.webp':'image/webp'}.get(ext)
+    if not mime:
+        continue
+    with open(f, 'rb') as fh:
+        assets[f] = f'data:{mime};base64,' + base64.b64encode(fh.read()).decode()
+if assets:
+    inline = ('<script>window.__ASSETS = {'
+              + ','.join(f'{k!r}:{v!r}' for k, v in assets.items())
+              + '};</script>\n')
+    html = html.replace('<script type="module">', inline + '<script type="module">', 1)
+    print(f'встроено фотографий: {len(assets)}')
+
 OLD_HEAD = """<script type="module">
 import * as THREE from 'three';
 import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';"""
