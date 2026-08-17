@@ -3,44 +3,46 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-<title>Machos.Uz — семечки, курт, сырные палочки</title>
-<meta name="description" content="Machos.Uz — снеки из Узбекистана: семечки свежей обжарки, настоящий курт и сырные палочки. Интерактивная 3D-презентация продукции, оптовые поставки." />
-<meta name="theme-color" content="#0a0908" />
+<title>Machos.uz — курт, сырные палочки и семечки из Ташкента</title>
+<meta name="description" content="Machos.uz — производство снеков в Ташкенте: курт трёх форм, сырные палочки, сырная косичка и солёные семечки. Натуральный состав, поставки оптом по Узбекистану." />
+<meta name="theme-color" content="#0A0A0A" />
 
 <meta property="og:type" content="website" />
-<meta property="og:title" content="Machos.Uz — снеки из Узбекистана" />
-<meta property="og:description" content="Семечки, курт и сырные палочки. Хрустит по-нашему." />
+<meta property="og:title" content="Machos.uz — натуральные снеки из Узбекистана" />
+<meta property="og:description" content="Курт, сырные палочки и семечки. Своё производство в Ташкенте, поставки оптом." />
 <meta property="og:locale" content="ru_RU" />
+<meta property="og:locale:alternate" content="uz_UZ" />
 
 <link rel="preconnect" href="https://fonts.googleapis.com" />
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-<link href="https://fonts.googleapis.com/css2?family=Unbounded:wght@400;600;800&family=Inter:wght@300;400;500;600&display=swap" rel="stylesheet" />
+<link href="https://fonts.googleapis.com/css2?family=Rubik:wght@500;700;800&family=Manrope:wght@400;500;600&display=swap" rel="stylesheet" />
 
-<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='24' fill='%230a0908'/><text x='50' y='70' font-size='58' font-family='Arial,sans-serif' font-weight='bold' fill='%23f5a623' text-anchor='middle'>M</text></svg>" />
+<link rel="icon" href="data:image/svg+xml,<svg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'><rect width='100' height='100' rx='22' fill='%230A0A0A'/><text x='50' y='72' font-size='62' font-family='Arial Black,Arial' font-weight='900' fill='%23FFD400' text-anchor='middle'>M</text></svg>" />
 
 <style>
 /* ============================================================
-   Machos.Uz — дизайн-система
-   Акцент (--accent) переключается вместе с выбранным продуктом
+   Machos.uz — чёрное и жёлтое
+   Два цвета с упаковки: чёрная лента NATURAL PRODUCT и жёлтая
+   плёнка. Больше в палитре ничего нет — контраст держит всё.
    ============================================================ */
 :root{
-  --bg:        #0a0908;
-  --bg-2:      #100e0c;
-  --line:      rgba(255,255,255,.11);
-  --line-soft: rgba(255,255,255,.06);
+  --bg:      #0A0A0A;
+  --bg-2:    #131311;
+  --panel:   #191917;
+  --brand:   #FFD400;
+  --brand-2: #E8BE00;
+  --text:    #F6F3E9;
+  --muted:   #9E998C;
+  --dim:     #6B675D;
+  --line:    rgba(246,243,233,.13);
+  --line-2:  rgba(246,243,233,.07);
 
-  --text:  #f7f3ec;
-  --muted: #a49c90;
-  --dim:   #6e675d;
+  --display: "Rubik", system-ui, "Segoe UI", Roboto, sans-serif;
+  --sans:    "Manrope", system-ui, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
 
-  --accent: #f5a623;
-
-  --display: "Unbounded", "Arial Black", system-ui, sans-serif;
-  --sans: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-
-  --pad: clamp(20px, 5vw, 72px);
+  --pad:  clamp(18px, 5vw, 64px);
   --maxw: 1280px;
-  --r: 18px;
+  --r:    18px;
   --ease: cubic-bezier(.22,.61,.36,1);
 }
 
@@ -50,715 +52,872 @@ html{ scroll-behavior:smooth; -webkit-text-size-adjust:100%; }
 
 body{
   margin:0; background:var(--bg); color:var(--text);
-  font-family:var(--sans); font-weight:300; font-size:16px; line-height:1.65;
+  font-family:var(--sans); font-size:17px; line-height:1.6;
   -webkit-font-smoothing:antialiased; overflow-x:hidden;
 }
-img,canvas{ display:block; max-width:100%; }
+img{ display:block; max-width:100%; }
 a{ color:inherit; text-decoration:none; }
 button{ font:inherit; color:inherit; }
-:focus-visible{ outline:2px solid var(--accent); outline-offset:3px; border-radius:6px; }
-::selection{ background:var(--accent); color:#12100c; }
+:focus-visible{ outline:3px solid var(--brand); outline-offset:3px; border-radius:4px; }
+::selection{ background:var(--brand); color:#0A0A0A; }
 
-/* фоновая заливка */
-body::before{
-  content:""; position:fixed; inset:0; z-index:0; pointer-events:none;
-  background:
-    radial-gradient(85vw 65vh at 50% -12%, color-mix(in srgb, var(--accent) 14%, transparent), transparent 62%),
-    radial-gradient(55vw 55vh at 100% 45%, rgba(255,255,255,.05), transparent 60%),
-    linear-gradient(180deg, #0a0908 0%, #12100d 48%, #0a0908 100%);
-  transition:background .9s var(--ease);
-}
-/* зерно */
-body::after{
-  content:""; position:fixed; inset:0; z-index:60; pointer-events:none;
-  opacity:.26; mix-blend-mode:overlay;
-  background-image:url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='140' height='140'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='3'/></filter><rect width='140' height='140' filter='url(%23n)' opacity='.5'/></svg>");
-}
+h1,h2,h3{ font-family:var(--display); font-weight:800; margin:0; line-height:1.03; letter-spacing:-.025em; }
+h1{ font-size:clamp(38px,6.4vw,78px); text-wrap:balance; }
+h2{ font-size:clamp(30px,5vw,60px); }
+h3{ font-size:clamp(18px,2vw,23px); font-weight:700; letter-spacing:-.01em; line-height:1.22; }
+p{ margin:0; }
+.y{ color:var(--brand); }
 
-/* ============================================================
-   3D-сцена и запасной вариант
-   ============================================================ */
-#stage{ position:fixed; inset:0; z-index:1; pointer-events:none; transition:opacity .6s var(--ease); }
-#stage canvas{ width:100%; height:100%; }
-
-#fallback{ position:fixed; inset:0; z-index:1; display:none; place-items:center; pointer-events:none; }
-#fallback.on{ display:grid; }
-.fb-pack{
-  width:min(34vw,260px); aspect-ratio:.7; border-radius:16px 16px 26px 26px;
-  background:linear-gradient(165deg, color-mix(in srgb, var(--accent) 85%, #fff), color-mix(in srgb, var(--accent) 40%, #000));
-  box-shadow:0 60px 130px rgba(0,0,0,.65), inset 0 0 70px rgba(255,255,255,.14);
-  display:grid; place-content:center;
-  font-family:var(--display); font-weight:800; color:#1a1206; letter-spacing:.16em;
-}
-
-#glow{
-  position:fixed; z-index:2; width:520px; height:520px; margin:-260px 0 0 -260px;
-  border-radius:50%; pointer-events:none; opacity:0; will-change:transform;
-  background:radial-gradient(circle, color-mix(in srgb, var(--accent) 20%, transparent), transparent 66%);
-  transition:opacity .6s var(--ease), background .8s var(--ease);
-}
-@media (hover:hover) and (pointer:fine){ #glow.on{ opacity:.55; } }
-
-/* ============================================================
-   Прелоадер
-   ============================================================ */
-#preloader{
-  position:fixed; inset:0; z-index:100; display:grid; place-content:center; justify-items:center;
-  gap:22px; background:var(--bg); transition:opacity .8s var(--ease), visibility .8s;
-}
-#preloader.done{ opacity:0; visibility:hidden; }
-.pre-mark{
-  font-family:var(--display); font-weight:800; font-size:clamp(30px,6vw,52px);
-  letter-spacing:.14em; text-indent:.14em;
-}
-.pre-mark i{ color:var(--accent); font-style:normal; }
-.pre-bar{ width:min(220px,52vw); height:2px; background:var(--line); overflow:hidden; border-radius:2px; }
-.pre-bar i{ display:block; height:100%; width:0; background:var(--accent); transition:width .35s var(--ease); }
-.pre-txt{ font-size:11px; letter-spacing:.26em; text-transform:uppercase; color:var(--dim); }
-
-/* ============================================================
-   Навигация
-   ============================================================ */
-.skip{ position:absolute; left:-9999px; top:0; z-index:120; background:var(--accent); color:#12100c; padding:12px 18px; }
-.skip:focus{ left:0; }
-
-header.nav{
-  position:fixed; inset:0 0 auto 0; z-index:50;
-  display:flex; align-items:center; justify-content:space-between; gap:20px;
-  padding:18px var(--pad); border-bottom:1px solid transparent;
-  transition:background .4s var(--ease), backdrop-filter .4s var(--ease), border-color .4s var(--ease), padding .4s var(--ease);
-}
-header.nav.solid{
-  background:rgba(10,9,8,.74); backdrop-filter:blur(14px) saturate(140%);
-  -webkit-backdrop-filter:blur(14px) saturate(140%);
-  border-bottom-color:var(--line-soft); padding-block:12px;
-}
-.brand{
-  font-family:var(--display); font-weight:800; font-size:19px;
-  letter-spacing:.10em; white-space:nowrap; display:flex; align-items:baseline; gap:2px;
-}
-.brand i{ color:var(--accent); font-style:normal; transition:color .6s var(--ease); }
-
-.nav-links{ display:flex; gap:30px; align-items:center; }
-.nav-links a{
-  font-size:13px; letter-spacing:.06em; color:var(--muted);
-  position:relative; padding:6px 0; transition:color .3s var(--ease);
-}
-.nav-links a::after{
-  content:""; position:absolute; left:0; bottom:0; height:1px; width:0;
-  background:var(--accent); transition:width .35s var(--ease);
-}
-.nav-links a:hover{ color:var(--text); }
-.nav-links a:hover::after{ width:100%; }
-
-.btn{
-  display:inline-flex; align-items:center; justify-content:center; gap:10px;
-  padding:14px 26px; border-radius:100px; border:1px solid var(--line);
-  font-size:12px; font-weight:500; letter-spacing:.10em; text-transform:uppercase;
-  cursor:pointer; background:transparent;
-  transition:background .35s var(--ease), color .35s var(--ease), border-color .35s var(--ease), transform .18s var(--ease);
-}
-.btn:hover{ border-color:var(--accent); color:var(--accent); }
-.btn:active{ transform:translateY(1px); }
-.btn.primary{ background:var(--accent); border-color:var(--accent); color:#12100c; font-weight:600; }
-.btn.primary:hover{ background:transparent; color:var(--accent); }
-.nav .btn{ padding:11px 22px; }
-
-.burger{
-  display:none; width:44px; height:44px; border:1px solid var(--line);
-  border-radius:50%; background:transparent; cursor:pointer; position:relative;
-}
-.burger span{ position:absolute; left:13px; width:18px; height:1.5px; background:var(--text); transition:transform .35s var(--ease); }
-.burger span:nth-child(1){ top:18px; }
-.burger span:nth-child(2){ top:25px; }
-.burger.open span:nth-child(1){ transform:translateY(3.5px) rotate(45deg); }
-.burger.open span:nth-child(2){ transform:translateY(-3.5px) rotate(-45deg); }
-
-@media (max-width:900px){
-  .nav-links{
-    position:fixed; inset:0; flex-direction:column; justify-content:center; gap:26px;
-    background:rgba(10,9,8,.97); backdrop-filter:blur(20px);
-    opacity:0; visibility:hidden; transition:opacity .4s var(--ease), visibility .4s;
-  }
-  .nav-links.open{ opacity:1; visibility:visible; }
-  .nav-links a{ font-size:20px; font-family:var(--display); font-weight:400; }
-  .nav .btn{ display:none; }
-  .burger{ display:block; z-index:51; }
-}
-
-/* ============================================================
-   Секции
-   ============================================================ */
-main{ position:relative; z-index:3; }
-section{ padding:clamp(84px,13vh,150px) var(--pad); position:relative; }
 .wrap{ max-width:var(--maxw); margin-inline:auto; width:100%; }
+section{ padding:clamp(64px,9vw,124px) var(--pad); position:relative; z-index:2; }
 
 .eyebrow{
-  display:inline-flex; align-items:center; gap:10px; margin:0 0 20px;
-  font-size:11px; letter-spacing:.26em; text-transform:uppercase; color:var(--accent);
-  transition:color .6s var(--ease);
+  font-size:12px; font-weight:600; letter-spacing:.2em; text-transform:uppercase;
+  color:var(--brand); display:flex; align-items:center; gap:10px;
 }
-.eyebrow::before{ content:""; width:26px; height:1px; background:currentColor; opacity:.75; }
+.eyebrow::before{ content:""; width:22px; height:2px; background:var(--brand); border-radius:2px; }
+.lead{ color:var(--muted); font-size:clamp(16px,1.7vw,19px); max-width:56ch; }
 
-h1,h2,h3{ font-family:var(--display); margin:0; line-height:1.05; font-weight:800; }
-h1{ font-size:clamp(40px,8.4vw,104px); letter-spacing:-.02em; }
-h2{ font-size:clamp(28px,4.6vw,56px); letter-spacing:-.015em; }
-h3{ font-size:clamp(17px,2vw,21px); letter-spacing:-.005em; font-weight:600; line-height:1.3; }
-.lead{ color:var(--muted); font-size:clamp(15px,1.6vw,18px); max-width:54ch; }
-.hl{ color:var(--accent); transition:color .6s var(--ease); }
-
-.rv{ opacity:0; transform:translateY(26px); transition:opacity .9s var(--ease), transform .9s var(--ease); }
+.rv{ opacity:0; transform:translateY(22px); transition:opacity .8s var(--ease), transform .8s var(--ease); }
 .rv.in{ opacity:1; transform:none; }
-.rv.d1{ transition-delay:.10s } .rv.d2{ transition-delay:.20s }
-.rv.d3{ transition-delay:.30s } .rv.d4{ transition-delay:.40s }
+.rv.d1{ transition-delay:.08s } .rv.d2{ transition-delay:.16s }
+.rv.d3{ transition-delay:.24s } .rv.d4{ transition-delay:.32s }
 @media (prefers-reduced-motion: reduce){
   .rv{ opacity:1 !important; transform:none !important; transition:none !important; }
 }
 
+/* ---------- кнопки ---------- */
+.btn{
+  display:inline-flex; align-items:center; justify-content:center; gap:10px;
+  padding:15px 28px; border-radius:100px; border:2px solid var(--text);
+  font-family:var(--display); font-weight:700; font-size:15px;
+  cursor:pointer; background:transparent; white-space:nowrap;
+  transition:background .25s var(--ease), color .25s var(--ease), border-color .25s var(--ease), transform .15s var(--ease);
+}
+.btn:hover{ background:var(--text); color:var(--bg); }
+.btn:active{ transform:translateY(1px); }
+.btn.brand{ background:var(--brand); border-color:var(--brand); color:#0A0A0A; }
+.btn.brand:hover{ background:transparent; color:var(--brand); }
+.btn.dark{ background:#0A0A0A; border-color:#0A0A0A; color:var(--brand); }
+.btn.dark:hover{ background:transparent; border-color:#0A0A0A; color:#0A0A0A; }
+
 /* ============================================================
-   Hero
+   3D-сцена: фотография пачки живёт в объёме
    ============================================================ */
-#hero{ min-height:100svh; display:grid; align-content:center; padding-top:clamp(120px,17vh,180px); }
-.hero-grid{ display:grid; grid-template-columns:1fr auto; gap:40px; align-items:end; }
-.hero-title .l2{ display:block; padding-left:clamp(0px,9vw,150px); color:var(--accent); transition:color .6s var(--ease); }
-.hero-sub{ margin-top:32px; }
-.hero-actions{ display:flex; flex-wrap:wrap; gap:14px; margin-top:36px; }
-.hero-side{
-  writing-mode:vertical-rl; font-size:11px; letter-spacing:.26em;
-  text-transform:uppercase; color:var(--dim); padding-bottom:8px;
+#stage{ position:fixed; inset:0; z-index:1; pointer-events:none; transition:opacity .6s var(--ease); }
+#stage canvas{ width:100%; height:100%; }
+#fallback{ position:fixed; inset:0; z-index:1; display:none; place-items:center; pointer-events:none; }
+#fallback.on{ display:grid; }
+#fallback img{ width:min(34vw,300px); border-radius:16px; box-shadow:0 40px 80px rgba(0,0,0,.7); }
+
+/* ============================================================
+   Шапка
+   ============================================================ */
+.skip{ position:absolute; left:-9999px; top:0; z-index:200; background:var(--brand); color:#0A0A0A; padding:12px 18px; }
+.skip:focus{ left:0; }
+
+header.nav{
+  position:sticky; top:0; z-index:100;
+  display:flex; align-items:center; gap:clamp(10px,2.5vw,32px);
+  padding:14px var(--pad);
+  background:rgba(10,10,10,.78);
+  backdrop-filter:blur(14px) saturate(150%);
+  -webkit-backdrop-filter:blur(14px) saturate(150%);
+  border-bottom:1px solid var(--line-2);
 }
-@media (max-width:900px){ .hero-side{ display:none; } .hero-grid{ grid-template-columns:1fr; } }
-/* на узком экране пачка занимает верх экрана, текст уходит под неё */
-@media (max-aspect-ratio:85/100){
-  #hero{ align-content:end; padding-top:46svh; padding-bottom:14svh; }
-  #products .prod-stage{ min-height:38svh; }
+.brand{ display:flex; align-items:baseline; font-family:var(--display); font-weight:800; font-size:22px; letter-spacing:-.03em; }
+.brand i{ color:var(--brand); font-style:normal; }
+
+.nav-links{ display:flex; gap:clamp(12px,1.9vw,28px); margin-inline:auto; }
+.nav-links a{ font-size:15px; font-weight:500; color:var(--muted); padding:8px 0; position:relative; transition:color .25s var(--ease); }
+.nav-links a::after{
+  content:""; position:absolute; left:0; right:100%; bottom:2px; height:2px;
+  background:var(--brand); transition:right .3s var(--ease);
 }
+.nav-links a:hover{ color:var(--text); }
+.nav-links a:hover::after{ right:0; }
+
+.lang{ display:flex; gap:2px; padding:3px; background:var(--panel); border-radius:100px; }
+.lang button{
+  border:0; background:transparent; cursor:pointer; border-radius:100px;
+  padding:7px 13px; font-size:13px; font-weight:600; color:var(--dim);
+  transition:background .25s var(--ease), color .25s var(--ease);
+}
+.lang button[aria-pressed="true"]{ background:var(--brand); color:#0A0A0A; }
+
+.nav-phone{ font-family:var(--display); font-weight:700; font-size:15px; white-space:nowrap; color:var(--brand); }
+.burger{ display:none; width:42px; height:42px; border:2px solid var(--line); border-radius:12px; background:transparent; cursor:pointer; position:relative; }
+.burger span{ position:absolute; left:10px; width:18px; height:2px; background:var(--text); border-radius:2px; transition:transform .3s var(--ease), opacity .2s; }
+.burger span:nth-child(1){ top:14px } .burger span:nth-child(2){ top:20px } .burger span:nth-child(3){ top:26px }
+.burger.open span:nth-child(1){ transform:translateY(6px) rotate(45deg) }
+.burger.open span:nth-child(2){ opacity:0 }
+.burger.open span:nth-child(3){ transform:translateY(-6px) rotate(-45deg) }
+
+@media (max-width:940px){
+  .nav-links{
+    position:fixed; inset:64px 0 auto 0; flex-direction:column; gap:0; margin:0;
+    background:var(--bg); border-bottom:1px solid var(--line);
+    padding:8px var(--pad) 20px; transform:translateY(-130%);
+    transition:transform .4s var(--ease);
+  }
+  .nav-links.open{ transform:none; }
+  .nav-links a{ padding:14px 0; font-size:18px; font-family:var(--display); font-weight:700; border-bottom:1px solid var(--line-2); }
+  .nav-phone{ display:none; }
+  .burger{ display:block; margin-left:auto; }
+}
+
+/* ============================================================
+   Первый экран
+   ============================================================ */
+#hero{ min-height:100svh; display:grid; align-content:center; padding-top:clamp(40px,8vh,90px); }
+.hero-grid{ display:grid; grid-template-columns:1.08fr .92fr; gap:clamp(20px,4vw,50px); align-items:center; }
+@media (max-width:940px){ .hero-grid{ grid-template-columns:1fr; } }
+
+.hero h1{ margin:20px 0 0; }
+.hero h1 em{ font-style:normal; display:block; color:var(--brand); white-space:nowrap; }
+.hero-lead{ margin-top:22px; max-width:46ch; }
+.hero-cta{ display:flex; flex-wrap:wrap; gap:12px; margin-top:32px; }
+.hero-facts{ display:flex; flex-wrap:wrap; gap:clamp(18px,3vw,42px); margin-top:38px; }
+.hero-facts div{ display:grid; gap:2px; }
+.hero-facts b{ font-family:var(--display); font-weight:800; font-size:clamp(22px,2.6vw,32px); line-height:1; color:var(--brand); }
+.hero-facts span{ font-size:13px; color:var(--dim); }
+/* правая колонка пустая: в ней стоит 3D-карточка */
+.hero-slot{ min-height:min(62vh,540px); }
+@media (max-width:940px){ .hero-slot{ min-height:44svh; order:-1; } }
 
 .scroll-hint{
-  position:absolute; left:var(--pad); bottom:30px;
-  display:flex; align-items:center; gap:12px;
-  font-size:10px; letter-spacing:.26em; text-transform:uppercase; color:var(--dim);
+  position:absolute; left:var(--pad); bottom:28px; display:flex; align-items:center; gap:12px;
+  font-size:11px; letter-spacing:.24em; text-transform:uppercase; color:var(--dim);
 }
-.scroll-hint i{ display:block; width:52px; height:1px; background:var(--line); position:relative; overflow:hidden; }
-.scroll-hint i::after{ content:""; position:absolute; inset:0; background:var(--accent); animation:slide 2.6s var(--ease) infinite; }
+.scroll-hint i{ display:block; width:48px; height:2px; background:var(--line); position:relative; overflow:hidden; border-radius:2px; }
+.scroll-hint i::after{ content:""; position:absolute; inset:0; background:var(--brand); animation:slide 2.6s var(--ease) infinite; }
 @keyframes slide{ 0%{transform:translateX(-100%)} 60%,100%{transform:translateX(100%)} }
-@media (prefers-reduced-motion: reduce){ .scroll-hint i::after{ animation:none; opacity:.4 } }
+@media (prefers-reduced-motion: reduce){ .scroll-hint i::after{ animation:none; opacity:.5 } }
 
 /* ============================================================
-   Бегущая строка
+   Жёлтая лента — чёрное на жёлтом, как полоса на пачке
    ============================================================ */
-.ticker{
-  position:relative; z-index:3; overflow:hidden; border-block:1px solid var(--line-soft);
-  background:rgba(10,9,8,.55); backdrop-filter:blur(8px); padding:16px 0;
-  -webkit-mask-image:linear-gradient(90deg,transparent,#000 8%,#000 92%,transparent);
-          mask-image:linear-gradient(90deg,transparent,#000 8%,#000 92%,transparent);
+.tape{ position:relative; z-index:2; background:var(--brand); color:#0A0A0A; overflow:hidden; padding:15px 0; }
+.tape ul{ list-style:none; margin:0; padding:0; display:flex; gap:44px; width:max-content; animation:marquee 38s linear infinite; }
+.tape li{
+  display:flex; align-items:center; gap:44px; white-space:nowrap;
+  font-family:var(--display); font-weight:800; font-size:15px; letter-spacing:.14em; text-transform:uppercase;
 }
-.ticker ul{
-  list-style:none; margin:0; padding:0; display:flex; gap:52px; width:max-content;
-  animation:marquee 34s linear infinite;
-}
-.ticker li{
-  font-family:var(--display); font-weight:400; font-size:clamp(14px,1.7vw,19px);
-  letter-spacing:.06em; color:var(--muted); display:flex; align-items:center; gap:52px; white-space:nowrap;
-}
-.ticker li::after{ content:"◆"; color:var(--accent); font-size:.6em; }
-@keyframes marquee{ from{ transform:translateX(0) } to{ transform:translateX(-50%) } }
-@media (prefers-reduced-motion: reduce){ .ticker ul{ animation:none } }
+.tape li::after{ content:"●"; font-size:.5em; }
+@keyframes marquee{ from{transform:translateX(0)} to{transform:translateX(-50%)} }
+@media (prefers-reduced-motion: reduce){ .tape ul{ animation:none } }
 
 /* ============================================================
-   Факты
+   Продукция
    ============================================================ */
-.facts{ display:grid; grid-template-columns:repeat(4,1fr); gap:1px; background:var(--line-soft); }
-.fact{ background:var(--bg); padding:32px 26px; }
-.fact b{ display:block; font-family:var(--display); font-weight:800; font-size:clamp(28px,3.8vw,44px); letter-spacing:-.02em; }
-.fact span{ font-size:12px; letter-spacing:.10em; color:var(--dim); text-transform:uppercase; }
-@media (max-width:760px){ .facts{ grid-template-columns:repeat(2,1fr); } }
+.sec-head{ display:flex; flex-wrap:wrap; align-items:flex-end; justify-content:space-between; gap:20px; }
+.sec-head h2{ margin-top:14px; }
 
-/* ============================================================
-   Карточки
-   ============================================================ */
-.cards{ display:grid; grid-template-columns:repeat(3,1fr); gap:20px; margin-top:60px; }
-@media (max-width:900px){ .cards{ grid-template-columns:1fr; } }
+.filters{ display:flex; flex-wrap:wrap; gap:8px; margin-top:34px; }
+.filters button{
+  border:2px solid var(--line); background:transparent; cursor:pointer;
+  padding:10px 20px; border-radius:100px; font-size:14px; font-weight:600; color:var(--muted);
+  transition:border-color .25s var(--ease), background .25s var(--ease), color .25s var(--ease);
+}
+.filters button:hover{ border-color:var(--brand); color:var(--brand); }
+.filters button[aria-pressed="true"]{ background:var(--brand); border-color:var(--brand); color:#0A0A0A; }
+
+.grid{ display:grid; grid-template-columns:repeat(auto-fill, minmax(255px,1fr)); gap:clamp(14px,2vw,22px); margin-top:34px; }
 .card{
-  padding:34px 30px 38px; border:1px solid var(--line-soft); border-radius:var(--r);
-  background:
-    linear-gradient(180deg, rgba(255,255,255,.05), rgba(255,255,255,.015)),
-    rgba(13,12,10,.66);
-  backdrop-filter:blur(10px); -webkit-backdrop-filter:blur(10px);
-  transition:border-color .4s var(--ease), transform .4s var(--ease);
+  border:2px solid var(--line-2); border-radius:var(--r); overflow:hidden; background:var(--bg-2);
+  display:flex; flex-direction:column; text-align:left; cursor:pointer; padding:0;
+  transition:border-color .3s var(--ease), transform .3s var(--ease);
 }
-.card:hover{ border-color:color-mix(in srgb, var(--accent) 45%, transparent); transform:translateY(-4px); }
-.card .num{ font-family:var(--display); font-weight:600; font-size:12px; letter-spacing:.16em; color:var(--accent); display:block; margin-bottom:20px; }
-.card p{ color:var(--muted); margin:12px 0 0; font-size:15px; }
+.card:hover{ border-color:var(--brand); transform:translateY(-5px); }
+.card[aria-pressed="true"]{ border-color:var(--brand); }
+.card .shot{
+  position:relative; aspect-ratio:3/4; overflow:hidden; display:block;
+  background:radial-gradient(65% 55% at 50% 45%, rgba(255,212,0,.16), transparent 70%), var(--bg);
+}
+.card .shot img{ width:100%; height:100%; object-fit:contain; padding:14px; transition:transform .6s var(--ease); }
+.card:hover .shot img{ transform:scale(1.06) rotate(-1.2deg); }
+.card .tag{
+  position:absolute; left:12px; top:12px; z-index:2; background:var(--brand); color:#0A0A0A;
+  border-radius:100px; padding:6px 13px; font-size:12px; font-weight:800; font-family:var(--display);
+}
+.card .body{ padding:18px 20px 22px; display:grid; gap:8px; align-content:start; flex:1; }
+.card .sub{ font-size:14px; color:var(--dim); }
+.card dl{ margin:10px 0 0; display:grid; gap:1px; background:var(--line-2); border-radius:10px; overflow:hidden; }
+.card dl > div{ background:var(--bg); display:flex; justify-content:space-between; gap:14px; padding:9px 13px; font-size:13.5px; }
+.card dt{ color:var(--dim); }
+.card dd{ margin:0; font-weight:600; text-align:right; }
 
 /* ============================================================
-   Продукты
+   Почему берут
    ============================================================ */
-/* Левая колонка — намеренно пустая: в ней «стоит» 3D-пачка */
-#products{ min-height:100svh; display:grid; align-content:center; }
-#products .wrap{
-  display:grid; grid-template-columns:.82fr 1.18fr; gap:clamp(24px,5vw,70px); align-items:start;
-}
-/* колонка липкая: список товаров длинный, а фото должно оставаться в кадре */
-.prod-stage{
-  position:sticky; top:clamp(84px,12vh,120px);
-  min-height:60vh; display:grid; place-items:center;
-}
-
-/* Настоящее фото товара. Пока файла нет — блок скрыт и в колонке
-   остаётся 3D-пачка. */
-.prod-photo{
-  display:none; width:100%; max-width:420px; border-radius:20px;
-  box-shadow:0 40px 90px rgba(0,0,0,.6), 0 0 0 1px rgba(255,255,255,.07);
-  animation:photoIn .7s var(--ease) both;
-}
-.prod-photo.on{ display:block; }
-@keyframes photoIn{ from{ opacity:0; transform:translateY(18px) scale(.97) } to{ opacity:1; transform:none } }
-@media (prefers-reduced-motion: reduce){ .prod-photo{ animation:none } }
-
-/* Галерея фотографий продукции */
-#gallery{ display:none; }
-#gallery.on{ display:block; }
-.gal{ display:grid; grid-template-columns:repeat(3,1fr); gap:20px; margin-top:56px; }
-@media (max-width:900px){ .gal{ grid-template-columns:repeat(2,1fr); } }
-@media (max-width:560px){ .gal{ grid-template-columns:1fr; } }
-.gal figure{
-  margin:0; border:1px solid var(--line-soft); border-radius:var(--r); overflow:hidden;
-  background:rgba(13,12,10,.7); backdrop-filter:blur(10px);
-  transition:border-color .4s var(--ease), transform .4s var(--ease);
-}
-.gal figure:hover{ border-color:color-mix(in srgb, var(--accent) 45%, transparent); transform:translateY(-4px); }
-.gal img{ width:100%; aspect-ratio:3/4; object-fit:cover; display:block; }
-.gal figcaption{ padding:16px 20px 20px; }
-.gal b{ display:block; font-family:var(--display); font-weight:600; font-size:16px; }
-.gal span{ font-size:13px; color:var(--dim); }
-.prod-panel{ display:grid; gap:30px; }
-@media (max-width:980px){
-  #products .wrap{ grid-template-columns:1fr; }
-  .prod-stage{ position:static; min-height:auto; margin-bottom:8px; }
-  .prod-photo{ max-width:320px; }
-}
-
-.swatches{ display:grid; gap:10px; }
-.sw{
-  position:relative; text-align:left; cursor:pointer; overflow:hidden;
-  display:grid; grid-template-columns:auto 1fr auto; align-items:center; gap:16px;
-  border:1px solid var(--line-soft); border-radius:14px; padding:16px 20px;
-  background:rgba(13,12,10,.72); backdrop-filter:blur(10px); -webkit-backdrop-filter:blur(10px);
-  transition:border-color .4s var(--ease), background .4s var(--ease), transform .3s var(--ease);
-}
-.sw .txt{ display:grid; gap:2px; min-width:0; }
-.sw:hover{ transform:translateX(4px); }
-.sw[aria-pressed="true"]{ border-color:var(--sw-color); background:rgba(22,20,17,.86); }
-.sw::after{
-  content:""; position:absolute; inset:-40% auto -40% -10%; width:120px; opacity:0;
-  background:radial-gradient(closest-side, var(--sw-color), transparent);
-  transition:opacity .5s var(--ease);
-}
-.sw[aria-pressed="true"]::after{ opacity:.30; }
-.sw .dot{
-  width:26px; height:26px; border-radius:50%; display:block; flex:none;
-  background:var(--sw-color); box-shadow:inset 0 -5px 12px rgba(0,0,0,.4), 0 0 26px -6px var(--sw-color);
-}
-.sw .nm{ font-family:var(--display); font-weight:600; font-size:17px; display:block; letter-spacing:-.01em; }
-.sw .ds{ font-size:13px; color:var(--dim); }
-.sw .badge{
-  font-size:9px; letter-spacing:.18em; text-transform:uppercase;
-  color:var(--sw-color); opacity:0; transition:opacity .3s; white-space:nowrap;
-}
-.sw[aria-pressed="true"] .badge{ opacity:1; }
-
-.prod-detail{
-  display:grid; gap:24px;
-  border:1px solid var(--line-soft); border-radius:var(--r); padding:clamp(24px,3vw,34px);
-  background:
-    linear-gradient(135deg, rgba(255,255,255,.05), rgba(255,255,255,.012)),
-    rgba(13,12,10,.74);
-  backdrop-filter:blur(12px); -webkit-backdrop-filter:blur(12px);
-}
-.spec{ display:grid; gap:1px; background:var(--line-soft); border-radius:12px; overflow:hidden; align-content:start; }
-.spec div{ background:#0e0d0b; display:flex; justify-content:space-between; gap:16px; padding:15px 20px; font-size:14px; }
-.spec span:first-child{ color:var(--dim); }
-.tags{ display:flex; flex-wrap:wrap; gap:8px; margin:22px 0 0; padding:0; list-style:none; }
-.tags li{
-  font-size:12px; letter-spacing:.04em; padding:7px 14px; border-radius:100px;
-  border:1px solid var(--line); color:var(--muted);
-}
+.why{ background:var(--bg-2); }
+.grid4{ display:grid; grid-template-columns:repeat(4,1fr); gap:clamp(14px,2vw,22px); margin-top:44px; }
+@media (max-width:900px){ .grid4{ grid-template-columns:repeat(2,1fr); } }
+@media (max-width:520px){ .grid4{ grid-template-columns:1fr; } }
+.why article{ background:var(--bg); border:2px solid var(--line-2); border-radius:var(--r); padding:26px 24px 30px; display:grid; gap:10px; align-content:start; }
+.why .ic{ width:46px; height:46px; border-radius:14px; background:var(--brand); display:grid; place-items:center; margin-bottom:6px; }
+.why .ic svg{ width:24px; height:24px; fill:none; stroke:#0A0A0A; stroke-width:2; stroke-linecap:round; stroke-linejoin:round; }
+.why p{ color:var(--muted); font-size:15px; }
 
 /* ============================================================
-   Процесс
+   Производство
    ============================================================ */
-.steps{ display:grid; grid-template-columns:repeat(4,1fr); gap:20px; margin-top:56px; counter-reset:s; }
+.steps{ display:grid; grid-template-columns:repeat(4,1fr); gap:clamp(14px,2vw,26px); margin-top:44px; }
 @media (max-width:900px){ .steps{ grid-template-columns:repeat(2,1fr); } }
-@media (max-width:560px){ .steps{ grid-template-columns:1fr; } }
-.step{ border-top:1px solid var(--line); padding-top:22px; }
-.step b{
-  font-family:var(--display); font-weight:800; font-size:36px; color:var(--accent);
-  display:block; line-height:1; margin-bottom:14px; transition:color .6s var(--ease);
-}
-.step p{ color:var(--muted); font-size:14px; margin:8px 0 0; }
+@media (max-width:520px){ .steps{ grid-template-columns:1fr; } }
+.step{ border-top:3px solid var(--brand); padding-top:18px; }
+.step b{ font-family:var(--display); font-weight:800; font-size:14px; letter-spacing:.1em; color:var(--brand); display:block; margin-bottom:10px; }
+.step p{ color:var(--muted); font-size:15px; margin-top:6px; }
 
 /* ============================================================
-   Опт
+   Оптом — жёлтый блок, самый громкий на странице
    ============================================================ */
-#wholesale .wrap{
-  display:grid; grid-template-columns:1fr 1fr; gap:clamp(28px,5vw,64px); align-items:center;
-  border:1px solid var(--line-soft); border-radius:var(--r); padding:clamp(30px,5vw,64px);
-  background:
-    radial-gradient(75% 120% at 0% 0%, color-mix(in srgb, var(--accent) 14%, transparent), transparent 62%),
-    linear-gradient(180deg, rgba(255,255,255,.05), rgba(255,255,255,.012));
-  backdrop-filter:blur(12px); -webkit-backdrop-filter:blur(12px);
-}
-@media (max-width:900px){ #wholesale .wrap{ grid-template-columns:1fr; } }
-.checks{ list-style:none; margin:26px 0 0; padding:0; display:grid; gap:13px; }
-.checks li{ display:grid; grid-template-columns:auto 1fr; gap:13px; align-items:start; color:var(--muted); font-size:15px; }
+.wholesale{ background:var(--brand); color:#0A0A0A; }
+.wholesale .eyebrow{ color:rgba(10,10,10,.65); }
+.wholesale .eyebrow::before{ background:#0A0A0A; }
+.wholesale .lead{ color:rgba(10,10,10,.72); }
+.ws-grid{ display:grid; grid-template-columns:1fr 1fr; gap:clamp(28px,5vw,64px); align-items:start; }
+@media (max-width:900px){ .ws-grid{ grid-template-columns:1fr; } }
+.checks{ list-style:none; margin:30px 0 0; padding:0; display:grid; gap:14px; }
+.checks li{ display:grid; grid-template-columns:auto 1fr; gap:14px; align-items:start; color:rgba(10,10,10,.8); font-size:16px; }
 .checks li::before{
-  content:"✓"; color:var(--accent); font-size:12px; line-height:1;
-  border:1px solid color-mix(in srgb, var(--accent) 50%, transparent);
-  width:22px; height:22px; border-radius:50%; display:grid; place-items:center; margin-top:3px;
+  content:"✓"; color:var(--brand); background:#0A0A0A; font-size:13px; font-weight:700;
+  width:24px; height:24px; border-radius:50%; display:grid; place-items:center; margin-top:2px;
 }
-
-form{ display:grid; gap:13px; }
-.field input{
-  width:100%; padding:17px 18px; background:rgba(0,0,0,.4);
-  border:1px solid var(--line); border-radius:12px; color:var(--text);
-  font-family:var(--sans); font-size:15px; font-weight:300;
-  transition:border-color .3s var(--ease), background .3s var(--ease);
+form{ display:grid; gap:12px; background:rgba(10,10,10,.07); border-radius:var(--r); padding:clamp(22px,3vw,32px); }
+form input{
+  width:100%; padding:16px 18px; border-radius:12px; border:2px solid rgba(10,10,10,.2);
+  background:rgba(255,255,255,.7); color:#0A0A0A; font:inherit; font-size:16px;
+  transition:border-color .25s var(--ease), background .25s var(--ease);
 }
-.field input::placeholder{ color:var(--dim); }
-.field input:focus{ outline:none; border-color:var(--accent); background:rgba(0,0,0,.55); }
+form input::placeholder{ color:rgba(10,10,10,.45); }
+form input:focus{ outline:none; border-color:#0A0A0A; background:#fff; }
 form .btn{ justify-self:start; margin-top:4px; }
-.form-note{ font-size:12px; color:var(--dim); margin:2px 0 0; line-height:1.5; }
+.form-note{ font-size:13px; color:rgba(10,10,10,.55); line-height:1.5; }
 .form-ok{
-  display:none; align-items:center; gap:10px; font-size:14px; color:var(--accent);
-  border:1px dashed color-mix(in srgb, var(--accent) 50%, transparent);
-  border-radius:12px; padding:14px 16px;
+  display:none; align-items:center; gap:10px; font-size:15px; color:var(--brand);
+  background:#0A0A0A; border-radius:12px; padding:14px 16px; font-weight:600;
 }
 .form-ok.on{ display:flex; }
 
 /* ============================================================
    Контакты
    ============================================================ */
-#contacts .wrap{ display:grid; grid-template-columns:1fr 1fr; gap:clamp(28px,5vw,70px); align-items:start; }
-@media (max-width:900px){ #contacts .wrap{ grid-template-columns:1fr; } }
-
-.contact-card{
-  border:1px solid var(--line-soft); border-radius:var(--r); padding:clamp(26px,4vw,42px);
-  background:linear-gradient(160deg, rgba(255,255,255,.05), rgba(255,255,255,.012)), rgba(13,12,10,.74);
-  backdrop-filter:blur(12px); -webkit-backdrop-filter:blur(12px);
-  display:grid; gap:26px; align-content:start;
+.contacts-grid{ display:grid; grid-template-columns:1.1fr .9fr; gap:clamp(28px,5vw,64px); align-items:start; }
+@media (max-width:900px){ .contacts-grid{ grid-template-columns:1fr; } }
+.phone-xl{
+  font-family:var(--display); font-weight:800; font-size:clamp(30px,4.8vw,56px);
+  letter-spacing:-.03em; display:inline-block; margin-top:10px; color:var(--brand);
+  transition:opacity .25s var(--ease);
 }
-.phone-big{
-  font-family:var(--display); font-weight:800; letter-spacing:-.02em;
-  font-size:clamp(26px,3.6vw,42px); display:inline-block; line-height:1.1;
-  transition:color .3s var(--ease);
-}
-.phone-big:hover{ color:var(--accent); }
-.contact-row{ display:grid; gap:6px; }
-.contact-row .k{ font-size:11px; letter-spacing:.22em; text-transform:uppercase; color:var(--dim); }
-.contact-row a, .contact-row span.v{ font-size:16px; color:var(--text); }
-.contact-row a:hover{ color:var(--accent); }
-
-.socials{ display:flex; flex-wrap:wrap; gap:10px; }
+.phone-xl:hover{ opacity:.75; }
+.crow{ display:grid; gap:4px; padding:18px 0; border-bottom:1px solid var(--line-2); }
+.crow .k{ font-size:12px; font-weight:600; letter-spacing:.16em; text-transform:uppercase; color:var(--dim); }
+.crow a, .crow span.v{ font-size:17px; }
+.crow a:hover{ color:var(--brand); }
+.socials{ display:flex; flex-wrap:wrap; gap:10px; margin-top:26px; }
 .social{
-  display:inline-flex; align-items:center; gap:10px;
-  padding:12px 20px; border-radius:100px; border:1px solid var(--line);
-  font-size:13px; letter-spacing:.03em; color:var(--text);
-  transition:border-color .3s var(--ease), color .3s var(--ease), background .3s var(--ease);
+  display:inline-flex; align-items:center; gap:9px; padding:12px 20px; border-radius:100px;
+  border:2px solid var(--line); font-size:14px; font-weight:600;
+  transition:border-color .25s var(--ease), background .25s var(--ease), color .25s var(--ease);
 }
-.social:hover{ border-color:var(--accent); color:var(--accent); }
-.social svg{ width:17px; height:17px; fill:currentColor; flex:none; }
-/* ссылка ещё не заполнена — кнопка приглушена */
-.social[data-empty="1"]{ opacity:.45; cursor:default; }
-.social[data-empty="1"]:hover{ border-color:var(--line); color:var(--text); }
+.social:hover{ border-color:var(--brand); background:var(--brand); color:#0A0A0A; }
+.social svg{ width:17px; height:17px; fill:currentColor; }
+.social[data-empty="1"]{ opacity:.4; cursor:default; }
+.social[data-empty="1"]:hover{ border-color:var(--line); background:transparent; color:inherit; }
+.map-card{
+  border:2px solid var(--line-2); border-radius:var(--r); background:var(--bg-2);
+  padding:clamp(24px,3vw,34px); display:grid; gap:14px; align-content:start;
+}
 
 /* ============================================================
    Подвал
    ============================================================ */
-footer{
-  position:relative; z-index:3; border-top:1px solid var(--line-soft);
-  padding:54px var(--pad) 38px; background:rgba(10,9,8,.62); backdrop-filter:blur(10px);
-}
-.foot{ max-width:var(--maxw); margin-inline:auto; display:grid; grid-template-columns:1.5fr 1fr 1fr; gap:34px; }
-@media (max-width:760px){ .foot{ grid-template-columns:1fr; } }
-.foot h4{ font:500 11px/1 var(--sans); letter-spacing:.22em; text-transform:uppercase; color:var(--dim); margin:0 0 18px; }
-.foot ul{ list-style:none; padding:0; margin:0; display:grid; gap:11px; }
-.foot a{ color:var(--muted); font-size:14px; transition:color .3s; }
-.foot a:hover{ color:var(--accent); }
+footer{ position:relative; z-index:2; background:var(--bg-2); padding:clamp(44px,6vw,70px) var(--pad) 30px; border-top:1px solid var(--line-2); }
+.foot{ max-width:var(--maxw); margin-inline:auto; display:grid; grid-template-columns:1.6fr 1fr 1fr; gap:32px; }
+@media (max-width:760px){ .foot{ grid-template-columns:1fr 1fr; } }
+@media (max-width:480px){ .foot{ grid-template-columns:1fr; } }
+.foot h4{ font:600 12px/1 var(--sans); letter-spacing:.18em; text-transform:uppercase; color:var(--dim); margin:0 0 16px; }
+.foot ul{ list-style:none; padding:0; margin:0; display:grid; gap:10px; }
+.foot a{ color:var(--muted); font-size:15px; }
+.foot a:hover{ color:var(--brand); }
 .copy{
-  max-width:var(--maxw); margin:42px auto 0; padding-top:22px; border-top:1px solid var(--line-soft);
-  display:flex; flex-wrap:wrap; gap:14px; justify-content:space-between; font-size:12px; color:var(--dim);
+  max-width:var(--maxw); margin:40px auto 0; padding-top:20px; border-top:1px solid var(--line-2);
+  display:flex; flex-wrap:wrap; gap:12px; justify-content:space-between; font-size:13px; color:var(--dim);
 }
 </style>
 </head>
 
 <body>
-<a class="skip" href="#main">Перейти к содержимому</a>
+<a class="skip" href="#main" data-i18n="skip">Перейти к содержимому</a>
 
-<!-- ============ Прелоадер ============ -->
-<div id="preloader">
-  <div class="pre-mark">MACHOS<i>.UZ</i></div>
-  <div class="pre-bar"><i id="preBar"></i></div>
-  <div class="pre-txt">Пакуем</div>
-</div>
-
-<!-- ============ 3D ============ -->
 <div id="stage" aria-hidden="true"></div>
-<div id="fallback" aria-hidden="true"><div class="fb-pack">MACHOS</div></div>
-<div id="glow" aria-hidden="true"></div>
+<div id="fallback" aria-hidden="true"></div>
 
-<!-- ============ Навигация ============ -->
-<header class="nav" id="nav">
-  <a href="#hero" class="brand">MACHOS<i>.UZ</i></a>
+<header class="nav">
+  <a href="#hero" class="brand">Machos<i>.uz</i></a>
+
   <nav class="nav-links" id="navLinks" aria-label="Основная навигация">
-    <a href="#about">О бренде</a>
-    <a href="#products">Продукция</a>
-    <a href="#process">Производство</a>
-    <a href="#wholesale">Оптом</a>
-    <a href="#contacts">Контакты</a>
+    <a href="#products" data-i18n="nav.products">Продукция</a>
+    <a href="#why" data-i18n="nav.why">Почему мы</a>
+    <a href="#process" data-i18n="nav.process">Производство</a>
+    <a href="#wholesale" data-i18n="nav.wholesale">Оптом</a>
+    <a href="#contacts" data-i18n="nav.contacts">Контакты</a>
   </nav>
-  <a href="#contacts" class="btn primary" id="navPhone">Стать партнёром</a>
+
+  <div class="lang" role="group" aria-label="Язык сайта">
+    <button type="button" data-lang="ru" aria-pressed="true">RU</button>
+    <button type="button" data-lang="uz" aria-pressed="false">UZ</button>
+  </div>
+
+  <a class="nav-phone" id="navPhone" href="#">—</a>
   <button class="burger" id="burger" aria-label="Меню" aria-expanded="false" aria-controls="navLinks">
-    <span></span><span></span>
+    <span></span><span></span><span></span>
   </button>
 </header>
 
 <main id="main">
 
-  <!-- ============ HERO ============ -->
-  <section id="hero" data-pose="hero">
+  <!-- ============ Первый экран ============ -->
+  <section id="hero" class="hero" data-pose="hero">
     <div class="wrap hero-grid">
-      <div class="hero-title rv in">
-        <p class="eyebrow">Снеки из Узбекистана</p>
-        <h1>Хрустит<span class="l2">по-нашему</span></h1>
-        <p class="lead hero-sub">
-          Настоящий курт трёх форм, сырные палочки и косичка.
-          Снеки, за которыми возвращаются в магазин.
+      <div>
+        <p class="eyebrow rv in" data-i18n="hero.eyebrow">Производство снеков · Ташкент</p>
+        <h1 class="rv in d1"><span data-i18n="hero.h1a">Натуральный снек</span><em data-i18n="hero.h1b">из Узбекистана</em></h1>
+        <p class="lead hero-lead rv in d2" data-i18n="hero.lead">
+          Курт трёх форм, сырные палочки, косичка и солёные семечки.
+          Свой цех, честный состав, отгрузка по всей стране.
         </p>
-        <div class="hero-actions">
-          <a href="#products" class="btn primary">Смотреть продукцию</a>
-          <a href="#wholesale" class="btn">Оптовые поставки</a>
+        <div class="hero-cta rv in d3">
+          <a href="#products" class="btn brand" data-i18n="hero.cta1">Смотреть продукцию</a>
+          <a href="#wholesale" class="btn" data-i18n="hero.cta2">Купить оптом</a>
+        </div>
+        <div class="hero-facts rv in d4">
+          <div><b data-i18n="hero.f1n">6</b><span data-i18n="hero.f1t">позиций в линейке</span></div>
+          <div><b data-i18n="hero.f2n">100%</b><span data-i18n="hero.f2t">натуральный состав</span></div>
+          <div><b data-i18n="hero.f3n">Ташкент</b><span data-i18n="hero.f3t">собственное производство</span></div>
         </div>
       </div>
-      <div class="hero-side">Покрутите пачку мышью</div>
+      <div class="hero-slot" aria-hidden="true"></div>
     </div>
-    <div class="scroll-hint"><i></i> Листайте</div>
+    <div class="scroll-hint" aria-hidden="true"><i></i><span data-i18n="scroll">Листайте</span></div>
   </section>
 
-  <!-- ============ Бегущая строка ============ -->
-  <div class="ticker" aria-hidden="true">
-    <ul id="ticker"></ul>
-  </div>
-
-  <!-- ============ Факты ============ -->
-  <div class="facts rv">
-    <div class="fact"><b>6</b><span>позиций в линейке</span></div>
-    <div class="fact"><b>100%</b><span>натуральный состав</span></div>
-    <div class="fact"><b>UZ</b><span>своё производство</span></div>
-    <div class="fact"><b>Опт</b><span>и розница</span></div>
-  </div>
-
-  <!-- ============ О бренде ============ -->
-  <section id="about" data-pose="about">
-    <div class="wrap">
-      <p class="eyebrow rv">О бренде</p>
-      <h2 class="rv">Снек должен быть <span class="hl">простым</span><br>и честным.</h2>
-      <p class="lead rv d1" style="margin-top:24px">
-        Machos.Uz — это привычный вкус, к которому у нас дома привыкли с детства:
-        семечки к вечеру, курт в дорогу и сыр к чаю. Мы просто делаем
-        их так, как надо: свежими, без лишнего и в упаковке, которая держит хруст.
-      </p>
-
-      <div class="cards">
-        <article class="card rv d1">
-          <span class="num">01</span>
-          <h3>Свежая партия</h3>
-          <p>Готовим небольшими партиями и фасуем в тот же день. Пачка на полке — такая же, как в цеху.</p>
-        </article>
-        <article class="card rv d2">
-          <span class="num">02</span>
-          <h3>Чистый состав</h3>
-          <p>Сырьё, соль и больше ничего лишнего. Полный состав напечатан на обороте каждой пачки.</p>
-        </article>
-        <article class="card rv d3">
-          <span class="num">03</span>
-          <h3>Упаковка держит хруст</h3>
-          <p>Многослойный дой-пак с плотным швом: не пропускает влагу и свет, продукт остаётся хрустящим до последней горсти.</p>
-        </article>
-      </div>
-    </div>
-  </section>
+  <!-- ============ Лента ============ -->
+  <div class="tape" aria-hidden="true"><ul id="tape"></ul></div>
 
   <!-- ============ Продукция ============ -->
   <section id="products" data-pose="products">
     <div class="wrap">
-      <!-- фото товара, если оно загружено; иначе тут стоит 3D-пачка -->
-      <div class="prod-stage">
-        <img id="prodPhoto" class="prod-photo" alt="" />
-      </div>
-
-      <div class="prod-panel">
+      <div class="sec-head">
         <div>
-          <p class="eyebrow rv">Продукция</p>
-          <h2 class="rv">Вся линейка Machos</h2>
-          <p class="lead rv d1" style="margin-top:18px">
-            Выберите продукт — фотография сменится вместе с ним.
-          </p>
+          <p class="eyebrow rv" data-i18n="prod.eyebrow">Продукция</p>
+          <h2 class="rv" data-i18n="prod.h2">Что мы делаем</h2>
         </div>
-
-        <div class="swatches rv d1" id="swatches" role="group" aria-label="Выбор продукта"></div>
-
-        <div class="prod-detail rv d2">
-          <div>
-            <h3 id="pName" style="font-size:clamp(22px,2.6vw,30px)">—</h3>
-            <p class="lead" id="pDesc" style="margin-top:12px"></p>
-            <ul class="tags" id="pTags"></ul>
-          </div>
-          <div class="spec">
-            <div><span>Формат</span><span id="sWeight">—</span></div>
-            <div><span>Состав</span><span id="sComp">—</span></div>
-            <div><span>Упаковка</span><span id="sPack">—</span></div>
-            <div><span>Срок годности</span><span id="sLife">—</span></div>
-            <div><span>В коробе</span><span id="sBox">—</span></div>
-          </div>
-          <a href="#wholesale" class="btn primary" style="justify-self:start">Заказать оптом</a>
-        </div>
+        <p class="lead rv d1" style="max-width:38ch" data-i18n="prod.lead">
+          Небольшая линейка, зато каждую позицию мы делаем сами и отвечаем за неё.
+        </p>
       </div>
+
+      <div class="filters rv d1" id="filters" role="group" aria-label="Категории"></div>
+      <div class="grid" id="productGrid"></div>
     </div>
   </section>
 
-  <!-- ============ Галерея фотографий ============ -->
-  <section id="gallery" data-pose="gallery">
+  <!-- ============ Почему берут ============ -->
+  <section id="why" class="why" data-pose="why">
     <div class="wrap">
-      <p class="eyebrow rv">Продукция</p>
-      <h2 class="rv">Вся продукция<br>в упаковке</h2>
-      <div class="gal" id="galGrid"></div>
+      <p class="eyebrow rv" data-i18n="why.eyebrow">Почему берут снова</p>
+      <h2 class="rv" data-i18n="why.h2">Четыре причины</h2>
+
+      <div class="grid4">
+        <article class="rv d1">
+          <span class="ic"><svg viewBox="0 0 24 24"><path d="M12 3v18M5 8l7-5 7 5"/></svg></span>
+          <h3 data-i18n="why.1h">Честный состав</h3>
+          <p data-i18n="why.1p">Молоко и соль в курте, сыр и соль в чечиле. Ничего лишнего — состав напечатан на каждой пачке.</p>
+        </article>
+        <article class="rv d2">
+          <span class="ic"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8"/><path d="M12 8v4l3 2"/></svg></span>
+          <h3 data-i18n="why.2h">Свежая партия</h3>
+          <p data-i18n="why.2p">Готовим небольшими партиями и фасуем в тот же день. Дата на каждой пачке.</p>
+        </article>
+        <article class="rv d3">
+          <span class="ic"><svg viewBox="0 0 24 24"><path d="M4 7h16v13H4z"/><path d="M4 7l3-4h10l3 4"/></svg></span>
+          <h3 data-i18n="why.3h">Удобный формат</h3>
+          <p data-i18n="why.3p">Пачка с подвесом ложится и на крючок, и в прикассовую зону, и в карман покупателю.</p>
+        </article>
+        <article class="rv d4">
+          <span class="ic"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="M3 12h18M12 3v18"/></svg></span>
+          <h3 data-i18n="why.4h">Поставки по стране</h3>
+          <p data-i18n="why.4p">Отгружаем магазинам, оптовикам и на маркетплейсы. Документы и сертификаты в порядке.</p>
+        </article>
+      </div>
     </div>
   </section>
 
   <!-- ============ Производство ============ -->
   <section id="process" data-pose="process">
     <div class="wrap">
-      <p class="eyebrow rv">Производство</p>
-      <h2 class="rv">Путь до пачки —<br><span class="hl">четыре шага</span></h2>
+      <p class="eyebrow rv" data-i18n="proc.eyebrow">Производство</p>
+      <h2 class="rv" data-i18n="proc.h2">Путь до пачки</h2>
 
       <div class="steps">
-        <div class="step rv d1"><b>01</b><h3>Отбор сырья</h3><p>Работаем с местными хозяйствами. Калибруем семечку по размеру, сырьё для курта и сыра принимаем по своим требованиям.</p></div>
-        <div class="step rv d2"><b>02</b><h3>Обжарка и сушка</h3><p>Свой режим для каждого продукта: семечки — обжарка, курт и сыр — сушка и посол.</p></div>
-        <div class="step rv d3"><b>03</b><h3>Контроль</h3><p>Влажность, вес, вкус. Партия не уходит на фасовку, пока не пройдёт проверку.</p></div>
-        <div class="step rv d4"><b>04</b><h3>Упаковка</h3><p>Фасовка в тот же день, шов под контролем, дата партии на каждой пачке.</p></div>
+        <div class="step rv d1"><b>01</b><h3 data-i18n="proc.1h">Сырьё</h3><p data-i18n="proc.1p">Молоко и сыр от проверенных хозяйств, семечка калибруется по размеру.</p></div>
+        <div class="step rv d2"><b>02</b><h3 data-i18n="proc.2h">Обработка</h3><p data-i18n="proc.2p">Свой режим на каждый продукт: семечку обжариваем, курт и сыр сушим и солим.</p></div>
+        <div class="step rv d3"><b>03</b><h3 data-i18n="proc.3h">Контроль</h3><p data-i18n="proc.3p">Влажность, вес и вкус. Партия не уходит на фасовку, пока не пройдёт проверку.</p></div>
+        <div class="step rv d4"><b>04</b><h3 data-i18n="proc.4h">Фасовка</h3><p data-i18n="proc.4p">Упаковка в тот же день, шов под контролем, дата партии на каждой пачке.</p></div>
       </div>
     </div>
   </section>
 
-  <!-- ============ Опт ============ -->
-  <section id="wholesale" data-pose="wholesale">
-    <div class="wrap rv">
+  <!-- ============ Оптом ============ -->
+  <section id="wholesale" class="wholesale" data-pose="wholesale">
+    <div class="wrap ws-grid">
       <div>
-        <p class="eyebrow">Партнёрам</p>
-        <h2>Поставки в магазины,<br>кафе и на маркетплейсы</h2>
-        <ul class="checks">
-          <li>Отгрузка от одного короба, доставка по регионам</li>
-          <li>Гибкие цены и отсрочка для постоянных партнёров</li>
-          <li>Все документы и сертификаты на продукцию</li>
-          <li>Готовые фото и описания для карточек товара</li>
+        <p class="eyebrow rv" data-i18n="ws.eyebrow">Партнёрам</p>
+        <h2 class="rv" data-i18n="ws.h2">Поставки в магазины и на маркетплейсы</h2>
+        <p class="lead rv d1" style="margin-top:18px" data-i18n="ws.lead">
+          Оставьте контакты — перезвоним в рабочее время, пришлём прайс и условия отгрузки.
+        </p>
+        <ul class="checks rv d2">
+          <li data-i18n="ws.c1">Отгрузка от одного короба</li>
+          <li data-i18n="ws.c2">Гибкая цена и отсрочка для постоянных партнёров</li>
+          <li data-i18n="ws.c3">Полный пакет документов и сертификатов</li>
+          <li data-i18n="ws.c4">Фото и описания для карточек товара</li>
         </ul>
       </div>
 
-      <form id="leadForm" novalidate>
-        <div class="field">
-          <label for="fName" style="position:absolute;left:-9999px">Имя</label>
-          <input id="fName" name="name" type="text" placeholder="Имя" autocomplete="name" required />
-        </div>
-        <div class="field">
-          <label for="fComp" style="position:absolute;left:-9999px">Компания</label>
-          <input id="fComp" name="company" type="text" placeholder="Компания или магазин" autocomplete="organization" />
-        </div>
-        <div class="field">
-          <label for="fTel" style="position:absolute;left:-9999px">Телефон</label>
-          <input id="fTel" name="phone" type="tel" placeholder="Телефон" autocomplete="tel" required />
-        </div>
-        <button class="btn primary" type="submit">Отправить заявку</button>
-        <p class="form-note">
-          Перезвоним в рабочее время и пришлём прайс.
-          <br>Демо-режим: форма пока не подключена к серверу.
-        </p>
-        <p class="form-ok" id="formOk" role="status">✓ Заявка принята. Подключите endpoint, чтобы получать её на почту или в Telegram.</p>
+      <form id="leadForm" class="rv d1" novalidate>
+        <label class="skip" for="fName" data-i18n="ws.name">Имя</label>
+        <input id="fName" name="name" type="text" autocomplete="name" required data-i18n-ph="ws.name" placeholder="Имя" />
+        <label class="skip" for="fComp" data-i18n="ws.comp">Компания или магазин</label>
+        <input id="fComp" name="company" type="text" autocomplete="organization" data-i18n-ph="ws.comp" placeholder="Компания или магазин" />
+        <label class="skip" for="fTel" data-i18n="ws.tel">Телефон</label>
+        <input id="fTel" name="phone" type="tel" autocomplete="tel" required data-i18n-ph="ws.tel" placeholder="Телефон" />
+        <button type="submit" class="btn dark" data-i18n="ws.send">Отправить заявку</button>
+        <p class="form-note" data-i18n="ws.note">Нажимая кнопку, вы соглашаетесь на обработку контактных данных.</p>
+        <p class="form-ok" id="formOk" role="status" data-i18n="ws.ok">✓ Заявка принята — свяжемся с вами.</p>
       </form>
     </div>
   </section>
+
   <!-- ============ Контакты ============ -->
   <section id="contacts" data-pose="contacts">
-    <div class="wrap">
+    <div class="wrap contacts-grid">
       <div>
-        <p class="eyebrow rv">Контакты</p>
-        <h2 class="rv">Позвоните<br>или напишите</h2>
-        <p class="lead rv d1" style="margin-top:20px">
-          Отдел продаж отвечает в рабочее время. Пишите в мессенджеры —
-          пришлём прайс, фото продукции и условия отгрузки.
-        </p>
-        <div class="rv d2" style="margin-top:28px">
-          <p class="eyebrow" style="margin-bottom:12px">Мы в соцсетях</p>
-          <div class="socials" id="socials"></div>
+        <p class="eyebrow rv" data-i18n="ct.eyebrow">Контакты</p>
+        <h2 class="rv" data-i18n="ct.h2">Позвоните или напишите</h2>
+        <a class="phone-xl rv d1" id="cPhone" href="#">—</a>
+
+        <div class="rv d2">
+          <div class="crow"><span class="k" data-i18n="ct.phone2">Отдел продаж</span><a id="cPhone2" href="#">—</a></div>
+          <div class="crow"><span class="k" data-i18n="ct.mail">Почта</span><a id="cMail" href="#">—</a></div>
+          <div class="crow"><span class="k" data-i18n="ct.site">Сайт</span><a id="cSite" href="#">—</a></div>
         </div>
+
+        <div class="socials rv d3" id="socials"></div>
       </div>
 
-      <div class="contact-card rv d1">
-        <div class="contact-row">
-          <span class="k">Телефон</span>
-          <a class="phone-big" id="cPhone" href="#">—</a>
-        </div>
-        <div class="contact-row">
-          <span class="k">Почта</span>
-          <a id="cMail" href="#">—</a>
-        </div>
-        <div class="contact-row">
-          <span class="k">Сайт</span>
-          <a id="cSite" href="#">—</a>
-        </div>
-        <div class="contact-row">
-          <span class="k">Производитель</span>
-          <span class="v" id="cComp">—</span>
-          <span class="v" id="cCity" style="color:var(--muted)">—</span>
-        </div>
-        <a href="#wholesale" class="btn primary" style="justify-self:start">Оставить заявку</a>
+      <div class="map-card rv d1">
+        <h3 data-i18n="ct.prod">Производство</h3>
+        <p class="lead" id="cComp" style="font-size:16px">—</p>
+        <p class="lead" id="cAddr" style="font-size:16px">—</p>
+        <a href="#wholesale" class="btn brand" style="justify-self:start;margin-top:6px" data-i18n="ct.cta">Оставить заявку</a>
       </div>
     </div>
   </section>
 </main>
 
-<!-- ============ Подвал ============ -->
 <footer data-pose="footer">
   <div class="foot">
     <div>
-      <div class="brand" style="font-size:18px">MACHOS<i>.UZ</i></div>
-      <p class="lead" style="font-size:14px;margin-top:16px;max-width:34ch">
-        Производство снеков: семечки, курт, сырные палочки и косичка. Ташкент, Узбекистан.
+      <div class="brand" style="font-size:20px">Machos<i>.uz</i></div>
+      <p class="lead" style="font-size:15px;margin-top:14px;max-width:32ch" data-i18n="foot.about">
+        Производство снеков: курт, сырные палочки, косичка и семечки. Ташкент, Узбекистан.
       </p>
     </div>
     <div>
-      <h4>Разделы</h4>
+      <h4 data-i18n="foot.nav">Разделы</h4>
       <ul>
-        <li><a href="#about">О бренде</a></li>
-        <li><a href="#products">Продукция</a></li>
-        <li><a href="#process">Производство</a></li>
-        <li><a href="#wholesale">Оптом</a></li>
-        <li><a href="#contacts">Контакты</a></li>
+        <li><a href="#products" data-i18n="nav.products">Продукция</a></li>
+        <li><a href="#why" data-i18n="nav.why">Почему мы</a></li>
+        <li><a href="#process" data-i18n="nav.process">Производство</a></li>
+        <li><a href="#wholesale" data-i18n="nav.wholesale">Оптом</a></li>
       </ul>
     </div>
     <div>
-      <h4>Контакты</h4>
+      <h4 data-i18n="foot.contacts">Контакты</h4>
       <ul id="footContacts"></ul>
     </div>
   </div>
   <div class="copy">
     <span>© <span id="year">2026</span> Machos.uz · ООО «FUN NUTS GROUP»</span>
-    <span>Сцена собрана на Three.js</span>
+    <span data-i18n="foot.made">Сделано в Ташкенте</span>
   </div>
 </footer>
 
 <!-- ============================================================
-     Three.js — процедурная сцена (пачка + летающие снеки)
+     Содержимое сайта
+     ============================================================ -->
+<script>
+const CONTACTS = {
+  company:  'ООО «FUN NUTS GROUP»',
+  address:  'Ташкент, Шайхантахурский район, пр. Гормонский, 3А',
+  phone:    '+998 90 949 00 00',
+  phoneRaw: '+998909490000',
+  phone2:   '+998 95 194 55 15',
+  phone2Raw:'+998951945515',
+  email:    'info@machos.uz',
+  site:     'machos.uz',
+  socials: [
+    { name:'Facebook',  url:'' },   // ← ссылка на страницу Facebook
+    { name:'Instagram', url:'' },
+    { name:'Telegram',  url:'' },
+  ],
+};
+
+const CATS = [
+  { id:'all',    ru:'Всё',     uz:'Barchasi' },
+  { id:'kurt',   ru:'Курт',    uz:'Qurt' },
+  { id:'cheese', ru:'Сыр',     uz:'Pishloq' },
+  { id:'seeds',  ru:'Семечки', uz:'Pista' },
+];
+
+/* Фото ищется в assets/<id>.jpg (png, jpeg, webp тоже).
+   Позиция без фотографии на сайте не показывается. */
+const PRODUCTS = [
+  { id:'kurt-cube', cat:'kurt', badge:{ru:'30 г',uz:'30 g'},
+    ru:{ name:'Курт кубиками', sub:'классический, солёный',
+         about:'Плотный солёный курт кубиками. Четыре штуки в пачке — удобно взять с собой.' },
+    uz:{ name:'Qurt, kubik shaklida', sub:'klassik, sho‘r',
+         about:'Zich, sho‘r qurt. Qadoqda to‘rt dona — o‘zingiz bilan olib yurish qulay.' },
+    spec:{ weight:{ru:'30 ± 5 г',uz:'30 ± 5 g'}, comp:{ru:'Молоко, йодированная соль',uz:'Sut, yodlangan tuz'}, life:{ru:'3 месяца',uz:'3 oy'} } },
+
+  { id:'kurt-ball', cat:'kurt', badge:{ru:'4 шт',uz:'4 dona'},
+    ru:{ name:'Курт шариками', sub:'классический, круглый',
+         about:'Курт привычной круглой формы. Тот же состав и вкус, другая подача.' },
+    uz:{ name:'Qurt, dumaloq', sub:'klassik, dumaloq',
+         about:'Odatiy dumaloq shakldagi qurt. Tarkibi va ta’mi o‘sha, ko‘rinishi boshqa.' },
+    spec:{ weight:{ru:'уточняется',uz:'aniqlanmoqda'}, comp:{ru:'Молоко, йодированная соль',uz:'Sut, yodlangan tuz'}, life:{ru:'3 месяца',uz:'3 oy'} } },
+
+  { id:'kurt-stick', cat:'kurt', badge:{ru:'12 шт',uz:'12 dona'},
+    ru:{ name:'Курт палочками', sub:'батончики',
+         about:'Курт в форме батончиков: удобно есть на ходу и делить с друзьями.' },
+    uz:{ name:'Qurt, tayoqcha shaklida', sub:'batonchalar',
+         about:'Tayoqcha shaklidagi qurt: yo‘lda yeyish va bo‘lishish uchun qulay.' },
+    spec:{ weight:{ru:'уточняется',uz:'aniqlanmoqda'}, comp:{ru:'Молоко, йодированная соль',uz:'Sut, yodlangan tuz'}, life:{ru:'3 месяца',uz:'3 oy'} } },
+
+  { id:'sticks', cat:'cheese', badge:{ru:'Чечил',uz:'Chechil'},
+    ru:{ name:'Сырные палочки', sub:'чечил, солёные',
+         about:'Плотные солёные палочки чечила. Тянутся нитями — берут к чаю и к пиву.' },
+    uz:{ name:'Pishloq tayoqchalari', sub:'chechil, sho‘r',
+         about:'Zich, sho‘r chechil tayoqchalari. Tolalarga ajraladi — choyga ham, pivoga ham.' },
+    spec:{ weight:{ru:'уточняется',uz:'aniqlanmoqda'}, comp:{ru:'Сыр, соль',uz:'Pishloq, tuz'}, life:{ru:'уточняется',uz:'aniqlanmoqda'} } },
+
+  { id:'braid', cat:'cheese', badge:{ru:'Чечил',uz:'Chechil'},
+    ru:{ name:'Сырная косичка', sub:'плетёный чечил',
+         about:'Классическая плетёная косичка из чечила. Разбирается на нити — самый «долгий» снек.' },
+    uz:{ name:'Pishloq oʻrimi', sub:'oʻrilgan chechil',
+         about:'Klassik oʻrilgan chechil. Tolalarga ajraladi — eng “uzoq” gazak.' },
+    spec:{ weight:{ru:'уточняется',uz:'aniqlanmoqda'}, comp:{ru:'Сыр, соль',uz:'Pishloq, tuz'}, life:{ru:'уточняется',uz:'aniqlanmoqda'} } },
+
+  { id:'seeds', cat:'seeds', badge:{ru:'200 г',uz:'200 g'},
+    ru:{ name:'Семечки Pista Tuzli', sub:'солёные, крупные',
+         about:'Крупная калиброванная семечка с солью. Пачка 200 г — та самая, к вечеру и в дорогу.' },
+    uz:{ name:'Pista Tuzli', sub:'sho‘r, yirik',
+         about:'Yirik, kalibrlangan sho‘r pista. 200 g qadoq — kechqurunga ham, yo‘lga ham.' },
+    spec:{ weight:{ru:'200 г',uz:'200 g'}, comp:{ru:'Семена подсолнечника, соль',uz:'Kungaboqar urugʻi, tuz'}, life:{ru:'уточняется',uz:'aniqlanmoqda'} } },
+];
+
+const I18N = {
+  ru:{
+    'skip':'Перейти к содержимому','scroll':'Листайте',
+    'nav.products':'Продукция','nav.why':'Почему мы','nav.process':'Производство',
+    'nav.wholesale':'Оптом','nav.contacts':'Контакты',
+    'hero.eyebrow':'Производство снеков · Ташкент',
+    'hero.h1a':'Натуральный снек','hero.h1b':'из Узбекистана',
+    'hero.lead':'Курт трёх форм, сырные палочки, косичка и солёные семечки. Свой цех, честный состав, отгрузка по всей стране.',
+    'hero.cta1':'Смотреть продукцию','hero.cta2':'Купить оптом',
+    'hero.f1n':'6','hero.f1t':'позиций в линейке',
+    'hero.f2n':'100%','hero.f2t':'натуральный состав',
+    'hero.f3n':'Ташкент','hero.f3t':'собственное производство',
+    'prod.eyebrow':'Продукция','prod.h2':'Что мы делаем',
+    'prod.lead':'Небольшая линейка, зато каждую позицию мы делаем сами и отвечаем за неё.',
+    'why.eyebrow':'Почему берут снова','why.h2':'Четыре причины',
+    'why.1h':'Честный состав','why.1p':'Молоко и соль в курте, сыр и соль в чечиле. Ничего лишнего — состав напечатан на каждой пачке.',
+    'why.2h':'Свежая партия','why.2p':'Готовим небольшими партиями и фасуем в тот же день. Дата на каждой пачке.',
+    'why.3h':'Удобный формат','why.3p':'Пачка с подвесом ложится и на крючок, и в прикассовую зону, и в карман покупателю.',
+    'why.4h':'Поставки по стране','why.4p':'Отгружаем магазинам, оптовикам и на маркетплейсы. Документы и сертификаты в порядке.',
+    'proc.eyebrow':'Производство','proc.h2':'Путь до пачки',
+    'proc.1h':'Сырьё','proc.1p':'Молоко и сыр от проверенных хозяйств, семечка калибруется по размеру.',
+    'proc.2h':'Обработка','proc.2p':'Свой режим на каждый продукт: семечку обжариваем, курт и сыр сушим и солим.',
+    'proc.3h':'Контроль','proc.3p':'Влажность, вес и вкус. Партия не уходит на фасовку, пока не пройдёт проверку.',
+    'proc.4h':'Фасовка','proc.4p':'Упаковка в тот же день, шов под контролем, дата партии на каждой пачке.',
+    'ws.eyebrow':'Партнёрам','ws.h2':'Поставки в магазины и на маркетплейсы',
+    'ws.lead':'Оставьте контакты — перезвоним в рабочее время, пришлём прайс и условия отгрузки.',
+    'ws.c1':'Отгрузка от одного короба','ws.c2':'Гибкая цена и отсрочка для постоянных партнёров',
+    'ws.c3':'Полный пакет документов и сертификатов','ws.c4':'Фото и описания для карточек товара',
+    'ws.name':'Имя','ws.comp':'Компания или магазин','ws.tel':'Телефон','ws.send':'Отправить заявку',
+    'ws.note':'Нажимая кнопку, вы соглашаетесь на обработку контактных данных.',
+    'ws.ok':'✓ Заявка принята — свяжемся с вами.',
+    'ct.eyebrow':'Контакты','ct.h2':'Позвоните или напишите',
+    'ct.phone2':'Отдел продаж','ct.mail':'Почта','ct.site':'Сайт',
+    'ct.prod':'Производство','ct.cta':'Оставить заявку',
+    'foot.about':'Производство снеков: курт, сырные палочки, косичка и семечки. Ташкент, Узбекистан.',
+    'foot.nav':'Разделы','foot.contacts':'Контакты','foot.made':'Сделано в Ташкенте',
+    'card.weight':'Вес','card.comp':'Состав','card.life':'Срок годности',
+    'lead.request':'Заявка на поставку',
+  },
+  uz:{
+    'skip':'Asosiy qismga o‘tish','scroll':'Pastga suring',
+    'nav.products':'Mahsulotlar','nav.why':'Nima uchun biz','nav.process':'Ishlab chiqarish',
+    'nav.wholesale':'Ulgurji','nav.contacts':'Aloqa',
+    'hero.eyebrow':'Gazak ishlab chiqarish · Toshkent',
+    'hero.h1a':'O‘zbekistonning','hero.h1b':'tabiiy gazagi',
+    'hero.lead':'Uch xil shakldagi qurt, pishloq tayoqchalari, oʻrim va sho‘r pista. O‘z sexi, halol tarkib, butun mamlakat bo‘ylab yetkazib berish.',
+    'hero.cta1':'Mahsulotlarni ko‘rish','hero.cta2':'Ulgurji sotib olish',
+    'hero.f1n':'6','hero.f1t':'mahsulot turi',
+    'hero.f2n':'100%','hero.f2t':'tabiiy tarkib',
+    'hero.f3n':'Toshkent','hero.f3t':'o‘z ishlab chiqarishi',
+    'prod.eyebrow':'Mahsulotlar','prod.h2':'Biz nima ishlab chiqaramiz',
+    'prod.lead':'Assortiment katta emas, lekin har bir mahsulotni o‘zimiz tayyorlaymiz va javob beramiz.',
+    'why.eyebrow':'Nega yana olishadi','why.h2':'To‘rtta sabab',
+    'why.1h':'Halol tarkib','why.1p':'Qurtda sut va tuz, chechilda pishloq va tuz. Ortiqcha hech nima — tarkibi har qadoqda yozilgan.',
+    'why.2h':'Yangi partiya','why.2p':'Kichik partiyalarda tayyorlaymiz va o‘sha kuni qadoqlaymiz. Sana har qadoqda.',
+    'why.3h':'Qulay format','why.3p':'Ilgichli qadoq ilgakka ham, kassa oldiga ham, xaridor cho‘ntagiga ham to‘g‘ri keladi.',
+    'why.4h':'Mamlakat bo‘ylab yetkazish','why.4p':'Do‘konlar, ulgurjichilar va marketpleyslarga jo‘natamiz. Hujjatlar va sertifikatlar joyida.',
+    'proc.eyebrow':'Ishlab chiqarish','proc.h2':'Qadoqqacha bo‘lgan yo‘l',
+    'proc.1h':'Xomashyo','proc.1p':'Sut va pishloq ishonchli xo‘jaliklardan, pista o‘lchami bo‘yicha saralanadi.',
+    'proc.2h':'Ishlov','proc.2p':'Har mahsulotga o‘z rejimi: pistani qovuramiz, qurt va pishloqni quritamiz va tuzlaymiz.',
+    'proc.3h':'Nazorat','proc.3p':'Namlik, vazn va ta’m. Partiya tekshiruvdan o‘tmaguncha qadoqlashga ketmaydi.',
+    'proc.4h':'Qadoqlash','proc.4p':'O‘sha kuni qadoqlash, chok nazoratda, partiya sanasi har qadoqda.',
+    'ws.eyebrow':'Hamkorlarga','ws.h2':'Do‘konlar va marketpleyslarga yetkazib berish',
+    'ws.lead':'Kontaktlaringizni qoldiring — ish vaqtida qo‘ng‘iroq qilamiz, narxlar va shartlarni yuboramiz.',
+    'ws.c1':'Bitta qutidan boshlab jo‘natish','ws.c2':'Doimiy hamkorlarga moslashuvchan narx va muddatli to‘lov',
+    'ws.c3':'To‘liq hujjatlar va sertifikatlar','ws.c4':'Mahsulot kartochkalari uchun rasm va tavsiflar',
+    'ws.name':'Ism','ws.comp':'Kompaniya yoki do‘kon','ws.tel':'Telefon','ws.send':'Arizani yuborish',
+    'ws.note':'Tugmani bosish orqali siz kontakt ma’lumotlarini qayta ishlashga rozilik bildirasiz.',
+    'ws.ok':'✓ Ariza qabul qilindi — siz bilan bog‘lanamiz.',
+    'ct.eyebrow':'Aloqa','ct.h2':'Qo‘ng‘iroq qiling yoki yozing',
+    'ct.phone2':'Savdo bo‘limi','ct.mail':'Pochta','ct.site':'Sayt',
+    'ct.prod':'Ishlab chiqarish','ct.cta':'Ariza qoldirish',
+    'foot.about':'Gazak ishlab chiqarish: qurt, pishloq tayoqchalari, oʻrim va pista. Toshkent, O‘zbekiston.',
+    'foot.nav':'Bo‘limlar','foot.contacts':'Aloqa','foot.made':'Toshkentda tayyorlangan',
+    'card.weight':'Vazn','card.comp':'Tarkibi','card.life':'Yaroqlilik muddati',
+    'lead.request':'Yetkazib berish uchun ariza',
+  },
+};
+
+const TAPE = {
+  ru:['Курт','Сырные палочки','Сырная косичка','Семечки','Натуральный продукт','Оптом по Узбекистану'],
+  uz:['Qurt','Pishloq tayoqchalari','Pishloq oʻrimi','Pista','Tabiiy mahsulot','O‘zbekiston bo‘ylab ulgurji'],
+};
+
+const SOCIAL_ICONS = {
+  Facebook:'<svg viewBox="0 0 24 24"><path d="M13.5 22v-8h2.7l.4-3.1h-3.1V8.9c0-.9.25-1.5 1.55-1.5H16.7V4.6A21 21 0 0 0 14.3 4.5c-2.4 0-4 1.45-4 4.1v2.3H7.6V14h2.7v8h3.2z"/></svg>',
+  Instagram:'<svg viewBox="0 0 24 24"><path d="M12 2.2c3.2 0 3.6 0 4.85.07 1.17.05 1.8.25 2.23.42.56.22.96.48 1.38.9.42.42.68.82.9 1.38.16.42.36 1.06.41 2.23.06 1.25.07 1.62.07 4.8s0 3.56-.07 4.81c-.05 1.17-.25 1.8-.41 2.23-.22.56-.48.96-.9 1.38-.42.42-.82.68-1.38.9-.43.16-1.06.36-2.23.41-1.25.06-1.62.07-4.85.07s-3.6 0-4.85-.07c-1.17-.05-1.8-.25-2.23-.41a3.8 3.8 0 0 1-1.38-.9 3.8 3.8 0 0 1-.9-1.38c-.16-.43-.36-1.06-.41-2.23C2.21 15.56 2.2 15.2 2.2 12s0-3.55.07-4.8c.05-1.17.25-1.81.41-2.23.22-.56.48-.96.9-1.38.42-.42.82-.68 1.38-.9.43-.17 1.06-.37 2.23-.42C8.44 2.2 8.8 2.2 12 2.2zm0 1.98c-3.14 0-3.5.01-4.74.07-1.14.05-1.76.24-2.17.4-.55.21-.94.47-1.35.88-.41.41-.67.8-.88 1.35-.16.41-.35 1.03-.4 2.17-.06 1.24-.07 1.6-.07 4.74s.01 3.5.07 4.74c.05 1.14.24 1.76.4 2.17.21.55.47.94.88 1.35.41.41.8.67 1.35.88.41.16 1.03.35 2.17.4 1.24.06 1.6.07 4.74.07s3.5-.01 4.74-.07c1.14-.05 1.76-.24 2.17-.4.55-.21.94-.47 1.35-.88.41-.41.67-.8.88-1.35.16-.41.35-1.03.4-2.17.06-1.24.07-1.6.07-4.74s-.01-3.5-.07-4.74c-.05-1.14-.24-1.76-.4-2.17a3.6 3.6 0 0 0-.88-1.35 3.6 3.6 0 0 0-1.35-.88c-.41-.16-1.03-.35-2.17-.4-1.24-.06-1.6-.07-4.74-.07zm0 3.37a5.45 5.45 0 1 1 0 10.9 5.45 5.45 0 0 1 0-10.9zm0 8.99a3.54 3.54 0 1 0 0-7.08 3.54 3.54 0 0 0 0 7.08zm6.94-9.2a1.27 1.27 0 1 1-2.55 0 1.27 1.27 0 0 1 2.55 0z"/></svg>',
+  Telegram:'<svg viewBox="0 0 24 24"><path d="M21.7 4.1 18.9 19c-.2.9-.8 1.1-1.6.7l-4.4-3.2-2.1 2c-.24.24-.43.43-.87.43l.3-4.4 8.1-7.3c.35-.3-.08-.48-.55-.18L7.8 12.3l-4.3-1.35c-.94-.3-.95-.94.2-1.4l16.8-6.5c.78-.28 1.46.18 1.2 1.05z"/></svg>',
+};
+</script>
+
+<!-- ============================================================
+     Интерфейс
+     ============================================================ -->
+<script>
+let lang = (localStorage.getItem('machos-lang') === 'uz') ? 'uz' : 'ru';
+let filter = 'all';
+let active = 0;
+
+const assetUrl = (path) => (window.__ASSETS && window.__ASSETS[path]) || path;
+const t = (key) => (I18N[lang][key] ?? I18N.ru[key] ?? key);
+
+const photoUrl = new Map();
+let VISIBLE = [];
+
+function probePhoto(p){
+  return new Promise((resolve) => {
+    const exts = ['webp','png','jpg','jpeg'];
+    let i = 0;
+    const next = () => {
+      if(i >= exts.length){ resolve(null); return; }
+      const url = assetUrl(`assets/${p.id}.${exts[i++]}`);
+      const img = new Image();
+      img.onload = () => resolve(url);
+      img.onerror = next;
+      img.src = url;
+    };
+    next();
+  });
+}
+
+async function loadPhotos(){
+  const found = await Promise.all(PRODUCTS.map(probePhoto));
+  PRODUCTS.forEach((p, i) => { if(found[i]) photoUrl.set(p.id, found[i]); });
+  // товар без фотографии не показываем — рисованных пачек на сайте нет
+  VISIBLE = PRODUCTS.filter(p => photoUrl.has(p.id));
+  const missing = PRODUCTS.filter(p => !photoUrl.has(p.id)).map(p => p.ru.name);
+  if(missing.length) console.info('Нет фотографии, позиция скрыта:', missing.join(', '));
+  render();
+  document.dispatchEvent(new CustomEvent('photos-ready'));
+}
+
+function render(){
+  document.documentElement.lang = lang;
+  applyDictionary();
+  renderTape();
+  renderFilters();
+  renderProducts();
+  renderContacts();
+}
+
+function applyDictionary(){
+  document.querySelectorAll('[data-i18n]').forEach(el => {
+    const v = t(el.dataset.i18n);
+    if(v) el.textContent = v;
+  });
+  document.querySelectorAll('[data-i18n-ph]').forEach(el => {
+    const v = t(el.dataset.i18nPh);
+    if(v) el.placeholder = v;
+  });
+  document.querySelectorAll('.lang button').forEach(b =>
+    b.setAttribute('aria-pressed', String(b.dataset.lang === lang)));
+}
+
+function renderTape(){
+  const items = TAPE[lang];
+  document.getElementById('tape').innerHTML = [...items, ...items].map(x => `<li>${x}</li>`).join('');
+}
+
+function renderFilters(){
+  const used = new Set(VISIBLE.map(p => p.cat));
+  const list = CATS.filter(c => c.id === 'all' || used.has(c.id));
+  document.getElementById('filters').innerHTML = list.map(c =>
+    `<button type="button" data-cat="${c.id}" aria-pressed="${c.id === filter}">${c[lang]}</button>`).join('');
+}
+
+function renderProducts(){
+  const list = VISIBLE.filter(p => filter === 'all' || p.cat === filter);
+  document.getElementById('productGrid').innerHTML = list.map(p => {
+    const L = p[lang];
+    const i = VISIBLE.indexOf(p);
+    return `
+    <button type="button" class="card rv" data-index="${i}" aria-pressed="${i === active}">
+      <span class="shot">
+        <span class="tag">${p.badge[lang]}</span>
+        <img src="${photoUrl.get(p.id)}" alt="${L.name} — Machos.uz" loading="lazy" />
+      </span>
+      <span class="body">
+        <h3>${L.name}</h3>
+        <span class="sub">${L.sub}</span>
+        <span class="lead" style="font-size:15px">${L.about}</span>
+        <dl>
+          <div><dt>${t('card.weight')}</dt><dd>${p.spec.weight[lang]}</dd></div>
+          <div><dt>${t('card.comp')}</dt><dd>${p.spec.comp[lang]}</dd></div>
+          <div><dt>${t('card.life')}</dt><dd>${p.spec.life[lang]}</dd></div>
+        </dl>
+      </span>
+    </button>`;
+  }).join('');
+  observeReveals();
+}
+
+function renderContacts(){
+  const set = (id, text, href) => {
+    const el = document.getElementById(id);
+    if(!el) return;
+    el.textContent = text;
+    if(href) el.href = href;
+  };
+  set('cPhone',  CONTACTS.phone,  'tel:' + CONTACTS.phoneRaw);
+  set('cPhone2', CONTACTS.phone2, 'tel:' + CONTACTS.phone2Raw);
+  set('cMail',   CONTACTS.email,  'mailto:' + CONTACTS.email);
+  set('cSite',   CONTACTS.site,   'https://' + CONTACTS.site);
+  set('navPhone',CONTACTS.phone,  'tel:' + CONTACTS.phoneRaw);
+  document.getElementById('cComp').textContent = CONTACTS.company;
+  document.getElementById('cAddr').textContent = CONTACTS.address;
+
+  // незаполненная ссылка остаётся приглушённой заглушкой
+  document.getElementById('socials').innerHTML = CONTACTS.socials.map(s => {
+    const ic = SOCIAL_ICONS[s.name] || '';
+    return s.url
+      ? `<a class="social" href="${s.url}" target="_blank" rel="noopener">${ic}${s.name}</a>`
+      : `<span class="social" data-empty="1" title="Ссылка не указана">${ic}${s.name}</span>`;
+  }).join('');
+
+  document.getElementById('footContacts').innerHTML = `
+    <li><a href="tel:${CONTACTS.phoneRaw}">${CONTACTS.phone}</a></li>
+    <li><a href="mailto:${CONTACTS.email}">${CONTACTS.email}</a></li>
+    <li><a href="https://${CONTACTS.site}" rel="noopener">${CONTACTS.site}</a></li>
+    <li><a href="#wholesale">${t('lead.request')}</a></li>`;
+}
+
+const io = new IntersectionObserver((entries) => {
+  entries.forEach(e => { if(e.isIntersecting){ e.target.classList.add('in'); io.unobserve(e.target); } });
+}, { threshold:.12, rootMargin:'0px 0px -6% 0px' });
+function observeReveals(){ document.querySelectorAll('.rv:not(.in)').forEach(n => io.observe(n)); }
+
+/* переключатели */
+document.querySelector('.lang').addEventListener('click', (e) => {
+  const b = e.target.closest('button[data-lang]');
+  if(!b || b.dataset.lang === lang) return;
+  lang = b.dataset.lang;
+  localStorage.setItem('machos-lang', lang);
+  render();
+});
+
+document.getElementById('filters').addEventListener('click', (e) => {
+  const b = e.target.closest('button[data-cat]');
+  if(!b || b.dataset.cat === filter) return;
+  filter = b.dataset.cat;
+  renderFilters();
+  renderProducts();
+});
+
+/* выбор товара — карточка в 3D меняется вместе с ним */
+document.getElementById('productGrid').addEventListener('click', (e) => {
+  const b = e.target.closest('.card');
+  if(!b) return;
+  active = Number(b.dataset.index);
+  document.querySelectorAll('.card').forEach(c =>
+    c.setAttribute('aria-pressed', String(Number(c.dataset.index) === active)));
+  document.dispatchEvent(new CustomEvent('product-change'));
+});
+
+const burger = document.getElementById('burger');
+const navLinks = document.getElementById('navLinks');
+burger.addEventListener('click', () => {
+  const open = navLinks.classList.toggle('open');
+  burger.classList.toggle('open', open);
+  burger.setAttribute('aria-expanded', String(open));
+});
+navLinks.addEventListener('click', (e) => {
+  if(e.target.tagName === 'A'){
+    navLinks.classList.remove('open');
+    burger.classList.remove('open');
+    burger.setAttribute('aria-expanded', 'false');
+  }
+});
+
+document.getElementById('leadForm').addEventListener('submit', (e) => {
+  e.preventDefault();
+  const f = e.target;
+  if(!f.name.value.trim()){ f.name.focus(); return; }
+  if(f.phone.value.replace(/\D/g, '').length < 7){ f.phone.focus(); return; }
+
+  // TODO: подключить отправку —
+  // fetch('/api/lead', { method:'POST', body:new FormData(f) })
+  console.info('lead:', Object.fromEntries(new FormData(f)));
+  document.getElementById('formOk').classList.add('on');
+  f.reset();
+});
+
+document.getElementById('year').textContent = new Date().getFullYear();
+observeReveals();
+loadPhotos();
+</script>
+
+<!-- ============================================================
+     3D-сцена: фотография пачки в объёме
      ============================================================ -->
 <script type="importmap">
 {
@@ -773,152 +932,12 @@ footer{
 import * as THREE from 'three';
 import { RoomEnvironment } from 'three/addons/environments/RoomEnvironment.js';
 
-/* ============================================================
-   КОНТЕНТ — всё, что меняется при обновлении сайта, лежит здесь
-   ============================================================ */
-/* ============================================================
-   ТОВАРЫ И КОНТАКТЫ — здесь меняется всё содержимое сайта
-   ------------------------------------------------------------
-   Пачка собирается по этим данным: печатная шапка, прозрачное окно
-   и настоящий продукт внутри. `win` задаёт окно долями высоты пачки
-   (сверху вниз), `piece` — форму, размер и раскладку продукта.
-   ============================================================ */
-const PRODUCTS = [
-  {
-    id:'kurt-cube', photo:null,
-    name:'Курт кубиками',
-    sub:'классический, 30 г',
-    form:'flow', hang:'round', wave:false,
-    title:'КУРТ',
-    weight:'30 г',
-    size:{ w:1.90, h:2.75, d:0.44, r:0.16 },
-    win:{ t:0.40, b:0.775 },
-    piece:{ kind:'cube', s:0.42, cols:2, rows:2, sx:0.48, sy:0.48, color:'#f1eadb' },
-    accent:'#f5d90a', base:'#f6dc14', base2:'#d4ac00', ink:'#15130a',
-    fly:'cube', flyColor:'#f2ece0',
-    desc:'Тот самый курт кубиками: плотный, солёный, с настоящим кисломолочным вкусом. Четыре штуки в пачке — удобно взять с собой.',
-    tags:['Кисломолочный','120 ккал / 100 г','Белки 17 г'],
-    spec:{ weight:'30 ± 5 г', comp:'Молоко, йодированная соль', pack:'Флоу-пак с подвесом', life:'3 месяца', box:'уточняется' },
-  },
-  {
-    id:'kurt-ball', photo:null,
-    name:'Курт шариками',
-    sub:'классический, круглый',
-    form:'flow', hang:'round', wave:false,
-    title:'КУРТ',
-    weight:'',
-    size:{ w:2.05, h:2.60, d:0.46, r:0.16 },
-    win:{ t:0.40, b:0.80 },
-    piece:{ kind:'ball', s:0.46, cols:2, rows:2, sx:0.50, sy:0.50, color:'#f1eadb' },
-    accent:'#f5d90a', base:'#f6dc14', base2:'#d4ac00', ink:'#15130a',
-    fly:'ball', flyColor:'#f3efe4',
-    desc:'Курт классической круглой формы. Четыре шарика в пачке — тот же вкус, привычный вид.',
-    tags:['Кисломолочный','Круглый','4 шт'],
-    spec:{ weight:'уточняется', comp:'Молоко, йодированная соль', pack:'Флоу-пак', life:'3 месяца', box:'уточняется' },
-  },
-  {
-    id:'kurt-stick', photo:null,
-    name:'Курт палочками',
-    sub:'классический, батончики',
-    form:'flow', hang:'round', wave:false,
-    title:'КУРТ',
-    weight:'',
-    size:{ w:2.00, h:2.55, d:0.44, r:0.16 },
-    win:{ t:0.42, b:0.80 },
-    piece:{ kind:'baton', s:0.34, cols:6, rows:2, sx:0.17, sy:0.38, color:'#f0e9da' },
-    accent:'#f5d90a', base:'#f6dc14', base2:'#d4ac00', ink:'#15130a',
-    fly:'baton', flyColor:'#efe7d6',
-    desc:'Курт в форме палочек. Удобно есть на ходу и делить — двенадцать батончиков в пачке.',
-    tags:['Кисломолочный','Палочки','12 шт'],
-    spec:{ weight:'уточняется', comp:'Молоко, йодированная соль', pack:'Флоу-пак', life:'3 месяца', box:'уточняется' },
-  },
-  {
-    id:'sticks', photo:null,
-    name:'Сырные палочки',
-    sub:'солёные, тянущиеся',
-    form:'flow', hang:'slot', wave:true,
-    title:'СЫРНЫЕ', titleSub:'ПАЛОЧКИ',
-    weight:'',
-    size:{ w:1.72, h:3.05, d:0.40, r:0.14 },
-    win:{ t:0.40, b:0.86 },
-    piece:{ kind:'thin', s:1.35, cols:6, rows:1, sx:0.20, sy:0, color:'#ecdcae' },
-    accent:'#ecdf1c', base:'#eddf1a', base2:'#c9ac00', ink:'#14130a',
-    fly:'thin', flyColor:'#e8d9a8',
-    desc:'Сырные палочки чечил: плотные, солёные, тянутся нитями. Шесть штук в пачке — берут к чаю и к пиву.',
-    tags:['Сыр чечил','Солёные','6 штук'],
-    spec:{ weight:'уточняется', comp:'Сыр, соль', pack:'Флоу-пак с подвесом', life:'уточняется', box:'уточняется' },
-  },
-  {
-    id:'braid', photo:null,
-    name:'Сырная косичка',
-    sub:'плетёный чечил',
-    form:'flow', hang:'round', wave:true,
-    title:'СЫРНАЯ', titleSub:'КОСИЧКА',
-    weight:'',
-    size:{ w:1.72, h:2.95, d:0.44, r:0.14 },
-    win:{ t:0.34, b:0.84 },
-    piece:{ kind:'braid', s:1.0, cols:1, rows:1, sx:0, sy:0, color:'#e8d3a0' },
-    accent:'#ecdf1c', base:'#eddf1a', base2:'#c9ac00', ink:'#14130a',
-    fly:'braid', flyColor:'#e9d7a2',
-    desc:'Классическая плетёная косичка из сыра чечил. Плотная, солёная, разбирается на нити — самый «долгий» снек из линейки.',
-    tags:['Сыр чечил','Плетёная','Солёная'],
-    spec:{ weight:'уточняется', comp:'Сыр, соль', pack:'Флоу-пак с подвесом', life:'уточняется', box:'уточняется' },
-  },
-  {
-    id:'seeds', photo:null,
-    name:'Семечки Pista Tuzli',
-    sub:'солёные, крупные',
-    form:'doy',                                  // печать на всю сторону, окна нет
-    title:'PISTA', titleSub:'TUZLI',
-    weight:'200 g',
-    size:{ w:2.15, h:2.85, d:0.58, r:0.24 },
-    accent:'#f5d90a', base:'#f7e01c', base2:'#d8b400', ink:'#15130a',
-    fly:'seed', flyColor:'#33261a',
-    desc:'Крупная калиброванная семечка с солью. Пачка 200 г — та самая, которую берут к вечеру и в дорогу.',
-    tags:['100% натурально','Солёные','200 г'],
-    spec:{ weight:'200 г', comp:'Семена подсолнечника, соль', pack:'Дой-пак', life:'уточняется', box:'уточняется' },
-  },
-];
-
-/* Контакты. Телефон — основной номер компании, остальное с упаковки.
-   FACEBOOK: вставьте ссылку в поле url ниже — кнопка станет активной. */
-const CONTACTS = {
-  company: 'ООО «FUN NUTS GROUP»',
-  city:    'Ташкент, Шайхантахурский район, пр. Гормонский, 3А',
-  phone:   '+998 90 949 00 00',
-  phoneRaw:'+998909490000',
-  phone2:  '+998 95 194 55 15',
-  phone2Raw:'+998951945515',
-  email:   'info@machos.uz',
-  site:    'machos.uz',
-  socials: [
-    { name:'Facebook',  url:'' },   // ← сюда ссылку на Facebook-канал
-    { name:'Instagram', url:'' },
-    { name:'Telegram',  url:'' },
-  ],
-};
-
-/* Упаковки, которых нет в списке выбора, но они есть в продаже —
-   показываем их в галерее. Файл лежит в assets/. */
-const EXTRA_PHOTOS = [
-  { file:'assets/sticks-cyan.jpg',  name:'Сырные палочки',  sub:'тонкие, бирюзовая упаковка' },
-  { file:'assets/kurt-ball-12.jpg', name:'Курт шариками',   sub:'большая пачка, 12 шт' },
-  { file:'assets/braid-green.jpg',  name:'Сырная косичка',  sub:'зелёная упаковка' },
-];
-
-const TICKER = ['Семечки Pista Tuzli','Курт кубиками','Курт шариками','Курт палочками','Сырные палочки','Сырная косичка','Оптом по Узбекистану','Machos.uz'];
-
-/* ============================================================
-   Утилиты
-   ============================================================ */
+const stageEl = document.getElementById('stage');
 const reduceMotion = matchMedia('(prefers-reduced-motion: reduce)').matches;
-const stageEl   = document.getElementById('stage');
-const preloader = document.getElementById('preloader');
-const preBar    = document.getElementById('preBar');
 
 const clamp = (v,a,b) => Math.min(b, Math.max(a, v));
 const lerp  = (a,b,t) => a + (b - a) * t;
-const damp  = (a,b,l,dt) => lerp(a, b, 1 - Math.exp(-l * dt));   // сглаживание, независимое от FPS
+const damp  = (a,b,l,dt) => lerp(a, b, 1 - Math.exp(-l * dt));   // сглаживание, не зависящее от FPS
 
 function supportsWebGL(){
   try{
@@ -927,158 +946,93 @@ function supportsWebGL(){
   }catch(e){ return false; }
 }
 
-
-
-/* ============================================================
-   Карточка товара в сцене
-   ------------------------------------------------------------
-   Раньше здесь собиралась трёхмерная модель упаковки. Теперь в
-   сцене висит настоящая фотография: плоская карточка с толщиной
-   и скруглёнными углами, которая поворачивается и парит.
-   ============================================================ */
-function cardGeometry(w, h, d, r){
-  const shape = new THREE.Shape();
-  const x0 = -w / 2, y0 = -h / 2;
-  shape.moveTo(x0 + r, y0);
-  shape.lineTo(x0 + w - r, y0);
-  shape.quadraticCurveTo(x0 + w, y0, x0 + w, y0 + r);
-  shape.lineTo(x0 + w, y0 + h - r);
-  shape.quadraticCurveTo(x0 + w, y0 + h, x0 + w - r, y0 + h);
-  shape.lineTo(x0 + r, y0 + h);
-  shape.quadraticCurveTo(x0, y0 + h, x0, y0 + h - r);
-  shape.lineTo(x0, y0 + r);
-  shape.quadraticCurveTo(x0, y0, x0 + r, y0);
-
-  const geo = new THREE.ExtrudeGeometry(shape, {
-    depth: d, bevelEnabled: true,
-    bevelThickness: d * 0.3, bevelSize: d * 0.3, bevelSegments: 3, curveSegments: 18,
-  });
-  geo.center();
-
-  // планарная развёртка: фотография ложится на лицевую грань целиком
-  const pos = geo.attributes.position, uv = geo.attributes.uv;
-  for(let i = 0; i < pos.count; i++){
-    uv.setXY(i, (pos.getX(i) + w / 2) / w, (pos.getY(i) + h / 2) / h);
-  }
-  uv.needsUpdate = true;
-  return geo;
-}
-
-/* ============================================================
-   Сцена
-   ============================================================ */
-let renderer, scene, camera, holder, packGroup, pack, labelMat, edgeMat, halo;
-let activeIndex = 0, baseRotY = 0;
-const pointer = { x:0, y:0, tx:0, ty:0 };
-const accentColor = { cur:new THREE.Color(PRODUCTS[0].accent), goal:new THREE.Color(PRODUCTS[0].accent) };
-
-/* Положение пачки для каждой секции. Углы держим в пределах ±0.7 рад,
-   чтобы этикетка всегда оставалась читаемой. */
+/* Положение карточки для каждой секции. Углы держим небольшими,
+   чтобы фотография всегда читалась. */
 const POSES = {
-  hero:      { x: 2.10, y: 0.00, rot:-0.44, scale:0.94 },
-  about:     { x:-2.30, y: 0.05, rot: 0.62, scale:0.70 },
-  products:  { x:-2.28, y: 0.00, rot:-0.26, scale:0.86 },
-  process:   { x: 2.30, y: 0.05, rot: 0.60, scale:0.70 },
-  gallery:   { x: 2.70, y: 0.10, rot: 0.70, scale:0.52 },
-  wholesale: { x:-2.25, y: 0.00, rot:-0.58, scale:0.72 },
-  contacts:  { x: 2.15, y: 0.00, rot: 0.48, scale:0.74 },
-  footer:    { x: 0.00, y:-0.25, rot: 0.30, scale:0.60 },
+  hero:      { x: 2.15, y: 0.00, rot:-0.36, scale:1.00 },
+  products:  { x:-2.35, y: 0.00, rot: 0.30, scale:0.78 },
+  why:       { x: 2.40, y: 0.05, rot: 0.42, scale:0.62 },
+  process:   { x:-2.40, y: 0.05, rot:-0.42, scale:0.62 },
+  wholesale: { x: 2.35, y: 0.00, rot: 0.36, scale:0.60 },
+  contacts:  { x: 2.20, y: 0.00, rot: 0.30, scale:0.68 },
+  footer:    { x: 0.00, y:-0.20, rot: 0.20, scale:0.50 },
 };
-/* На узких экранах колонок нет — пачку поднимаем над текстом */
+/* Насколько сцена видна в каждой секции: в полноширинных блоках
+   она уходит на дальний план, чтобы не спорить с контентом. */
+const POSE_ALPHA = {
+  hero:1, products:0.10, why:0.14, process:0.14,
+  wholesale:0.10, contacts:0.55, footer:0.30,
+};
+
 const POSES_NARROW = {
-  hero:      { x:0, y: 1.55, rot:-0.30, scale:0.60 },
-  about:     { x:0, y: 0.30, rot: 0.45, scale:0.46 },
-  products:  { x:0, y: 1.60, rot:-0.20, scale:0.62 },
-  process:   { x:0, y: 0.30, rot: 0.45, scale:0.46 },
-  gallery:   { x:0, y: 0.30, rot: 0.50, scale:0.40 },
-  wholesale: { x:0, y: 0.30, rot:-0.40, scale:0.46 },
-  contacts:  { x:0, y: 0.40, rot: 0.40, scale:0.46 },
-  footer:    { x:0, y: 0.00, rot: 0.25, scale:0.42 },
+  hero:      { x:0, y: 1.35, rot:-0.26, scale:0.62 },
+  products:  { x:0, y: 0.20, rot: 0.24, scale:0.42 },
+  why:       { x:0, y: 0.20, rot: 0.34, scale:0.40 },
+  process:   { x:0, y: 0.20, rot:-0.34, scale:0.40 },
+  wholesale: { x:0, y: 0.20, rot: 0.30, scale:0.38 },
+  contacts:  { x:0, y: 0.25, rot: 0.26, scale:0.42 },
+  footer:    { x:0, y: 0.00, rot: 0.18, scale:0.34 },
 };
-let pose = POSES.hero, poseName = 'hero';
-const isNarrow = () => innerWidth / innerHeight < 0.85;
-const currentPose = () => (isNarrow() ? POSES_NARROW[poseName] : POSES[poseName]) || POSES.hero;
+
+let renderer, scene, camera, holder, card, faceMat, halo;
+let poseName = 'hero', baseRotY = 0;
+const pointer = { x:0, y:0, tx:0, ty:0 };
+const isNarrow = () => innerWidth / innerHeight < 0.9;
+const pose = () => (isNarrow() ? POSES_NARROW[poseName] : POSES[poseName]) || POSES.hero;
 
 function haloTexture(){
   const c = document.createElement('canvas');
   c.width = c.height = 256;
   const g = c.getContext('2d');
-  const grd = g.createRadialGradient(128, 128, 0, 128, 128, 128);
-  grd.addColorStop(0,   'rgba(255,255,255,.6)');
-  grd.addColorStop(.35, 'rgba(255,255,255,.18)');
-  grd.addColorStop(1,   'rgba(255,255,255,0)');
-  g.fillStyle = grd; g.fillRect(0, 0, 256, 256);
+  const grd = g.createRadialGradient(128,128,0,128,128,128);
+  grd.addColorStop(0,   'rgba(255,212,0,.55)');
+  grd.addColorStop(.4,  'rgba(255,212,0,.14)');
+  grd.addColorStop(1,   'rgba(255,212,0,0)');
+  g.fillStyle = grd; g.fillRect(0,0,256,256);
   const t = new THREE.CanvasTexture(c);
   t.colorSpace = THREE.SRGBColorSpace;
   return t;
 }
 
-function buildScene(){
+function build(){
   renderer = new THREE.WebGLRenderer({ antialias:true, alpha:true, powerPreference:'high-performance' });
   renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
   renderer.setSize(innerWidth, innerHeight);
   renderer.toneMapping = THREE.ACESFilmicToneMapping;
-  renderer.toneMappingExposure = 1.02;
-  renderer.shadowMap.enabled = true;
-  renderer.shadowMap.type = THREE.PCFSoftShadowMap;
+  renderer.toneMappingExposure = 1.05;
   stageEl.appendChild(renderer.domElement);
 
   scene = new THREE.Scene();
-  camera = new THREE.PerspectiveCamera(34, innerWidth / innerHeight, 0.1, 100);
+  camera = new THREE.PerspectiveCamera(34, innerWidth/innerHeight, 0.1, 100);
   camera.position.set(0, 0, 8);
 
-  // студийное окружение — даёт отражения на плёнке пачки
   const pmrem = new THREE.PMREMGenerator(renderer);
   scene.environment = pmrem.fromScene(new RoomEnvironment(), 0.04).texture;
 
-  scene.add(new THREE.AmbientLight(0xffffff, 0.55));
-
-  const key = new THREE.DirectionalLight(0xfff4e2, 1.7);
+  scene.add(new THREE.AmbientLight(0xffffff, 0.5));
+  const key = new THREE.DirectionalLight(0xfff6df, 1.9);
   key.position.set(4, 6, 6);
-  key.castShadow = true;
-  key.shadow.mapSize.set(1024, 1024);
-  key.shadow.camera.left = -3; key.shadow.camera.right = 3;
-  key.shadow.camera.top = 3;   key.shadow.camera.bottom = -3;
-  key.shadow.camera.near = 1;  key.shadow.camera.far = 18;
-  key.shadow.bias = -0.0012;
-  key.shadow.radius = 3;
   scene.add(key);
+  const rim = new THREE.PointLight(0xffd400, 26, 24, 2);
+  rim.position.set(-3.4, 1.6, -2.2);
+  scene.add(rim);
 
-  const rimWarm = new THREE.PointLight(0xf5a623, 30, 24, 2);
-  rimWarm.position.set(-3.6, 1.8, -2.4);
-  scene.add(rimWarm);
-
-  const rimCool = new THREE.PointLight(0x88a8ff, 18, 24, 2);
-  rimCool.position.set(3.8, -1.6, -3.0);
-  scene.add(rimCool);
-
-  /* --- пачка --- */
   holder = new THREE.Group();
   scene.add(holder);
 
-  // Печать: прозрачные места текстуры вырезаются, поэтому в окне
-  // виден продукт внутри пачки, а не заливка.
-  // лицо карточки — сама фотография, торец — светлая кромка
-  labelMat = new THREE.MeshStandardMaterial({ metalness:0.02, roughness:0.62, envMapIntensity:0.6 });
-  edgeMat  = new THREE.MeshStandardMaterial({ color:0xf2efe8, metalness:0.02, roughness:0.7 });
+  // фон у фотографий вырезан, поэтому в сцене висит силуэт пачки,
+  // а не прямоугольная плитка
+  faceMat = new THREE.MeshBasicMaterial({ transparent:true, alphaTest:0.35, side:THREE.DoubleSide, toneMapped:false });
+  card = new THREE.Mesh(new THREE.PlaneGeometry(2.2, 3.0), faceMat);
+  card.visible = false;
+  holder.add(card);
 
-  packGroup = new THREE.Group();
-  pack = new THREE.Mesh(cardGeometry(2.2, 3.0, 0.075, 0.09), [labelMat, edgeMat]);
-  pack.castShadow = true;
-  packGroup.add(pack);
-
-  holder.add(packGroup);
-
-  /* --- свечение под пачкой --- */
   halo = new THREE.Mesh(
-    new THREE.PlaneGeometry(7.5, 7.5),
-    new THREE.MeshBasicMaterial({
-      map:haloTexture(), transparent:true, opacity:0.32,
-      blending:THREE.AdditiveBlending, depthWrite:false, toneMapped:false,
-    })
+    new THREE.PlaneGeometry(8, 8),
+    new THREE.MeshBasicMaterial({ map:haloTexture(), transparent:true, opacity:0.5,
+      blending:THREE.AdditiveBlending, depthWrite:false, toneMapped:false })
   );
-  halo.rotation.x = -Math.PI / 2;
-  halo.position.y = -1.95;
+  halo.position.z = -1.6;
   holder.add(halo);
 
   addEventListener('resize', onResize);
@@ -1086,389 +1040,111 @@ function buildScene(){
 }
 
 function onResize(){
-  const w = innerWidth, h = innerHeight;
-  camera.aspect = w / h;
-  camera.position.z = w / h < 0.85 ? 10.2 : 8;   // на узких экранах отодвигаем камеру
+  camera.aspect = innerWidth / innerHeight;
+  camera.position.z = isNarrow() ? 10.2 : 8;
   camera.updateProjectionMatrix();
   renderer.setPixelRatio(Math.min(devicePixelRatio, 2));
-  renderer.setSize(w, h);
+  renderer.setSize(innerWidth, innerHeight);
 }
 
-const clock = new THREE.Clock();
-let firstFrame = true;
+/* Фотография выбранного товара на карточке */
+const texLoader = new THREE.TextureLoader();
+const texCache = new Map();
 
+function showProduct(){
+  const p = VISIBLE[active];
+  if(!p){ card.visible = false; return; }
+  const url = photoUrl.get(p.id);
+  if(!url){ card.visible = false; return; }
+
+  const put = (tex) => {
+    tex.colorSpace = THREE.SRGBColorSpace;
+    tex.anisotropy = 8;
+    faceMat.map = tex;
+    faceMat.needsUpdate = true;
+    const h = 3.1, w = h * (tex.image.width / tex.image.height);
+    card.geometry.dispose();
+    card.geometry = new THREE.PlaneGeometry(w, h);
+    card.visible = true;
+    window.__lastPhoto = url;
+  };
+
+  const cached = texCache.get(p.id);
+  if(cached){ put(cached); return; }
+  texLoader.load(url, (tex) => { texCache.set(p.id, tex); put(tex); });
+}
+
+/* Позиция карточки привязана к секции, а не к проценту прокрутки */
+const ratios = new Map();
+const poseIO = new IntersectionObserver((entries) => {
+  entries.forEach(e => ratios.set(e.target, e.isIntersecting ? e.intersectionRatio : 0));
+  let best = null, top = 0;
+  ratios.forEach((r, el) => { if(r > top){ top = r; best = el; } });
+  if(best && best.dataset.pose !== poseName){
+    poseName = best.dataset.pose;
+    const a = POSE_ALPHA[poseName] ?? 1;
+    stageEl.style.opacity = String(isNarrow() ? Math.min(a, poseName === 'hero' ? 1 : 0.22) : a);
+  }
+}, { threshold:[0,.15,.3,.5,.75,1] });
+document.querySelectorAll('[data-pose]').forEach(el => poseIO.observe(el));
+
+addEventListener('pointermove', (e) => {
+  pointer.tx = (e.clientX / innerWidth) * 2 - 1;
+  pointer.ty = (e.clientY / innerHeight) * 2 - 1;
+}, { passive:true });
+
+const clock = new THREE.Clock();
 function tick(){
   requestAnimationFrame(tick);
   const dt = Math.min(clock.getDelta(), 0.05);
   const el = clock.elapsedTime;
-
-  const narrow = isNarrow();
-  const k = currentPose();
+  const k = pose();
 
   pointer.x = damp(pointer.x, pointer.tx, 4, dt);
   pointer.y = damp(pointer.y, pointer.ty, 4, dt);
 
   holder.position.x = damp(holder.position.x, k.x, 3.2, dt);
-  holder.position.y = damp(holder.position.y, k.y + (reduceMotion ? 0 : Math.sin(el * 0.7) * 0.08), 3.2, dt);
-  holder.scale.setScalar(damp(holder.scale.x, k.scale, 3.2, dt));
+  holder.position.y = damp(holder.position.y, k.y + (reduceMotion ? 0 : Math.sin(el * .7) * .08), 3.2, dt);
+  holder.scale.setScalar(damp(holder.scale.x || 1, k.scale, 3.2, dt));
 
-  // лёгкое покачивание вместо непрерывного вращения — этикетку видно всегда
-  const sway = reduceMotion ? 0 : Math.sin(el * 0.42) * 0.20;
+  const sway = reduceMotion ? 0 : Math.sin(el * .45) * .16;
   baseRotY = damp(baseRotY, k.rot, 3.2, dt);
-  holder.rotation.y = baseRotY + sway + pointer.x * 0.35;
-  holder.rotation.x = damp(holder.rotation.x, -pointer.y * 0.14 + (reduceMotion ? 0 : Math.sin(el * 0.33) * 0.05), 4, dt);
-  holder.rotation.z = damp(holder.rotation.z, pointer.x * 0.04, 4, dt);
+  holder.rotation.y = baseRotY + sway + pointer.x * .32;
+  holder.rotation.x = damp(holder.rotation.x, -pointer.y * .14, 4, dt);
 
-  // перелив акцента при смене продукта
-  accentColor.cur.lerp(accentColor.goal, 1 - Math.exp(-3 * dt));
-  halo.material.color.copy(accentColor.cur).lerp(new THREE.Color(0xffffff), 0.4);
-
-  camera.position.x = damp(camera.position.x, pointer.x * 0.4, 3, dt);
-  camera.position.y = damp(camera.position.y, -pointer.y * 0.3, 3, dt);
+  camera.position.x = damp(camera.position.x, pointer.x * .35, 3, dt);
+  camera.position.y = damp(camera.position.y, -pointer.y * .28, 3, dt);
   camera.lookAt(0, 0, 0);
 
   renderer.render(scene, camera);
-
-  if(firstFrame){ firstFrame = false; finishLoading(); }
 }
 
-/* ============================================================
-   Интерфейс
-   ============================================================ */
-let preValue = 0;
-const preTimer = setInterval(() => {
-  preValue = Math.min(preValue + Math.random() * 18, 92);
-  preBar.style.width = preValue + '%';
-}, 140);
-
-function finishLoading(){
-  clearInterval(preTimer);
-  preBar.style.width = '100%';
-  setTimeout(() => {
-    preloader.classList.add('done');
-    document.querySelectorAll('#hero .rv').forEach(n => n.classList.add('in'));
-  }, 420);
+function showFallback(){
+  const box = document.getElementById('fallback');
+  const p = VISIBLE[active] || VISIBLE[0];
+  const url = p && photoUrl.get(p.id);
+  if(url) box.innerHTML = `<img src="${url}" alt="" />`;
+  box.classList.add('on');
 }
 
-function onScroll(){
-  document.getElementById('nav').classList.toggle('solid', scrollY > 40);
-}
-addEventListener('scroll', onScroll, { passive:true });
-
-/* Пачка привязана к секциям, а не к проценту прокрутки: так позиция не
-   разъезжается при любых правках контента. */
-/* Одно место, где решается видимость 3D-сцены:
-   на узких экранах она не должна мешать тексту, а в секции продукции
-   уступает место настоящему фото, если оно загружено. */
-function updateStageOpacity(){
-  if(!stageEl) return;
-  const hasPhoto = photoUrl.has(VISIBLE[activeIndex].id);
-  let o = 1;
-  if(poseName === 'gallery') o = 0.14;             // галерея живёт фотографиями
-  else if(poseName === 'products' && hasPhoto) o = 0.22;
-  else if(isNarrow() && poseName !== 'hero') o = 0.45;
-  stageEl.style.opacity = String(o);
-}
-
-const poseRatios = new Map();
-const poseIO = new IntersectionObserver((entries) => {
-  entries.forEach(en => poseRatios.set(en.target, en.isIntersecting ? en.intersectionRatio : 0));
-
-  let best = null, bestRatio = 0;
-  poseRatios.forEach((ratio, el) => { if(ratio > bestRatio){ bestRatio = ratio; best = el; } });
-  if(!best) return;
-
-  const name = best.dataset.pose;
-  if(name === poseName) return;
-  poseName = name;
-
-  updateStageOpacity();
-}, { threshold:[0, .15, .3, .5, .75, 1] });
-document.querySelectorAll('[data-pose]').forEach(el => poseIO.observe(el));
-
-const glow = document.getElementById('glow');
-addEventListener('pointermove', (e) => {
-  pointer.tx = (e.clientX / innerWidth) * 2 - 1;
-  pointer.ty = (e.clientY / innerHeight) * 2 - 1;
-  glow.style.transform = `translate(${e.clientX}px, ${e.clientY}px)`;
-  glow.classList.add('on');
-}, { passive:true });
-addEventListener('pointerleave', () => glow.classList.remove('on'));
-
-const io = new IntersectionObserver((entries) => {
-  entries.forEach(en => { if(en.isIntersecting){ en.target.classList.add('in'); io.unobserve(en.target); } });
-}, { threshold:0.14, rootMargin:'0px 0px -8% 0px' });
-document.querySelectorAll('.rv').forEach(n => io.observe(n));
-
-/* меню */
-const burger = document.getElementById('burger');
-const navLinks = document.getElementById('navLinks');
-burger.addEventListener('click', () => {
-  const open = navLinks.classList.toggle('open');
-  burger.classList.toggle('open', open);
-  burger.setAttribute('aria-expanded', String(open));
-  document.body.style.overflow = open ? 'hidden' : '';
+document.addEventListener('photos-ready', () => {
+  if(renderer) showProduct();
+  else showFallback();
 });
-navLinks.addEventListener('click', (e) => {
-  if(e.target.tagName === 'A'){
-    navLinks.classList.remove('open');
-    burger.classList.remove('open');
-    burger.setAttribute('aria-expanded', 'false');
-    document.body.style.overflow = '';
-  }
-});
-
-/* бегущая строка — дублируем список, чтобы шов был незаметен */
-const tickerEl = document.getElementById('ticker');
-tickerEl.innerHTML = [...TICKER, ...TICKER].map(t => `<li>${t}</li>`).join('');
-
-/* ---------- контакты: телефон, почта и соцсети из CONTACTS ---------- */
-const SOCIAL_ICONS = {
-  Facebook:'<svg viewBox="0 0 24 24"><path d="M13.5 22v-8h2.7l.4-3.1h-3.1V8.9c0-.9.25-1.5 1.55-1.5H16.7V4.6A21 21 0 0 0 14.3 4.5c-2.4 0-4 1.45-4 4.1v2.3H7.6V14h2.7v8h3.2z"/></svg>',
-  Instagram:'<svg viewBox="0 0 24 24"><path d="M12 2.2c3.2 0 3.6 0 4.85.07 1.17.05 1.8.25 2.23.42.56.22.96.48 1.38.9.42.42.68.82.9 1.38.16.42.36 1.06.41 2.23.06 1.25.07 1.62.07 4.8s0 3.56-.07 4.81c-.05 1.17-.25 1.8-.41 2.23-.22.56-.48.96-.9 1.38-.42.42-.82.68-1.38.9-.43.16-1.06.36-2.23.41-1.25.06-1.62.07-4.85.07s-3.6 0-4.85-.07c-1.17-.05-1.8-.25-2.23-.41a3.8 3.8 0 0 1-1.38-.9 3.8 3.8 0 0 1-.9-1.38c-.16-.43-.36-1.06-.41-2.23C2.21 15.56 2.2 15.2 2.2 12s0-3.55.07-4.8c.05-1.17.25-1.81.41-2.23.22-.56.48-.96.9-1.38.42-.42.82-.68 1.38-.9.43-.17 1.06-.37 2.23-.42C8.44 2.2 8.8 2.2 12 2.2zm0 1.98c-3.14 0-3.5.01-4.74.07-1.14.05-1.76.24-2.17.4-.55.21-.94.47-1.35.88-.41.41-.67.8-.88 1.35-.16.41-.35 1.03-.4 2.17-.06 1.24-.07 1.6-.07 4.74s.01 3.5.07 4.74c.05 1.14.24 1.76.4 2.17.21.55.47.94.88 1.35.41.41.8.67 1.35.88.41.16 1.03.35 2.17.4 1.24.06 1.6.07 4.74.07s3.5-.01 4.74-.07c1.14-.05 1.76-.24 2.17-.4.55-.21.94-.47 1.35-.88.41-.41.67-.8.88-1.35.16-.41.35-1.03.4-2.17.06-1.24.07-1.6.07-4.74s-.01-3.5-.07-4.74c-.05-1.14-.24-1.76-.4-2.17a3.6 3.6 0 0 0-.88-1.35 3.6 3.6 0 0 0-1.35-.88c-.41-.16-1.03-.35-2.17-.4-1.24-.06-1.6-.07-4.74-.07zm0 3.37a5.45 5.45 0 1 1 0 10.9 5.45 5.45 0 0 1 0-10.9zm0 8.99a3.54 3.54 0 1 0 0-7.08 3.54 3.54 0 0 0 0 7.08zm6.94-9.2a1.27 1.27 0 1 1-2.55 0 1.27 1.27 0 0 1 2.55 0z"/></svg>',
-  Telegram:'<svg viewBox="0 0 24 24"><path d="M21.7 4.1 18.9 19c-.2.9-.8 1.1-1.6.7l-4.4-3.2-2.1 2c-.24.24-.43.43-.87.43l.3-4.4 8.1-7.3c.35-.3-.08-.48-.55-.18L7.8 12.3l-4.3-1.35c-.94-.3-.95-.94.2-1.4l16.8-6.5c.78-.28 1.46.18 1.2 1.05z"/></svg>',
-};
-
-(function renderContacts(){
-  const phone = document.getElementById('cPhone');
-  phone.textContent = CONTACTS.phone;
-  phone.href = 'tel:' + CONTACTS.phoneRaw;
-
-  const mail = document.getElementById('cMail');
-  mail.textContent = CONTACTS.email;
-  mail.href = 'mailto:' + CONTACTS.email;
-
-  const site = document.getElementById('cSite');
-  site.textContent = CONTACTS.site;
-  site.href = 'https://' + CONTACTS.site;
-  site.rel = 'noopener';
-
-  document.getElementById('cComp').textContent = CONTACTS.company;
-  document.getElementById('cCity').textContent = CONTACTS.city;
-
-  // соцсети: пустой url оставляет кнопку-заглушку, чтобы было куда вставить ссылку
-  document.getElementById('socials').innerHTML = CONTACTS.socials.map(sn => {
-    const icon = SOCIAL_ICONS[sn.name] || '';
-    return sn.url
-      ? `<a class="social" href="${sn.url}" target="_blank" rel="noopener">${icon}${sn.name}</a>`
-      : `<span class="social" data-empty="1" title="Ссылка ещё не указана">${icon}${sn.name}</span>`;
-  }).join('');
-
-  document.getElementById('footContacts').innerHTML = `
-    <li><a href="tel:${CONTACTS.phoneRaw}">${CONTACTS.phone}</a></li>
-    <li><a href="mailto:${CONTACTS.email}">${CONTACTS.email}</a></li>
-    <li><a href="https://${CONTACTS.site}" rel="noopener">${CONTACTS.site}</a></li>
-    <li><a href="#wholesale">Заявка на поставку</a></li>`;
-
-  // в шапке показываем телефон — это главный путь к заказу
-  const navBtn = document.getElementById('navPhone');
-  navBtn.textContent = CONTACTS.phone;
-  navBtn.href = 'tel:' + CONTACTS.phoneRaw;
-})();
-
-/* ============================================================
-   Фотографии товара
-   ------------------------------------------------------------
-   Файл assets/<id>.jpg (или .png, .jpeg, .webp) подхватывается сам.
-   Пока фото нет, в колонке остаётся 3D-пачка, а галерея скрыта.
-   ============================================================ */
-const photoUrl = new Map();          // id продукта → найденный файл
-let photosChecked = 0;
-
-/* В сборке одним файлом фотографии лежат внутри страницы (window.__ASSETS),
-   а не в папке рядом. Здесь путь превращается в то, что реально доступно. */
-const assetUrl = (path) => (window.__ASSETS && window.__ASSETS[path]) || path;
-
-function probePhoto(p, done){
-  const exts = ['jpg', 'png', 'jpeg', 'webp'];
-  const candidates = p.photo ? [p.photo] : exts.map(e => `assets/${p.id}.${e}`);
-  let i = 0;
-  const next = () => {
-    if(i >= candidates.length){ done(null); return; }
-    const url = assetUrl(candidates[i++]);
-    const img = new Image();
-    img.onload  = () => done(url);
-    img.onerror = next;
-    img.src = url;
-  };
-  next();
-}
-
-/* Показываем только те позиции, у которых есть фотография: рисованных
-   пачек на сайте быть не должно. Товар вернётся в список сам, как только
-   его снимок появится в assets/. */
-let VISIBLE = PRODUCTS;
-
-PRODUCTS.forEach(p => probePhoto(p, (url) => {
-  if(url) photoUrl.set(p.id, url);
-  if(++photosChecked === PRODUCTS.length) onPhotosReady();
-}));
-
-function onPhotosReady(){
-  const withPhoto = PRODUCTS.filter(p => photoUrl.has(p.id));
-  VISIBLE = withPhoto.length ? withPhoto : PRODUCTS;
-  const missing = PRODUCTS.filter(p => !photoUrl.has(p.id)).map(p => p.name);
-  if(missing.length) console.info('Нет фотографии, позиция скрыта:', missing.join(', '));
-
-  buildSwatches();
-  buildGallery();
-  selectProduct(0);
-}
-
-/* Фото в колонке продукта. Есть фото — 3D-пачка уходит на второй план. */
-function showPhoto(p){
-  const img = document.getElementById('prodPhoto');
-  const url = photoUrl.get(p.id);
-  if(url){
-    img.src = url;
-    img.alt = `${p.name} — упаковка Machos.uz`;
-    img.classList.add('on');
-  }else{
-    img.classList.remove('on');
-    img.removeAttribute('src');
-  }
-  updateStageOpacity();
-}
-
-function buildGallery(){
-  const cards = VISIBLE
-    .filter(p => photoUrl.has(p.id))
-    .map(p => ({ file: photoUrl.get(p.id), name: p.name, sub: p.sub }))
-    .concat(EXTRA_PHOTOS.map(e => ({ ...e, file: assetUrl(e.file) })));
-  if(!cards.length) return;                     // нет файлов — секции нет
-  document.getElementById('galGrid').innerHTML = cards.map(c => `
-    <figure class="rv">
-      <img src="${c.file}" alt="${c.name} — упаковка Machos.uz" loading="lazy" />
-      <figcaption><b>${c.name}</b><span>${c.sub}</span></figcaption>
-    </figure>`).join('');
-  document.getElementById('gallery').classList.add('on');
-  document.querySelectorAll('#gallery .rv').forEach(n => io.observe(n));
-}
-
-/* карточки продуктов */
-const swWrap = document.getElementById('swatches');
-function buildSwatches(){
-  swWrap.innerHTML = '';
-  VISIBLE.forEach((p, i) => {
-  const b = document.createElement('button');
-  b.type = 'button';
-  b.className = 'sw';
-  b.style.setProperty('--sw-color', p.accent);
-  b.setAttribute('aria-pressed', String(i === 0));
-  b.innerHTML = `
-    <span class="dot"></span>
-    <span class="txt"><span class="nm">${p.name}</span><span class="ds">${p.sub}</span></span>
-    <span class="badge">Выбрано</span>`;
-    b.addEventListener('click', () => selectProduct(i));
-    swWrap.appendChild(b);
-  });
-}
-
-function selectProduct(i){
-  activeIndex = i;
-  const p = VISIBLE[i];
-
-  document.querySelectorAll('.sw').forEach((el, idx) => el.setAttribute('aria-pressed', String(idx === i)));
-
-  document.getElementById('pName').textContent = p.name;
-  document.getElementById('pDesc').textContent = p.desc;
-  document.getElementById('pTags').innerHTML = p.tags.map(t => `<li>${t}</li>`).join('');
-  document.getElementById('sWeight').textContent = p.spec.weight;
-  document.getElementById('sComp').textContent   = p.spec.comp;
-  document.getElementById('sPack').textContent   = p.spec.pack;
-  document.getElementById('sLife').textContent   = p.spec.life;
-  document.getElementById('sBox').textContent    = p.spec.box;
-
-  document.documentElement.style.setProperty('--accent', p.accent);
-
-  showPhoto(p);
-  if(renderer) buildPack(p);
-}
-
-/* Ставит в сцену карточку текущего товара: фотография, если она есть,
-   иначе нарисованный макет (пока такой только у семечек). */
-function buildPack(p){
-  const url = photoUrl.get(p.id);
-  accentColor.goal.set(p.accent);
-  pack.visible = !!url;
-  if(!url) return;                    // рисованных пачек в сцене не показываем
-
-  const apply = (tex, aspect) => {
-    tex.colorSpace = THREE.SRGBColorSpace;
-    tex.anisotropy = 8;
-    if(labelMat.map && labelMat.map !== tex) labelMat.map.dispose();
-    labelMat.map = tex;
-    labelMat.needsUpdate = true;
-
-    const h = 3.0, w = h * aspect;
-    pack.geometry.dispose();
-    pack.geometry = cardGeometry(w, h, 0.075, Math.min(0.09, w * 0.05));
-    edgeMat.color.set(0xf2efe8);
-  };
-
-  texLoader.load(url, (tex) => apply(tex, tex.image.width / tex.image.height));
-}
-
-const texLoader = new THREE.TextureLoader();
-
-/* форма */
-const form = document.getElementById('leadForm');
-form.addEventListener('submit', (e) => {
-  e.preventDefault();
-  const name = form.name.value.trim();
-  const phone = form.phone.value.trim();
-  if(!name){ form.name.focus(); return; }
-  if(phone.replace(/\D/g, '').length < 7){ form.phone.focus(); return; }
-
-  // TODO: подключить отправку —
-  // fetch('/api/lead', { method:'POST', body:new FormData(form) })
-  console.info('lead:', Object.fromEntries(new FormData(form)), 'product:', VISIBLE[activeIndex].id);
-  document.getElementById('formOk').classList.add('on');
-  form.reset();
-});
-
-document.getElementById('year').textContent = new Date().getFullYear();
-
-/* ============================================================
-   Запуск
-   ============================================================ */
-window.__machosBooted = true;   // сигнал сторожевому таймеру ниже
+document.addEventListener('product-change', () => { if(renderer) showProduct(); });
 
 if(supportsWebGL()){
   try{
-    buildScene();
-    selectProduct(0);
-    onScroll();
+    build();
     tick();
+    if(VISIBLE.length) showProduct();
   }catch(err){
     console.error('Сцена не собралась:', err);
-    document.getElementById('fallback').classList.add('on');
-    selectProduct(0);
-    finishLoading();
+    showFallback();
   }
 }else{
-  document.getElementById('fallback').classList.add('on');
-  selectProduct(0);
-  onScroll();
-  finishLoading();
+  document.addEventListener('photos-ready', showFallback, { once:true });
 }
-</script>
-
-<!-- Сторожевой таймер: если модуль не загрузился (нет ES-модулей, заблокирован
-     скрипт, оборвалась сеть) — снимаем прелоадер и показываем плоскую версию,
-     чтобы посетитель не остался перед пустым экраном. -->
-<script>
-(function(){
-  var LIMIT = 7000;
-  setTimeout(function(){
-    if(window.__machosBooted) return;
-    document.getElementById('preloader').classList.add('done');
-    document.getElementById('fallback').classList.add('on');
-    document.querySelectorAll('.rv').forEach(function(n){ n.classList.add('in'); });
-    var y = document.getElementById('year');
-    if(y) y.textContent = new Date().getFullYear();
-  }, LIMIT);
-})();
 </script>
 </body>
 </html>

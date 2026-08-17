@@ -49,7 +49,9 @@ if assets:
     inline = ('<script>window.__ASSETS = {'
               + ','.join(f'{k!r}:{v!r}' for k, v in assets.items())
               + '};</script>\n')
-    html = html.replace('<script type="module">', inline + '<script type="module">', 1)
+    # вставляем в самое начало body: логика сайта читает __ASSETS
+    # раньше, чем доходит до модуля со сценой
+    html = html.replace('<body>', '<body>\n' + inline, 1)
     print(f'встроено фотографий: {len(assets)}')
 
 OLD_HEAD = """<script type="module">
@@ -65,9 +67,8 @@ new_head = ('<script type="module">\n'
             '\n/* ---- сайт ---- */\n{')
 html = html.replace(OLD_HEAD, new_head, 1)
 
-MARKER = '\nwindow.__machosBooted = true;'
-assert MARKER in html
-end = html.index('</script>', html.index(MARKER))
+# закрываем блок в конце модуля — это последний script на странице
+end = html.index('</script>', html.index(new_head))
 html = html[:end] + '}\n' + html[end:]
 
 os.makedirs('dist', exist_ok=True)
