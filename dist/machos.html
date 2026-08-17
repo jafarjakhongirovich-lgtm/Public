@@ -270,37 +270,6 @@ header.nav{
 .step p{ color:var(--muted); font-size:15px; margin-top:6px; }
 
 /* ============================================================
-   Оптом — жёлтый блок, самый громкий на странице
-   ============================================================ */
-.wholesale{ background:var(--brand); color:#0A0A0A; }
-.wholesale .eyebrow{ color:rgba(10,10,10,.65); }
-.wholesale .eyebrow::before{ background:#0A0A0A; }
-.wholesale .lead{ color:rgba(10,10,10,.72); }
-.ws-grid{ display:grid; grid-template-columns:1fr 1fr; gap:clamp(28px,5vw,64px); align-items:start; }
-@media (max-width:900px){ .ws-grid{ grid-template-columns:1fr; } }
-.checks{ list-style:none; margin:30px 0 0; padding:0; display:grid; gap:14px; }
-.checks li{ display:grid; grid-template-columns:auto 1fr; gap:14px; align-items:start; color:rgba(10,10,10,.8); font-size:16px; }
-.checks li::before{
-  content:"✓"; color:var(--brand); background:#0A0A0A; font-size:13px; font-weight:700;
-  width:24px; height:24px; border-radius:50%; display:grid; place-items:center; margin-top:2px;
-}
-form{ display:grid; gap:12px; background:rgba(10,10,10,.07); border-radius:var(--r); padding:clamp(22px,3vw,32px); }
-form input{
-  width:100%; padding:16px 18px; border-radius:12px; border:2px solid rgba(10,10,10,.2);
-  background:rgba(255,255,255,.7); color:#0A0A0A; font:inherit; font-size:16px;
-  transition:border-color .25s var(--ease), background .25s var(--ease);
-}
-form input::placeholder{ color:rgba(10,10,10,.45); }
-form input:focus{ outline:none; border-color:#0A0A0A; background:#fff; }
-form .btn{ justify-self:start; margin-top:4px; }
-.form-note{ font-size:13px; color:rgba(10,10,10,.55); line-height:1.5; }
-.form-ok{
-  display:none; align-items:center; gap:10px; font-size:15px; color:var(--brand);
-  background:#0A0A0A; border-radius:12px; padding:14px 16px; font-weight:600;
-}
-.form-ok.on{ display:flex; }
-
-/* ============================================================
    Контакты
    ============================================================ */
 .contacts-grid{ display:grid; grid-template-columns:1.1fr .9fr; gap:clamp(28px,5vw,64px); align-items:start; }
@@ -363,7 +332,6 @@ footer{ position:relative; z-index:2; background:var(--bg-2); padding:clamp(44px
     <a href="#products" data-i18n="nav.products">Продукция</a>
     <a href="#why" data-i18n="nav.why">Почему мы</a>
     <a href="#process" data-i18n="nav.process">Производство</a>
-    <a href="#wholesale" data-i18n="nav.wholesale">Оптом</a>
     <a href="#contacts" data-i18n="nav.contacts">Контакты</a>
   </nav>
 
@@ -392,7 +360,7 @@ footer{ position:relative; z-index:2; background:var(--bg-2); padding:clamp(44px
         </p>
         <div class="hero-cta rv in d3">
           <a href="#products" class="btn brand" data-i18n="hero.cta1">Смотреть продукцию</a>
-          <a href="#wholesale" class="btn" data-i18n="hero.cta2">Купить оптом</a>
+          <a class="btn" id="heroCall" href="#" data-i18n="hero.cta2">Позвонить</a>
         </div>
         <div class="hero-facts rv in d4">
           <div><b data-i18n="hero.f1n">6</b><span data-i18n="hero.f1t">позиций в линейке</span></div>
@@ -472,37 +440,6 @@ footer{ position:relative; z-index:2; background:var(--bg-2); padding:clamp(44px
     </div>
   </section>
 
-  <!-- ============ Оптом ============ -->
-  <section id="wholesale" class="wholesale" data-pose="wholesale">
-    <div class="wrap ws-grid">
-      <div>
-        <p class="eyebrow rv" data-i18n="ws.eyebrow">Партнёрам</p>
-        <h2 class="rv" data-i18n="ws.h2">Поставки в магазины и на маркетплейсы</h2>
-        <p class="lead rv d1" style="margin-top:18px" data-i18n="ws.lead">
-          Оставьте контакты — перезвоним в рабочее время, пришлём прайс и условия отгрузки.
-        </p>
-        <ul class="checks rv d2">
-          <li data-i18n="ws.c1">Отгрузка от одного короба</li>
-          <li data-i18n="ws.c2">Гибкая цена и отсрочка для постоянных партнёров</li>
-          <li data-i18n="ws.c3">Полный пакет документов и сертификатов</li>
-          <li data-i18n="ws.c4">Фото и описания для карточек товара</li>
-        </ul>
-      </div>
-
-      <form id="leadForm" class="rv d1" novalidate>
-        <label class="skip" for="fName" data-i18n="ws.name">Имя</label>
-        <input id="fName" name="name" type="text" autocomplete="name" required data-i18n-ph="ws.name" placeholder="Имя" />
-        <label class="skip" for="fComp" data-i18n="ws.comp">Компания или магазин</label>
-        <input id="fComp" name="company" type="text" autocomplete="organization" data-i18n-ph="ws.comp" placeholder="Компания или магазин" />
-        <label class="skip" for="fTel" data-i18n="ws.tel">Телефон</label>
-        <input id="fTel" name="phone" type="tel" autocomplete="tel" required data-i18n-ph="ws.tel" placeholder="Телефон" />
-        <button type="submit" class="btn dark" data-i18n="ws.send">Отправить заявку</button>
-        <p class="form-note" data-i18n="ws.note">Нажимая кнопку, вы соглашаетесь на обработку контактных данных.</p>
-        <p class="form-ok" id="formOk" role="status" data-i18n="ws.ok">✓ Заявка принята — свяжемся с вами.</p>
-      </form>
-    </div>
-  </section>
-
   <!-- ============ Контакты ============ -->
   <section id="contacts" data-pose="contacts">
     <div class="wrap contacts-grid">
@@ -524,7 +461,7 @@ footer{ position:relative; z-index:2; background:var(--bg-2); padding:clamp(44px
         <h3 data-i18n="ct.prod">Производство</h3>
         <p class="lead" id="cComp" style="font-size:16px">—</p>
         <p class="lead" id="cAddr" style="font-size:16px">—</p>
-        <a href="#wholesale" class="btn brand" style="justify-self:start;margin-top:6px" data-i18n="ct.cta">Оставить заявку</a>
+        <a class="btn brand" id="cardCall" href="#" style="justify-self:start;margin-top:6px" data-i18n="ct.cta">Позвонить</a>
       </div>
     </div>
   </section>
@@ -544,7 +481,6 @@ footer{ position:relative; z-index:2; background:var(--bg-2); padding:clamp(44px
         <li><a href="#products" data-i18n="nav.products">Продукция</a></li>
         <li><a href="#why" data-i18n="nav.why">Почему мы</a></li>
         <li><a href="#process" data-i18n="nav.process">Производство</a></li>
-        <li><a href="#wholesale" data-i18n="nav.wholesale">Оптом</a></li>
       </ul>
     </div>
     <div>
@@ -635,11 +571,11 @@ const I18N = {
   ru:{
     'skip':'Перейти к содержимому','scroll':'Листайте',
     'nav.products':'Продукция','nav.why':'Почему мы','nav.process':'Производство',
-    'nav.wholesale':'Оптом','nav.contacts':'Контакты',
+    'nav.contacts':'Контакты',
     'hero.eyebrow':'Производство снеков · Ташкент',
     'hero.h1a':'Натуральный снек','hero.h1b':'из Узбекистана',
     'hero.lead':'Курт трёх форм, сырные палочки, косичка и солёные семечки. Свой цех, честный состав, отгрузка по всей стране.',
-    'hero.cta1':'Смотреть продукцию','hero.cta2':'Купить оптом',
+    'hero.cta1':'Смотреть продукцию','hero.cta2':'Позвонить',
     'hero.f1n':'6','hero.f1t':'позиций в линейке',
     'hero.f2n':'100%','hero.f2t':'натуральный состав',
     'hero.f3n':'Ташкент','hero.f3t':'собственное производство',
@@ -655,29 +591,22 @@ const I18N = {
     'proc.2h':'Обработка','proc.2p':'Свой режим на каждый продукт: семечку обжариваем, курт и сыр сушим и солим.',
     'proc.3h':'Контроль','proc.3p':'Влажность, вес и вкус. Партия не уходит на фасовку, пока не пройдёт проверку.',
     'proc.4h':'Фасовка','proc.4p':'Упаковка в тот же день, шов под контролем, дата партии на каждой пачке.',
-    'ws.eyebrow':'Партнёрам','ws.h2':'Поставки в магазины и на маркетплейсы',
-    'ws.lead':'Оставьте контакты — перезвоним в рабочее время, пришлём прайс и условия отгрузки.',
-    'ws.c1':'Отгрузка от одного короба','ws.c2':'Гибкая цена и отсрочка для постоянных партнёров',
-    'ws.c3':'Полный пакет документов и сертификатов','ws.c4':'Фото и описания для карточек товара',
-    'ws.name':'Имя','ws.comp':'Компания или магазин','ws.tel':'Телефон','ws.send':'Отправить заявку',
-    'ws.note':'Нажимая кнопку, вы соглашаетесь на обработку контактных данных.',
-    'ws.ok':'✓ Заявка принята — свяжемся с вами.',
     'ct.eyebrow':'Контакты','ct.h2':'Позвоните или напишите',
     'ct.phone2':'Отдел продаж','ct.mail':'Почта','ct.site':'Сайт',
-    'ct.prod':'Производство','ct.cta':'Оставить заявку',
+    'ct.prod':'Производство','ct.cta':'Позвонить',
     'foot.about':'Производство снеков: курт, сырные палочки, косичка и семечки. Ташкент, Узбекистан.',
     'foot.nav':'Разделы','foot.contacts':'Контакты','foot.made':'Сделано в Ташкенте',
     'card.weight':'Вес','card.comp':'Состав','card.life':'Срок годности',
-    'lead.request':'Заявка на поставку',
+    
   },
   uz:{
     'skip':'Asosiy qismga o‘tish','scroll':'Pastga suring',
     'nav.products':'Mahsulotlar','nav.why':'Nima uchun biz','nav.process':'Ishlab chiqarish',
-    'nav.wholesale':'Ulgurji','nav.contacts':'Aloqa',
+    'nav.contacts':'Aloqa',
     'hero.eyebrow':'Gazak ishlab chiqarish · Toshkent',
     'hero.h1a':'O‘zbekistonning','hero.h1b':'tabiiy gazagi',
     'hero.lead':'Uch xil shakldagi qurt, pishloq tayoqchalari, oʻrim va sho‘r pista. O‘z sexi, halol tarkib, butun mamlakat bo‘ylab yetkazib berish.',
-    'hero.cta1':'Mahsulotlarni ko‘rish','hero.cta2':'Ulgurji sotib olish',
+    'hero.cta1':'Mahsulotlarni ko‘rish','hero.cta2':'Qo‘ng‘iroq qilish',
     'hero.f1n':'6','hero.f1t':'mahsulot turi',
     'hero.f2n':'100%','hero.f2t':'tabiiy tarkib',
     'hero.f3n':'Toshkent','hero.f3t':'o‘z ishlab chiqarishi',
@@ -693,20 +622,13 @@ const I18N = {
     'proc.2h':'Ishlov','proc.2p':'Har mahsulotga o‘z rejimi: pistani qovuramiz, qurt va pishloqni quritamiz va tuzlaymiz.',
     'proc.3h':'Nazorat','proc.3p':'Namlik, vazn va ta’m. Partiya tekshiruvdan o‘tmaguncha qadoqlashga ketmaydi.',
     'proc.4h':'Qadoqlash','proc.4p':'O‘sha kuni qadoqlash, chok nazoratda, partiya sanasi har qadoqda.',
-    'ws.eyebrow':'Hamkorlarga','ws.h2':'Do‘konlar va marketpleyslarga yetkazib berish',
-    'ws.lead':'Kontaktlaringizni qoldiring — ish vaqtida qo‘ng‘iroq qilamiz, narxlar va shartlarni yuboramiz.',
-    'ws.c1':'Bitta qutidan boshlab jo‘natish','ws.c2':'Doimiy hamkorlarga moslashuvchan narx va muddatli to‘lov',
-    'ws.c3':'To‘liq hujjatlar va sertifikatlar','ws.c4':'Mahsulot kartochkalari uchun rasm va tavsiflar',
-    'ws.name':'Ism','ws.comp':'Kompaniya yoki do‘kon','ws.tel':'Telefon','ws.send':'Arizani yuborish',
-    'ws.note':'Tugmani bosish orqali siz kontakt ma’lumotlarini qayta ishlashga rozilik bildirasiz.',
-    'ws.ok':'✓ Ariza qabul qilindi — siz bilan bog‘lanamiz.',
     'ct.eyebrow':'Aloqa','ct.h2':'Qo‘ng‘iroq qiling yoki yozing',
     'ct.phone2':'Savdo bo‘limi','ct.mail':'Pochta','ct.site':'Sayt',
-    'ct.prod':'Ishlab chiqarish','ct.cta':'Ariza qoldirish',
+    'ct.prod':'Ishlab chiqarish','ct.cta':'Qo‘ng‘iroq qilish',
     'foot.about':'Gazak ishlab chiqarish: qurt, pishloq tayoqchalari, oʻrim va pista. Toshkent, O‘zbekiston.',
     'foot.nav':'Bo‘limlar','foot.contacts':'Aloqa','foot.made':'Toshkentda tayyorlangan',
     'card.weight':'Vazn','card.comp':'Tarkibi','card.life':'Yaroqlilik muddati',
-    'lead.request':'Yetkazib berish uchun ariza',
+    
   },
 };
 
@@ -835,6 +757,10 @@ function renderContacts(){
   set('cMail',   CONTACTS.email,  'mailto:' + CONTACTS.email);
   set('cSite',   CONTACTS.site,   'https://' + CONTACTS.site);
   set('navPhone',CONTACTS.phone,  'tel:' + CONTACTS.phoneRaw);
+  ['heroCall','cardCall'].forEach(id => {
+    const el = document.getElementById(id);
+    if(el) el.href = 'tel:' + CONTACTS.phoneRaw;
+  });
   document.getElementById('cComp').textContent = CONTACTS.company;
   document.getElementById('cAddr').textContent = CONTACTS.address;
 
@@ -850,7 +776,7 @@ function renderContacts(){
     <li><a href="tel:${CONTACTS.phoneRaw}">${CONTACTS.phone}</a></li>
     <li><a href="mailto:${CONTACTS.email}">${CONTACTS.email}</a></li>
     <li><a href="https://${CONTACTS.site}" rel="noopener">${CONTACTS.site}</a></li>
-    <li><a href="#wholesale">${t('lead.request')}</a></li>`;
+`;
 }
 
 const io = new IntersectionObserver((entries) => {
@@ -898,19 +824,6 @@ navLinks.addEventListener('click', (e) => {
     burger.classList.remove('open');
     burger.setAttribute('aria-expanded', 'false');
   }
-});
-
-document.getElementById('leadForm').addEventListener('submit', (e) => {
-  e.preventDefault();
-  const f = e.target;
-  if(!f.name.value.trim()){ f.name.focus(); return; }
-  if(f.phone.value.replace(/\D/g, '').length < 7){ f.phone.focus(); return; }
-
-  // TODO: подключить отправку —
-  // fetch('/api/lead', { method:'POST', body:new FormData(f) })
-  console.info('lead:', Object.fromEntries(new FormData(f)));
-  document.getElementById('formOk').classList.add('on');
-  f.reset();
 });
 
 document.getElementById('year').textContent = new Date().getFullYear();
@@ -1093,7 +1006,6 @@ const POSES = {
   products:  { x:-2.35, y: 0.00, rot: 0.30, scale:0.78 },
   why:       { x: 2.40, y: 0.05, rot: 0.42, scale:0.62 },
   process:   { x:-2.40, y: 0.05, rot:-0.42, scale:0.62 },
-  wholesale: { x: 2.35, y: 0.00, rot: 0.36, scale:0.60 },
   contacts:  { x: 2.20, y: 0.00, rot: 0.30, scale:0.68 },
   footer:    { x: 0.00, y:-0.20, rot: 0.20, scale:0.50 },
 };
@@ -1101,7 +1013,7 @@ const POSES = {
    она уходит на дальний план, чтобы не спорить с контентом. */
 const POSE_ALPHA = {
   hero:1, products:0.10, why:0.14, process:0.14,
-  wholesale:0.10, contacts:0.55, footer:0.30,
+  contacts:0.55, footer:0.30,
 };
 
 const POSES_NARROW = {
@@ -1109,7 +1021,6 @@ const POSES_NARROW = {
   products:  { x:0, y: 0.20, rot: 0.24, scale:0.42 },
   why:       { x:0, y: 0.20, rot: 0.34, scale:0.40 },
   process:   { x:0, y: 0.20, rot:-0.34, scale:0.40 },
-  wholesale: { x:0, y: 0.20, rot: 0.30, scale:0.38 },
   contacts:  { x:0, y: 0.25, rot: 0.26, scale:0.42 },
   footer:    { x:0, y: 0.00, rot: 0.18, scale:0.34 },
 };
