@@ -167,6 +167,64 @@ header.nav{
 }
 
 /* ============================================================
+   Окно консультации
+   ============================================================ */
+.btn.sm{ padding:11px 20px; font-size:14px; }
+.nav-consult{ display:inline-flex; }
+.nav-consult-m{ display:none; }
+@media (max-width:940px){
+  .nav-consult{ display:none; }
+  .nav-consult-m{ display:inline-flex; margin:12px 0 6px; justify-content:center; }
+}
+
+dialog#consult{
+  border:0; padding:0; background:transparent; color:var(--text);
+  max-width:min(760px, 94vw); width:100%; max-height:90vh;
+}
+dialog#consult::backdrop{ background:rgba(0,0,0,.82); backdrop-filter:blur(4px); }
+.dlg{
+  background:var(--bg-2); border:2px solid var(--line); border-radius:22px;
+  padding:clamp(24px,4vw,44px); max-height:90vh; overflow:auto;
+}
+.dlg-top{ display:flex; align-items:flex-start; justify-content:space-between; gap:18px; }
+.dlg h2{ font-size:clamp(26px,3.6vw,40px); margin-top:12px; }
+.dlg-close{
+  flex:none; width:42px; height:42px; border-radius:50%; border:2px solid var(--line);
+  background:transparent; cursor:pointer; font-size:20px; line-height:1;
+  transition:border-color .25s var(--ease), background .25s var(--ease), color .25s var(--ease);
+}
+.dlg-close:hover{ border-color:var(--brand); background:var(--brand); color:#0A0A0A; }
+
+.dlg-steps{ display:grid; gap:14px; margin-top:26px; }
+.dlg-step{ display:grid; grid-template-columns:auto 1fr; gap:16px; align-items:start; }
+.dlg-step b{
+  width:34px; height:34px; border-radius:50%; background:var(--brand); color:#0A0A0A;
+  display:grid; place-items:center; font-family:var(--display); font-weight:800; font-size:15px;
+}
+.dlg-step h3{ margin:4px 0 2px; }
+.dlg-step p{ color:var(--muted); font-size:15px; }
+
+.tier-head{ margin-top:34px; }
+.tiers{ display:grid; gap:10px; margin-top:16px; }
+.tier{
+  display:grid; grid-template-columns:auto 1fr; gap:16px; align-items:center;
+  border:2px solid var(--line-2); border-radius:14px; padding:16px 18px;
+  transition:border-color .25s var(--ease), background .25s var(--ease);
+}
+.tier:hover{ border-color:var(--line); }
+.tier.top{ border-color:var(--brand); background:rgba(255,212,0,.07); }
+.tier .sum{
+  font-family:var(--display); font-weight:800; font-size:clamp(17px,2vw,21px);
+  white-space:nowrap; color:var(--brand);
+}
+.tier.min .sum{ color:var(--muted); }
+.tier .give{ font-size:15px; font-weight:600; }
+.tier .give small{ display:block; font-weight:400; color:var(--dim); font-size:13px; margin-top:2px; }
+@media (max-width:430px){ .tier{ grid-template-columns:1fr; gap:4px; } }
+.dlg-foot{ display:flex; flex-wrap:wrap; gap:12px; align-items:center; margin-top:28px; }
+.dlg-note{ font-size:13px; color:var(--dim); margin-top:14px; }
+
+/* ============================================================
    Первый экран
    ============================================================ */
 #hero{ min-height:100svh; display:grid; align-content:center; padding-top:clamp(40px,8vh,90px); }
@@ -331,7 +389,10 @@ footer{ position:relative; z-index:2; background:var(--bg-2); padding:clamp(44px
     <a href="#why" data-i18n="nav.why">Почему мы</a>
     <a href="#process" data-i18n="nav.process">Производство</a>
     <a href="#contacts" data-i18n="nav.contacts">Контакты</a>
+    <button type="button" class="btn brand sm nav-consult-m" data-consult data-i18n="consult.btn">Консультация</button>
   </nav>
+
+  <button type="button" class="btn brand sm nav-consult" data-consult data-i18n="consult.btn">Консультация</button>
 
   <div class="lang" role="group" aria-label="Язык сайта">
     <button type="button" data-lang="ru" aria-pressed="true">RU</button>
@@ -343,6 +404,31 @@ footer{ position:relative; z-index:2; background:var(--bg-2); padding:clamp(44px
     <span></span><span></span><span></span>
   </button>
 </header>
+
+<dialog id="consult" aria-labelledby="consultTitle">
+  <div class="dlg">
+    <div class="dlg-top">
+      <div>
+        <p class="eyebrow" data-i18n="consult.eyebrow">Консультация</p>
+        <h2 id="consultTitle" data-i18n="consult.h2">Приедем в магазин и соберём заявку</h2>
+      </div>
+      <button type="button" class="dlg-close" data-close aria-label="Закрыть">✕</button>
+    </div>
+
+    <div class="dlg-steps" id="consultSteps"></div>
+
+    <div class="tier-head">
+      <p class="eyebrow" data-i18n="consult.bonus">Бонусы за объём</p>
+      <div class="tiers" id="consultTiers"></div>
+      <p class="dlg-note" data-i18n="consult.note">Бонусы считаются от суммы одного заказа.</p>
+    </div>
+
+    <div class="dlg-foot">
+      <a class="btn brand" id="consultCall" href="#" data-i18n="consult.call">Позвонить</a>
+      <span class="lead" style="font-size:14px" data-i18n="consult.callnote">Ответим в рабочее время</span>
+    </div>
+  </div>
+</dialog>
 
 <main id="main">
 
@@ -512,6 +598,26 @@ const CONTACTS = {
   ],
 };
 
+/* Консультация: что делает представитель и бонусы за объём заказа.
+   Суммы в сумах, порядок — по возрастанию. */
+const CONSULT = {
+  steps: [
+    { ru:{ h:'Приедет в ваш магазин',    p:'Представитель Machos.uz сам приезжает по адресу — в удобное для вас время.' },
+      uz:{ h:'Do‘koningizga keladi',      p:'Machos.uz vakili o‘zi manzilingizga keladi — sizga qulay vaqtda.' } },
+    { ru:{ h:'Спросит, что нужно',        p:'Посмотрит полку и уточнит, какие позиции и в каком объёме вам нужны.' },
+      uz:{ h:'Nima kerakligini so‘raydi', p:'Javonni ko‘radi va qaysi mahsulot, qancha kerakligini aniqlaydi.' } },
+    { ru:{ h:'Запишет и передаст дилеру', p:'Заявка уходит дилеру — он согласует отгрузку, сроки и цену.' },
+      uz:{ h:'Yozib, dilerga uzatadi',    p:'Ariza dilerga boradi — u jo‘natish, muddat va narxni kelishadi.' } },
+  ],
+  tiers: [
+    { sum:200000,  kind:'min', ru:'Минимальная сумма заказа', uz:'Eng kam buyurtma summasi' },
+    { sum:500000,  ru:'Скидка 5%',  uz:'5% chegirma' },
+    { sum:750000,  ru:'Скидка 10%', uz:'10% chegirma' },
+    { sum:1000000, kind:'top', ru:'Фирменная стойка в подарок', uz:'Sovg‘aga firma javoni',
+      ru2:'Витрина для выкладки Machos.uz', uz2:'Machos.uz mahsulotlari uchun javon' },
+  ],
+};
+
 const CATS = [
   { id:'all',    ru:'Всё',     uz:'Barchasi' },
   { id:'kurt',   ru:'Курт',    uz:'Qurt' },
@@ -595,6 +701,11 @@ const I18N = {
     'foot.about':'Производство снеков: курт, сырные палочки, косичка и семечки. Ташкент, Узбекистан.',
     'foot.nav':'Разделы','foot.contacts':'Контакты','foot.made':'Сделано в Ташкенте',
     'card.weight':'Вес','card.comp':'Состав','card.life':'Срок годности',
+    'consult.btn':'Консультация','consult.eyebrow':'Консультация',
+    'consult.h2':'Приедем в магазин и соберём заявку',
+    'consult.bonus':'Бонусы за объём','consult.note':'Бонусы считаются от суммы одного заказа.',
+    'consult.call':'Позвонить','consult.callnote':'Ответим в рабочее время',
+    'consult.sum':'сум','consult.close':'Закрыть',
     
   },
   uz:{
@@ -626,6 +737,11 @@ const I18N = {
     'foot.about':'Gazak ishlab chiqarish: qurt, pishloq tayoqchalari, oʻrim va pista. Toshkent, O‘zbekiston.',
     'foot.nav':'Bo‘limlar','foot.contacts':'Aloqa','foot.made':'Toshkentda tayyorlangan',
     'card.weight':'Vazn','card.comp':'Tarkibi','card.life':'Yaroqlilik muddati',
+    'consult.btn':'Konsultatsiya','consult.eyebrow':'Konsultatsiya',
+    'consult.h2':'Do‘koningizga kelib, arizani yig‘amiz',
+    'consult.bonus':'Hajm uchun bonuslar','consult.note':'Bonuslar bitta buyurtma summasidan hisoblanadi.',
+    'consult.call':'Qo‘ng‘iroq qilish','consult.callnote':'Ish vaqtida javob beramiz',
+    'consult.sum':'so‘m','consult.close':'Yopish',
     
   },
 };
@@ -689,6 +805,7 @@ function render(){
   renderTape();
   renderFilters();
   renderProducts();
+  renderConsult();
   renderContacts();
 }
 
@@ -741,6 +858,29 @@ function renderProducts(){
     </button>`;
   }).join('');
   observeReveals();
+}
+
+function renderConsult(){
+  const money = (n) => n.toLocaleString('ru-RU').replace(/\u00A0/g, ' ') + ' ' + t('consult.sum');
+
+  document.getElementById('consultSteps').innerHTML = CONSULT.steps.map((st, i) => `
+    <div class="dlg-step">
+      <b>${i + 1}</b>
+      <div><h3>${st[lang].h}</h3><p>${st[lang].p}</p></div>
+    </div>`).join('');
+
+  document.getElementById('consultTiers').innerHTML = CONSULT.tiers.map(x => {
+    const extra = x[lang + '2'] ? `<small>${x[lang + '2']}</small>` : '';
+    return `
+    <div class="tier ${x.kind || ''}">
+      <span class="sum">${x.kind === 'min' ? (lang === 'uz' ? '' : 'от ') : ''}${money(x.sum)}</span>
+      <span class="give">${x[lang]}${extra}</span>
+    </div>`;
+  }).join('');
+
+  const call = document.getElementById('consultCall');
+  if(call) call.href = 'tel:' + CONTACTS.phoneRaw;
+  document.querySelector('.dlg-close').setAttribute('aria-label', t('consult.close'));
 }
 
 function renderContacts(){
@@ -807,6 +947,23 @@ document.getElementById('productGrid').addEventListener('click', (e) => {
   document.querySelectorAll('.card').forEach(c =>
     c.setAttribute('aria-pressed', String(Number(c.dataset.index) === active)));
   document.dispatchEvent(new CustomEvent('product-change'));
+});
+
+/* окно консультации */
+const consultDlg = document.getElementById('consult');
+document.addEventListener('click', (e) => {
+  if(e.target.closest('[data-consult]')){
+    consultDlg.showModal();
+    consultDlg.querySelector('.dlg-close').focus();
+    navLinks.classList.remove('open');
+    burger.classList.remove('open');
+    burger.setAttribute('aria-expanded', 'false');
+  }
+  if(e.target.closest('[data-close]')) consultDlg.close();
+});
+// клик по затемнению закрывает окно
+consultDlg.addEventListener('click', (e) => {
+  if(e.target === consultDlg) consultDlg.close();
 });
 
 const burger = document.getElementById('burger');
