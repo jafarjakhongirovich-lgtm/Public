@@ -294,10 +294,6 @@ dialog#consult::backdrop{ background:rgba(0,0,0,.82); backdrop-filter:blur(4px);
 }
 .card .shot img{ width:100%; height:100%; object-fit:contain; padding:14px; transition:transform .6s var(--ease); }
 .card:hover .shot img{ transform:scale(1.06) rotate(-1.2deg); }
-.card .tag{
-  position:absolute; left:12px; top:12px; z-index:2; background:var(--brand); color:#0A0A0A;
-  border-radius:100px; padding:6px 13px; font-size:12px; font-weight:800; font-family:var(--display);
-}
 .card .body{ padding:18px 20px 22px; display:grid; gap:8px; align-content:start; flex:1; }
 .card .sub{ font-size:14px; color:var(--dim); }
 .card dl{ margin:10px 0 0; display:grid; gap:1px; background:var(--line-2); border-radius:10px; overflow:hidden; }
@@ -488,7 +484,7 @@ footer{ position:relative; z-index:2; background:var(--bg-2); padding:clamp(44px
         <article class="rv d1">
           <span class="ic"><svg viewBox="0 0 24 24"><path d="M12 3v18M5 8l7-5 7 5"/></svg></span>
           <h3 data-i18n="why.1h">Честный состав</h3>
-          <p data-i18n="why.1p">Молоко и соль в курте, сыр и соль в чечиле. Ничего лишнего — состав напечатан на каждой пачке.</p>
+          <p data-i18n="why.1p">Молоко и соль в курте, сыр и соль в сырных палочках. Ничего лишнего — состав напечатан на каждой пачке.</p>
         </article>
         <article class="rv d2">
           <span class="ic"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8"/><path d="M12 8v4l3 2"/></svg></span>
@@ -628,49 +624,49 @@ const CATS = [
 /* Фото ищется в assets/<id>.jpg (png, jpeg, webp тоже).
    Позиция без фотографии на сайте не показывается. */
 const PRODUCTS = [
-  { id:'kurt-cube', cat:'kurt', badge:{ru:'30 г',uz:'30 g'},
+  { id:'kurt-cube', cat:'kurt',
     ru:{ name:'Курт кубиками', sub:'классический, солёный',
          about:'Плотный солёный курт кубиками. Четыре штуки в пачке — удобно взять с собой.' },
     uz:{ name:'Qurt, kubik shaklida', sub:'klassik, sho‘r',
          about:'Zich, sho‘r qurt. Qadoqda to‘rt dona — o‘zingiz bilan olib yurish qulay.' },
     spec:{ weight:{ru:'30 ± 5 г',uz:'30 ± 5 g'}, comp:{ru:'Молоко, йодированная соль',uz:'Sut, yodlangan tuz'} } },
 
-  { id:'kurt-ball', cat:'kurt', badge:{ru:'4 шт',uz:'4 dona'},
+  { id:'kurt-ball', cat:'kurt',
     ru:{ name:'Курт шариками', sub:'классический, круглый',
          about:'Курт привычной круглой формы. Тот же состав и вкус, другая подача.' },
     uz:{ name:'Qurt, dumaloq', sub:'klassik, dumaloq',
          about:'Odatiy dumaloq shakldagi qurt. Tarkibi va ta’mi o‘sha, ko‘rinishi boshqa.' },
     spec:{ weight:{ru:'уточняется',uz:'aniqlanmoqda'}, comp:{ru:'Молоко, йодированная соль',uz:'Sut, yodlangan tuz'} } },
 
-  { id:'kurt-stick', cat:'kurt', badge:{ru:'12 шт',uz:'12 dona'},
+  { id:'kurt-stick', cat:'kurt',
     ru:{ name:'Курт палочками', sub:'батончики',
          about:'Курт в форме батончиков: удобно есть на ходу и делить с друзьями.' },
     uz:{ name:'Qurt, tayoqcha shaklida', sub:'batonchalar',
          about:'Tayoqcha shaklidagi qurt: yo‘lda yeyish va bo‘lishish uchun qulay.' },
     spec:{ weight:{ru:'уточняется',uz:'aniqlanmoqda'}, comp:{ru:'Молоко, йодированная соль',uz:'Sut, yodlangan tuz'} } },
 
-  { id:'kurt-big', cat:'kurt', badge:{ru:'Крупный',uz:'Yirik'},
+  { id:'kurt-big', cat:'kurt',
     ru:{ name:'Курт крупными кусками', sub:'классический, солёный',
          about:'Курт крупными кусками ручной лепки. Один кусок — полноценный перекус.' },
     uz:{ name:'Qurt, yirik boʻlaklarda', sub:'klassik, sho‘r',
          about:'Qo‘lda tayyorlangan yirik bo‘laklardagi qurt. Bitta bo‘lak — to‘liq gazak.' },
     spec:{ weight:{ru:'уточняется',uz:'aniqlanmoqda'}, comp:{ru:'Молоко, йодированная соль',uz:'Sut, yodlangan tuz'} } },
 
-  { id:'sticks', cat:'cheese', badge:{ru:'Чечил',uz:'Chechil'},
-    ru:{ name:'Сырные палочки', sub:'чечил, солёные',
-         about:'Плотные солёные палочки чечила. Тянутся нитями — берут к чаю и к пиву.' },
-    uz:{ name:'Pishloq tayoqchalari', sub:'chechil, sho‘r',
-         about:'Zich, sho‘r chechil tayoqchalari. Tolalarga ajraladi — choyga ham, pivoga ham.' },
+  { id:'sticks', cat:'cheese',
+    ru:{ name:'Сырные палочки', sub:'солёные, тянущиеся',
+         about:'Плотные солёные сырные палочки. Тянутся нитями — берут к чаю и к пиву.' },
+    uz:{ name:'Pishloq tayoqchalari', sub:'sho‘r, cho‘ziluvchan',
+         about:'Zich, sho‘r pishloq tayoqchalari. Tolalarga ajraladi — choyga ham, pivoga ham.' },
     spec:{ weight:{ru:'уточняется',uz:'aniqlanmoqda'}, comp:{ru:'Сыр, соль',uz:'Pishloq, tuz'} } },
 
-  { id:'braid', cat:'cheese', badge:{ru:'Чечил',uz:'Chechil'},
-    ru:{ name:'Сырная косичка', sub:'плетёный чечил',
-         about:'Классическая плетёная косичка из чечила. Разбирается на нити — самый «долгий» снек.' },
-    uz:{ name:'Pishloq oʻrimi', sub:'oʻrilgan chechil',
-         about:'Klassik oʻrilgan chechil. Tolalarga ajraladi — eng “uzoq” gazak.' },
+  { id:'braid', cat:'cheese',
+    ru:{ name:'Сырная косичка', sub:'плетёная, солёная',
+         about:'Классическая плетёная сырная косичка. Разбирается на нити — самый «долгий» снек.' },
+    uz:{ name:'Pishloq oʻrimi', sub:'oʻrilgan, sho‘r',
+         about:'Klassik oʻrilgan pishloq. Tolalarga ajraladi — eng “uzoq” gazak.' },
     spec:{ weight:{ru:'уточняется',uz:'aniqlanmoqda'}, comp:{ru:'Сыр, соль',uz:'Pishloq, tuz'} } },
 
-  { id:'seeds', cat:'seeds', badge:{ru:'200 г',uz:'200 g'},
+  { id:'seeds', cat:'seeds',
     ru:{ name:'Семечки Pista Tuzli', sub:'солёные, крупные',
          about:'Крупная калиброванная семечка с солью. Пачка 200 г — та самая, к вечеру и в дорогу.' },
     uz:{ name:'Pista Tuzli', sub:'sho‘r, yirik',
@@ -693,7 +689,7 @@ const I18N = {
     'prod.eyebrow':'Продукция','prod.h2':'Что мы делаем',
     'prod.lead':'Небольшая линейка, зато каждую позицию мы делаем сами и отвечаем за неё.',
     'why.eyebrow':'Почему берут снова','why.h2':'Четыре причины',
-    'why.1h':'Честный состав','why.1p':'Молоко и соль в курте, сыр и соль в чечиле. Ничего лишнего — состав напечатан на каждой пачке.',
+    'why.1h':'Честный состав','why.1p':'Молоко и соль в курте, сыр и соль в сырных палочках. Ничего лишнего — состав напечатан на каждой пачке.',
     'why.2h':'Свежая партия','why.2p':'Готовим небольшими партиями и фасуем в тот же день. Дата на каждой пачке.',
     'why.3h':'Удобный формат','why.3p':'Пачка с подвесом ложится и на крючок, и в прикассовую зону, и в карман покупателю.',
     'why.4h':'Поставки по стране','why.4p':'Отгружаем магазинам, оптовикам и на маркетплейсы. Документы и сертификаты в порядке.',
@@ -729,7 +725,7 @@ const I18N = {
     'prod.eyebrow':'Mahsulotlar','prod.h2':'Biz nima ishlab chiqaramiz',
     'prod.lead':'Assortiment katta emas, lekin har bir mahsulotni o‘zimiz tayyorlaymiz va javob beramiz.',
     'why.eyebrow':'Nega yana olishadi','why.h2':'To‘rtta sabab',
-    'why.1h':'Halol tarkib','why.1p':'Qurtda sut va tuz, chechilda pishloq va tuz. Ortiqcha hech nima — tarkibi har qadoqda yozilgan.',
+    'why.1h':'Halol tarkib','why.1p':'Qurtda sut va tuz, pishloqda tuz. Ortiqcha hech nima — tarkibi har qadoqda yozilgan.',
     'why.2h':'Yangi partiya','why.2p':'Kichik partiyalarda tayyorlaymiz va o‘sha kuni qadoqlaymiz. Sana har qadoqda.',
     'why.3h':'Qulay format','why.3p':'Ilgichli qadoq ilgakka ham, kassa oldiga ham, xaridor cho‘ntagiga ham to‘g‘ri keladi.',
     'why.4h':'Mamlakat bo‘ylab yetkazish','why.4p':'Do‘konlar, ulgurjichilar va marketpleyslarga jo‘natamiz. Hujjatlar va sertifikatlar joyida.',
@@ -841,6 +837,16 @@ function renderFilters(){
     `<button type="button" data-cat="${c.id}" aria-pressed="${c.id === filter}">${c[lang]}</button>`).join('');
 }
 
+/* Строка характеристики показывается, только если значение известно:
+   «уточняется» в карточке ничего не сообщает покупателю. */
+const UNKNOWN = ['уточняется', 'aniqlanmoqda'];
+function specRows(p){
+  return [['card.weight', p.spec.weight], ['card.comp', p.spec.comp]]
+    .filter(([, v]) => v && !UNKNOWN.includes(v[lang]))
+    .map(([k, v]) => `<div><dt>${t(k)}</dt><dd>${v[lang]}</dd></div>`)
+    .join('');
+}
+
 function renderProducts(){
   const list = VISIBLE.filter(p => filter === 'all' || p.cat === filter);
   document.getElementById('productGrid').innerHTML = list.map(p => {
@@ -849,17 +855,13 @@ function renderProducts(){
     return `
     <button type="button" class="card rv" data-index="${i}" aria-pressed="${i === active}">
       <span class="shot">
-        <span class="tag">${p.badge[lang]}</span>
         <img src="${photoUrl.get(p.id)}" alt="${L.name} — Machos.uz" loading="lazy" />
       </span>
       <span class="body">
         <h3>${L.name}</h3>
         <span class="sub">${L.sub}</span>
         <span class="lead" style="font-size:15px">${L.about}</span>
-        <dl>
-          <div><dt>${t('card.weight')}</dt><dd>${p.spec.weight[lang]}</dd></div>
-          <div><dt>${t('card.comp')}</dt><dd>${p.spec.comp[lang]}</dd></div>
-        </dl>
+        <dl>${specRows(p)}</dl>
       </span>
     </button>`;
   }).join('');
