@@ -335,6 +335,7 @@ dialog#consult::backdrop{ background:rgba(0,0,0,.82); backdrop-filter:blur(4px);
 }
 .phone-xl:hover{ opacity:.75; }
 .crow{ display:grid; gap:4px; padding:18px 0; border-bottom:1px solid var(--line-2); }
+.crow[hidden]{ display:none; }   /* иначе display:grid перебивает атрибут hidden */
 .crow .k{ font-size:12px; font-weight:600; letter-spacing:.16em; text-transform:uppercase; color:var(--dim); }
 .crow a, .crow span.v{ font-size:17px; }
 .crow a:hover{ color:var(--brand); }
@@ -585,8 +586,8 @@ const CONTACTS = {
   address:  'Ташкент, Шайхантахурский район, пр. Гормонский, 3А',
   phone:    '+998 90 949 00 00',
   phoneRaw: '+998909490000',
-  phone2:   '+998 95 194 55 15',
-  phone2Raw:'+998951945515',
+  phone2:   '+998 90 949 00 00',   // пока тот же, что основной
+  phone2Raw:'+998909490000',
   email:    'info@machos.uz',
   site:     'machos.uz',
   socials: [
@@ -923,6 +924,9 @@ function renderContacts(){
   };
   set('cPhone',  CONTACTS.phone,  'tel:' + CONTACTS.phoneRaw);
   set('cPhone2', CONTACTS.phone2, 'tel:' + CONTACTS.phone2Raw);
+  // если отдел продаж на том же номере, второй строки быть не должно
+  const row2 = document.getElementById('cPhone2').closest('.crow');
+  if(row2) row2.hidden = CONTACTS.phone2Raw === CONTACTS.phoneRaw;
   set('cMail',   CONTACTS.email,  'mailto:' + CONTACTS.email);
   set('cSite',   CONTACTS.site,   'https://' + CONTACTS.site);
   set('navPhone',CONTACTS.phone,  'tel:' + CONTACTS.phoneRaw);
