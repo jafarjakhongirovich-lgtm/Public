@@ -590,7 +590,7 @@ const CONTACTS = {
   site:     'machos.uz',
   socials: [
     { name:'Facebook',  url:'' },   // ← ссылка на страницу Facebook
-    { name:'Instagram', url:'' },
+    { name:'Instagram', url:'https://www.instagram.com/machos_uz' },
     { name:'Telegram',  url:'' },
   ],
 };
@@ -845,6 +845,10 @@ function applyDictionary(){
   });
   document.querySelectorAll('.lang button').forEach(b =>
     b.setAttribute('aria-pressed', String(b.dataset.lang === lang)));
+
+  // цифра на первом экране должна совпадать с тем, что видно в каталоге
+  const count = document.querySelector('[data-i18n="hero.f1n"]');
+  if(count && VISIBLE.length) count.textContent = String(VISIBLE.length);
 }
 
 function renderTape(){
