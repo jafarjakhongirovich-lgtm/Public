@@ -633,42 +633,42 @@ const PRODUCTS = [
          about:'Плотный солёный курт кубиками. Четыре штуки в пачке — удобно взять с собой.' },
     uz:{ name:'Qurt, kubik shaklida', sub:'klassik, sho‘r',
          about:'Zich, sho‘r qurt. Qadoqda to‘rt dona — o‘zingiz bilan olib yurish qulay.' },
-    spec:{ weight:{ru:'30 ± 5 г',uz:'30 ± 5 g'}, comp:{ru:'Молоко, йодированная соль',uz:'Sut, yodlangan tuz'}, life:{ru:'3 месяца',uz:'3 oy'} } },
+    spec:{ weight:{ru:'30 ± 5 г',uz:'30 ± 5 g'}, comp:{ru:'Молоко, йодированная соль',uz:'Sut, yodlangan tuz'} } },
 
   { id:'kurt-ball', cat:'kurt', badge:{ru:'4 шт',uz:'4 dona'},
     ru:{ name:'Курт шариками', sub:'классический, круглый',
          about:'Курт привычной круглой формы. Тот же состав и вкус, другая подача.' },
     uz:{ name:'Qurt, dumaloq', sub:'klassik, dumaloq',
          about:'Odatiy dumaloq shakldagi qurt. Tarkibi va ta’mi o‘sha, ko‘rinishi boshqa.' },
-    spec:{ weight:{ru:'уточняется',uz:'aniqlanmoqda'}, comp:{ru:'Молоко, йодированная соль',uz:'Sut, yodlangan tuz'}, life:{ru:'3 месяца',uz:'3 oy'} } },
+    spec:{ weight:{ru:'уточняется',uz:'aniqlanmoqda'}, comp:{ru:'Молоко, йодированная соль',uz:'Sut, yodlangan tuz'} } },
 
   { id:'kurt-stick', cat:'kurt', badge:{ru:'12 шт',uz:'12 dona'},
     ru:{ name:'Курт палочками', sub:'батончики',
          about:'Курт в форме батончиков: удобно есть на ходу и делить с друзьями.' },
     uz:{ name:'Qurt, tayoqcha shaklida', sub:'batonchalar',
          about:'Tayoqcha shaklidagi qurt: yo‘lda yeyish va bo‘lishish uchun qulay.' },
-    spec:{ weight:{ru:'уточняется',uz:'aniqlanmoqda'}, comp:{ru:'Молоко, йодированная соль',uz:'Sut, yodlangan tuz'}, life:{ru:'3 месяца',uz:'3 oy'} } },
+    spec:{ weight:{ru:'уточняется',uz:'aniqlanmoqda'}, comp:{ru:'Молоко, йодированная соль',uz:'Sut, yodlangan tuz'} } },
 
   { id:'sticks', cat:'cheese', badge:{ru:'Чечил',uz:'Chechil'},
     ru:{ name:'Сырные палочки', sub:'чечил, солёные',
          about:'Плотные солёные палочки чечила. Тянутся нитями — берут к чаю и к пиву.' },
     uz:{ name:'Pishloq tayoqchalari', sub:'chechil, sho‘r',
          about:'Zich, sho‘r chechil tayoqchalari. Tolalarga ajraladi — choyga ham, pivoga ham.' },
-    spec:{ weight:{ru:'уточняется',uz:'aniqlanmoqda'}, comp:{ru:'Сыр, соль',uz:'Pishloq, tuz'}, life:{ru:'уточняется',uz:'aniqlanmoqda'} } },
+    spec:{ weight:{ru:'уточняется',uz:'aniqlanmoqda'}, comp:{ru:'Сыр, соль',uz:'Pishloq, tuz'} } },
 
   { id:'braid', cat:'cheese', badge:{ru:'Чечил',uz:'Chechil'},
     ru:{ name:'Сырная косичка', sub:'плетёный чечил',
          about:'Классическая плетёная косичка из чечила. Разбирается на нити — самый «долгий» снек.' },
     uz:{ name:'Pishloq oʻrimi', sub:'oʻrilgan chechil',
          about:'Klassik oʻrilgan chechil. Tolalarga ajraladi — eng “uzoq” gazak.' },
-    spec:{ weight:{ru:'уточняется',uz:'aniqlanmoqda'}, comp:{ru:'Сыр, соль',uz:'Pishloq, tuz'}, life:{ru:'уточняется',uz:'aniqlanmoqda'} } },
+    spec:{ weight:{ru:'уточняется',uz:'aniqlanmoqda'}, comp:{ru:'Сыр, соль',uz:'Pishloq, tuz'} } },
 
   { id:'seeds', cat:'seeds', badge:{ru:'200 г',uz:'200 g'},
     ru:{ name:'Семечки Pista Tuzli', sub:'солёные, крупные',
          about:'Крупная калиброванная семечка с солью. Пачка 200 г — та самая, к вечеру и в дорогу.' },
     uz:{ name:'Pista Tuzli', sub:'sho‘r, yirik',
          about:'Yirik, kalibrlangan sho‘r pista. 200 g qadoq — kechqurunga ham, yo‘lga ham.' },
-    spec:{ weight:{ru:'200 г',uz:'200 g'}, comp:{ru:'Семена подсолнечника, соль',uz:'Kungaboqar urugʻi, tuz'}, life:{ru:'уточняется',uz:'aniqlanmoqda'} } },
+    spec:{ weight:{ru:'200 г',uz:'200 g'}, comp:{ru:'Семена подсолнечника, соль',uz:'Kungaboqar urugʻi, tuz'} } },
 ];
 
 const I18N = {
@@ -700,7 +700,7 @@ const I18N = {
     'ct.prod':'Производство','ct.cta':'Позвонить',
     'foot.about':'Производство снеков: курт, сырные палочки, косичка и семечки. Ташкент, Узбекистан.',
     'foot.nav':'Разделы','foot.contacts':'Контакты','foot.made':'Сделано в Ташкенте',
-    'card.weight':'Вес','card.comp':'Состав','card.life':'Срок годности',
+    'card.weight':'Вес','card.comp':'Состав',
     'consult.btn':'Консультация','consult.eyebrow':'Консультация',
     'consult.h2':'Приедем в магазин и соберём заявку',
     'consult.bonus':'Бонусы за объём','consult.note':'Бонусы считаются от суммы одного заказа.',
@@ -736,7 +736,7 @@ const I18N = {
     'ct.prod':'Ishlab chiqarish','ct.cta':'Qo‘ng‘iroq qilish',
     'foot.about':'Gazak ishlab chiqarish: qurt, pishloq tayoqchalari, oʻrim va pista. Toshkent, O‘zbekiston.',
     'foot.nav':'Bo‘limlar','foot.contacts':'Aloqa','foot.made':'Toshkentda tayyorlangan',
-    'card.weight':'Vazn','card.comp':'Tarkibi','card.life':'Yaroqlilik muddati',
+    'card.weight':'Vazn','card.comp':'Tarkibi',
     'consult.btn':'Konsultatsiya','consult.eyebrow':'Konsultatsiya',
     'consult.h2':'Do‘koningizga kelib, arizani yig‘amiz',
     'consult.bonus':'Hajm uchun bonuslar','consult.note':'Bonuslar bitta buyurtma summasidan hisoblanadi.',
@@ -852,7 +852,6 @@ function renderProducts(){
         <dl>
           <div><dt>${t('card.weight')}</dt><dd>${p.spec.weight[lang]}</dd></div>
           <div><dt>${t('card.comp')}</dt><dd>${p.spec.comp[lang]}</dd></div>
-          <div><dt>${t('card.life')}</dt><dd>${p.spec.life[lang]}</dd></div>
         </dl>
       </span>
     </button>`;
