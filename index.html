@@ -314,6 +314,32 @@ dialog#consult::backdrop{ background:rgba(0,0,0,.82); backdrop-filter:blur(4px);
 .why p{ color:var(--muted); font-size:15px; }
 
 /* ============================================================
+   История
+   ============================================================ */
+.story{ background:var(--bg-2); }
+.rail{ display:grid; grid-template-columns:repeat(4,1fr); gap:clamp(16px,2.4vw,30px); margin-top:52px; }
+@media (max-width:900px){ .rail{ grid-template-columns:repeat(2,1fr); } }
+@media (max-width:560px){ .rail{ grid-template-columns:1fr; } }
+
+.mile{ position:relative; padding-top:30px; }
+.mile::before{                      /* линия времени */
+  content:""; position:absolute; left:0; right:-30px; top:9px; height:2px;
+  background:var(--line); 
+}
+.mile:last-child::before{ right:0; }
+@media (max-width:900px){ .mile::before{ right:0; } }
+.mile::after{                       /* точка на линии */
+  content:""; position:absolute; left:0; top:3px; width:14px; height:14px;
+  border-radius:50%; background:var(--brand);
+}
+.mile .yr{
+  font-family:var(--display); font-weight:800; font-size:14px; letter-spacing:.1em;
+  color:var(--brand); display:block; margin-bottom:10px; min-height:1em;
+}
+.mile h3{ margin:0 0 8px; }
+.mile p{ color:var(--muted); font-size:15px; }
+
+/* ============================================================
    Производство
    ============================================================ */
 .steps{ display:grid; grid-template-columns:repeat(4,1fr); gap:clamp(14px,2vw,26px); margin-top:44px; }
@@ -384,6 +410,7 @@ footer{ position:relative; z-index:2; background:var(--bg-2); padding:clamp(44px
   <nav class="nav-links" id="navLinks" aria-label="Основная навигация">
     <a href="#products" data-i18n="nav.products">Продукция</a>
     <a href="#why" data-i18n="nav.why">Почему мы</a>
+    <a href="#story" data-i18n="nav.story">История</a>
     <a href="#process" data-i18n="nav.process">Производство</a>
     <a href="#contacts" data-i18n="nav.contacts">Контакты</a>
     <button type="button" class="btn brand sm nav-consult-m" data-consult data-i18n="consult.btn">Консультация</button>
@@ -506,6 +533,19 @@ footer{ position:relative; z-index:2; background:var(--bg-2); padding:clamp(44px
     </div>
   </section>
 
+  <!-- ============ История ============ -->
+  <section id="story" class="story" data-pose="story">
+    <div class="wrap">
+      <p class="eyebrow rv" data-i18n="story.eyebrow">Как всё начиналось</p>
+      <h2 class="rv" data-i18n="story.h2">История Machos</h2>
+      <p class="lead rv d1" style="margin-top:18px" data-i18n="story.lead">
+        Всё началось с одного человека, который сушил курт у себя в Ташкенте
+        и сам развозил его по магазинам.
+      </p>
+      <div class="rail" id="rail"></div>
+    </div>
+  </section>
+
   <!-- ============ Производство ============ -->
   <section id="process" data-pose="process">
     <div class="wrap">
@@ -561,6 +601,7 @@ footer{ position:relative; z-index:2; background:var(--bg-2); padding:clamp(44px
       <ul>
         <li><a href="#products" data-i18n="nav.products">Продукция</a></li>
         <li><a href="#why" data-i18n="nav.why">Почему мы</a></li>
+        <li><a href="#story" data-i18n="nav.story">История</a></li>
         <li><a href="#process" data-i18n="nav.process">Производство</a></li>
       </ul>
     </div>
@@ -614,6 +655,31 @@ const CONSULT = {
       ru2:'Витрина для выкладки Machos.uz', uz2:'Machos.uz mahsulotlari uchun javon' },
   ],
 };
+
+/* История компании. Год стоит только там, где он известен точно;
+   у средних шагов поле year пустое — впишите свои даты. */
+const HISTORY = [
+  { year:'2012',
+    ru:{ h:'Начал один',
+         p:'Всё делал сам: покупал сырьё, сушил, солил, фасовал и сам развозил по магазинам Ташкента. Первая партия помещалась в багажник.' },
+    uz:{ h:'Yolg‘iz boshladi',
+         p:'Hammasini o‘zi qildi: xomashyo oldi, quritdi, tuzladi, qadoqladi va Toshkent do‘konlariga o‘zi tarqatdi. Birinchi partiya mashina yukxonasiga sig‘ardi.' } },
+  { year:'',
+    ru:{ h:'Нанял людей',
+         p:'Дела пошли хорошо, и одному перестало хватать рук. Он нанял работников — партии стали больше, а рецепт и подход остались прежними.' },
+    uz:{ h:'Odamlarni ishga oldi',
+         p:'Ishlar yaxshi ketdi, yolg‘iz ulgurmay qoldi. U ishchilarni yolladi — partiyalar kattalashdi, retsept va yondashuv esa o‘sha bo‘lib qoldi.' } },
+  { year:'',
+    ru:{ h:'Свой цех',
+         p:'Появилось помещение и оборудование. Курт пошёл в разных формах — кубиками, шариками, палочками. Следом добавился сыр.' },
+    uz:{ h:'O‘z sexi',
+         p:'Bino va uskuna paydo bo‘ldi. Qurt turli shaklda chiqa boshladi — kubik, dumaloq, tayoqcha. Ketidan pishloq qo‘shildi.' } },
+  { year:'',
+    ru:{ h:'Сегодня',
+         p:'ООО «FUN NUTS GROUP», производство в Ташкенте. Курт, сырные палочки, косичка и семечки едут в магазины по всей стране.' },
+    uz:{ h:'Bugun',
+         p:'"FUN NUTS GROUP" MChJ, ishlab chiqarish Toshkentda. Qurt, pishloq tayoqchalari, oʻrim va pista butun mamlakat do‘konlariga boradi.' } },
+];
 
 const CATS = [
   { id:'all',    ru:'Всё',     uz:'Barchasi' },
@@ -699,7 +765,7 @@ const PRODUCTS = [
 const I18N = {
   ru:{
     'skip':'Перейти к содержимому','scroll':'Листайте',
-    'nav.products':'Продукция','nav.why':'Почему мы','nav.process':'Производство',
+    'nav.products':'Продукция','nav.why':'Почему мы','nav.story':'История','nav.process':'Производство',
     'nav.contacts':'Контакты',
     'hero.eyebrow':'Производство снеков · Ташкент',
     'hero.h1a':'Натуральный снек','hero.h1b':'из Узбекистана',
@@ -715,6 +781,8 @@ const I18N = {
     'why.2h':'Свежая партия','why.2p':'Готовим небольшими партиями и фасуем в тот же день. Дата на каждой пачке.',
     'why.3h':'Удобный формат','why.3p':'Пачка с подвесом ложится и на крючок, и в прикассовую зону, и в карман покупателю.',
     'why.4h':'Поставки по стране','why.4p':'Отгружаем магазинам, оптовикам и на маркетплейсы. Документы и сертификаты в порядке.',
+    'story.eyebrow':'Как всё начиналось','story.h2':'История Machos',
+    'story.lead':'Всё началось с одного человека, который сушил курт у себя в Ташкенте и сам развозил его по магазинам.',
     'proc.eyebrow':'Производство','proc.h2':'Путь до пачки',
     'proc.1h':'Сырьё','proc.1p':'Молоко и сыр от проверенных хозяйств, семечка калибруется по размеру.',
     'proc.2h':'Обработка','proc.2p':'Свой режим на каждый продукт: семечку обжариваем, курт и сыр сушим и солим.',
@@ -735,7 +803,7 @@ const I18N = {
   },
   uz:{
     'skip':'Asosiy qismga o‘tish','scroll':'Pastga suring',
-    'nav.products':'Mahsulotlar','nav.why':'Nima uchun biz','nav.process':'Ishlab chiqarish',
+    'nav.products':'Mahsulotlar','nav.why':'Nima uchun biz','nav.story':'Tarix','nav.process':'Ishlab chiqarish',
     'nav.contacts':'Aloqa',
     'hero.eyebrow':'Gazak ishlab chiqarish · Toshkent',
     'hero.h1a':'O‘zbekistonning','hero.h1b':'tabiiy gazagi',
@@ -751,6 +819,8 @@ const I18N = {
     'why.2h':'Yangi partiya','why.2p':'Kichik partiyalarda tayyorlaymiz va o‘sha kuni qadoqlaymiz. Sana har qadoqda.',
     'why.3h':'Qulay format','why.3p':'Ilgichli qadoq ilgakka ham, kassa oldiga ham, xaridor cho‘ntagiga ham to‘g‘ri keladi.',
     'why.4h':'Mamlakat bo‘ylab yetkazish','why.4p':'Do‘konlar, ulgurjichilar va marketpleyslarga jo‘natamiz. Hujjatlar va sertifikatlar joyida.',
+    'story.eyebrow':'Qanday boshlangan','story.h2':'Machos tarixi',
+    'story.lead':'Hammasi bir odamdan boshlangan: u Toshkentda qurt quritib, do‘konlarga o‘zi tarqatgan.',
     'proc.eyebrow':'Ishlab chiqarish','proc.h2':'Qadoqqacha bo‘lgan yo‘l',
     'proc.1h':'Xomashyo','proc.1p':'Sut va pishloq ishonchli xo‘jaliklardan, pista o‘lchami bo‘yicha saralanadi.',
     'proc.2h':'Ishlov','proc.2p':'Har mahsulotga o‘z rejimi: pistani qovuramiz, qurt va pishloqni quritamiz va tuzlaymiz.',
@@ -830,8 +900,10 @@ function render(){
   renderTape();
   renderFilters();
   renderProducts();
+  renderStory();
   renderConsult();
   renderContacts();
+  observeReveals();   // блоки, отрисованные только что, тоже должны появиться
 }
 
 function applyDictionary(){
@@ -892,6 +964,15 @@ function renderProducts(){
     </button>`;
   }).join('');
   observeReveals();
+}
+
+function renderStory(){
+  document.getElementById('rail').innerHTML = HISTORY.map(m => `
+    <div class="mile rv">
+      <span class="yr">${m.year}</span>
+      <h3>${m[lang].h}</h3>
+      <p>${m[lang].p}</p>
+    </div>`).join('');
 }
 
 function renderConsult(){
@@ -1059,6 +1140,7 @@ const POSES = {
   hero:      { x: 2.15, y: 0.00, rot:-0.36, scale:1.00 },
   products:  { x:-2.35, y: 0.00, rot: 0.30, scale:0.78 },
   why:       { x: 2.40, y: 0.05, rot: 0.42, scale:0.62 },
+  story:     { x: 2.40, y: 0.05, rot: 0.40, scale:0.60 },
   process:   { x:-2.40, y: 0.05, rot:-0.42, scale:0.62 },
   contacts:  { x: 2.20, y: 0.00, rot: 0.30, scale:0.68 },
   footer:    { x: 0.00, y:-0.20, rot: 0.20, scale:0.50 },
@@ -1066,7 +1148,7 @@ const POSES = {
 /* Насколько сцена видна в каждой секции: в полноширинных блоках
    она уходит на дальний план, чтобы не спорить с контентом. */
 const POSE_ALPHA = {
-  hero:1, products:0.10, why:0.14, process:0.14,
+  hero:1, products:0.10, why:0.14, story:0.12, process:0.14,
   contacts:0.55, footer:0.30,
 };
 
@@ -1074,6 +1156,7 @@ const POSES_NARROW = {
   hero:      { x:0, y: 1.35, rot:-0.26, scale:0.62 },
   products:  { x:0, y: 0.20, rot: 0.24, scale:0.42 },
   why:       { x:0, y: 0.20, rot: 0.34, scale:0.40 },
+  story:     { x:0, y: 0.20, rot: 0.30, scale:0.38 },
   process:   { x:0, y: 0.20, rot:-0.34, scale:0.40 },
   contacts:  { x:0, y: 0.25, rot: 0.26, scale:0.42 },
   footer:    { x:0, y: 0.00, rot: 0.18, scale:0.34 },
