@@ -224,6 +224,17 @@ dialog#consult::backdrop{ background:rgba(0,0,0,.82); backdrop-filter:blur(4px);
 .dlg-foot{ display:flex; flex-wrap:wrap; gap:12px; align-items:center; margin-top:28px; }
 .dlg-note{ font-size:13px; color:var(--dim); margin-top:14px; }
 
+/* Всплывающее уведомление о скопированном номере */
+#toast{
+  position:fixed; left:50%; bottom:26px; translate:-50% 0; z-index:300;
+  background:var(--brand); color:#0A0A0A; border-radius:100px;
+  padding:14px 26px; font-family:var(--display); font-weight:700; font-size:15px;
+  box-shadow:0 16px 40px rgba(0,0,0,.5);
+  opacity:0; pointer-events:none; transform:translateY(14px);
+  transition:opacity .3s var(--ease), transform .3s var(--ease);
+}
+#toast.on{ opacity:1; transform:none; }
+
 /* ============================================================
    Первый экран
    ============================================================ */
@@ -403,6 +414,7 @@ footer{ position:relative; z-index:2; background:var(--bg-2); padding:clamp(44px
 
 <a class="skip" href="#main" data-i18n="skip">Перейти к содержимому</a>
 
+<div id="toast" role="status" aria-live="polite"></div>
 <div id="stage" aria-hidden="true"></div>
 <div id="fallback" aria-hidden="true"></div>
 
@@ -804,6 +816,7 @@ const I18N = {
     'consult.bonus':'Бонусы за объём','consult.note':'Бонусы считаются от суммы одного заказа.',
     'consult.call':'Позвонить','consult.callnote':'Ответим в рабочее время',
     'consult.sum':'сум','consult.close':'Закрыть',
+    'copied':'Номер скопирован',
     
   },
   uz:{
@@ -842,6 +855,7 @@ const I18N = {
     'consult.bonus':'Hajm uchun bonuslar','consult.note':'Bonuslar bitta buyurtma summasidan hisoblanadi.',
     'consult.call':'Qo‘ng‘iroq qilish','consult.callnote':'Ish vaqtida javob beramiz',
     'consult.sum':'so‘m','consult.close':'Yopish',
+    'copied':'Raqam nusxalandi',
     
   },
 };
@@ -1087,6 +1101,43 @@ document.addEventListener('click', (e) => {
 // клик по затемнению закрывает окно
 consultDlg.addEventListener('click', (e) => {
   if(e.target === consultDlg) consultDlg.close();
+});
+
+/* Кнопка звонка. На телефоне ссылка tel: набирает номер сама, а на
+   компьютере она ничего не делает — там копируем номер и показываем его,
+   чтобы нажатие не выглядело пустым. */
+function toast(text){
+  const el = document.getElementById('toast');
+  el.textContent = text;
+  el.classList.add('on');
+  clearTimeout(toast._t);
+  toast._t = setTimeout(() => el.classList.remove('on'), 2600);
+}
+
+function copyText(text){
+  if(navigator.clipboard && window.isSecureContext){
+    return navigator.clipboard.writeText(text).catch(() => fallbackCopy(text));
+  }
+  return Promise.resolve(fallbackCopy(text));
+}
+
+function fallbackCopy(text){
+  const ta = document.createElement('textarea');
+  ta.value = text;
+  ta.setAttribute('readonly', '');
+  ta.style.cssText = 'position:fixed;top:-1000px';
+  document.body.appendChild(ta);
+  ta.select();
+  try{ document.execCommand('copy'); }catch(e){}
+  ta.remove();
+}
+
+document.addEventListener('click', (e) => {
+  const link = e.target.closest('a[href^="tel:"]');
+  if(!link) return;
+  // не мешаем набору на телефоне: ссылку не перехватываем, только копируем
+  copyText(CONTACTS.phone);
+  toast(`${t('copied')}: ${CONTACTS.phone}`);
 });
 
 const burger = document.getElementById('burger');
