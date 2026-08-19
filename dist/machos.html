@@ -816,7 +816,8 @@ const I18N = {
     'consult.bonus':'Бонусы за объём','consult.note':'Бонусы считаются от суммы одного заказа.',
     'consult.call':'Позвонить','consult.callnote':'Ответим в рабочее время',
     'consult.sum':'сум','consult.close':'Закрыть',
-    'copied':'Номер скопирован',
+    'copied':'Номер скопирован','copied.mail':'Адрес скопирован',
+    'mail.subject':'Заявка с сайта Machos.uz',
     
   },
   uz:{
@@ -855,7 +856,8 @@ const I18N = {
     'consult.bonus':'Hajm uchun bonuslar','consult.note':'Bonuslar bitta buyurtma summasidan hisoblanadi.',
     'consult.call':'Qo‘ng‘iroq qilish','consult.callnote':'Ish vaqtida javob beramiz',
     'consult.sum':'so‘m','consult.close':'Yopish',
-    'copied':'Raqam nusxalandi',
+    'copied':'Raqam nusxalandi','copied.mail':'Manzil nusxalandi',
+    'mail.subject':'Machos.uz saytidan ariza',
     
   },
 };
@@ -1029,7 +1031,9 @@ function renderContacts(){
   // если отдел продаж на том же номере, второй строки быть не должно
   const row2 = document.getElementById('cPhone2').closest('.crow');
   if(row2) row2.hidden = CONTACTS.phone2Raw === CONTACTS.phoneRaw;
-  set('cMail',   CONTACTS.email,  'mailto:' + CONTACTS.email);
+  // тема подставляется заранее — в ящике сразу видно, что письмо с сайта
+  const mailHref = 'mailto:' + CONTACTS.email + '?subject=' + encodeURIComponent(t('mail.subject'));
+  set('cMail',   CONTACTS.email,  mailHref);
   set('cSite',   CONTACTS.site,   'https://' + CONTACTS.site);
   set('navPhone',CONTACTS.phone,  'tel:' + CONTACTS.phoneRaw);
   ['heroCall','cardCall'].forEach(id => {
@@ -1049,7 +1053,7 @@ function renderContacts(){
 
   document.getElementById('footContacts').innerHTML = `
     <li><a href="tel:${CONTACTS.phoneRaw}">${CONTACTS.phone}</a></li>
-    <li><a href="mailto:${CONTACTS.email}">${CONTACTS.email}</a></li>
+    <li><a href="${mailHref}">${CONTACTS.email}</a></li>
     <li><a href="https://${CONTACTS.site}" rel="noopener">${CONTACTS.site}</a></li>
 `;
 }
@@ -1133,22 +1137,26 @@ function fallbackCopy(text){
 }
 
 document.addEventListener('click', (e) => {
-  const link = e.target.closest('a[href^="tel:"]');
+  const link = e.target.closest('a[href^="tel:"], a[href^="mailto:"]');
   if(!link) return;
-  const tel = link.getAttribute('href');
+
+  const href = link.getAttribute('href');
+  const isMail = href.startsWith('mailto:');
+  const value  = isMail ? CONTACTS.email : CONTACTS.phone;
 
   // Страница может быть открыта внутри песочницы (превью, встроенный
-  // просмотрщик), где обычный переход по tel: блокируется. Пробуем открыть
-  // набор отдельным окном — так дозваниваемся и оттуда.
+  // просмотрщик), где обычный переход блокируется. Пробуем открыть набор
+  // или почту отдельным окном — так срабатывает и оттуда.
   let opened = null;
-  try{ opened = window.open(tel, '_blank'); }catch(err){}
+  try{ opened = window.open(href, '_blank'); }catch(err){}
   if(opened) e.preventDefault();
 
-  // На компьютере звонить нечем: кладём номер в буфер и показываем его,
-  // чтобы нажатие не осталось без ответа.
+  // Если звонить или писать нечем — на компьютере это обычное дело, —
+  // кладём контакт в буфер и показываем его, чтобы нажатие не осталось
+  // без ответа.
   if(!matchMedia('(pointer: coarse)').matches){
-    copyText(CONTACTS.phone);
-    toast(`${t('copied')}: ${CONTACTS.phone}`);
+    copyText(value);
+    toast(`${t(isMail ? 'copied.mail' : 'copied')}: ${value}`);
   }
 });
 
