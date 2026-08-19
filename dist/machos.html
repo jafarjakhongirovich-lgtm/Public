@@ -663,24 +663,27 @@ const CONSULT = {
 const HISTORY = [
   { year:'2012',
     ru:{ h:'Начал один',
-         p:'Всё делал сам: покупал сырьё, сушил, солил, фасовал и сам развозил по магазинам Ташкента. Первая партия помещалась в багажник.' },
+         p:'Всё делал сам: покупал сырьё, сушил, солил, фасовал и сам развозил по магазинам Ташкента.' },
     uz:{ h:'Yolg‘iz boshladi',
-         p:'Hammasini o‘zi qildi: xomashyo oldi, quritdi, tuzladi, qadoqladi va Toshkent do‘konlariga o‘zi tarqatdi. Birinchi partiya mashina yukxonasiga sig‘ardi.' } },
-  { year:'',
+         p:'Hammasini o‘zi qildi: xomashyo oldi, quritdi, tuzladi, qadoqladi va Toshkent do‘konlariga o‘zi tarqatdi.' } },
+
+  { year:'2013',
+    ru:{ h:'Открыл цех',
+         p:'Через год работа переехала из дома в своё помещение. Появилось оборудование, партии стали ровнее и больше.' },
+    uz:{ h:'Sex ochdi',
+         p:'Bir yildan so‘ng ish uydan o‘z binosiga ko‘chdi. Uskuna paydo bo‘ldi, partiyalar tekis va kattaroq bo‘ldi.' } },
+
+  { year:{ ru:'Начало февраля 2014', uz:'2014-yil fevral boshi' },
     ru:{ h:'Нанял людей',
-         p:'Дела пошли хорошо, и одному перестало хватать рук. Он нанял работников — партии стали больше, а рецепт и подход остались прежними.' },
+         p:'Дела пошли хорошо, и одному перестало хватать рук. В цехе появились работники — рецепт и подход остались прежними.' },
     uz:{ h:'Odamlarni ishga oldi',
-         p:'Ishlar yaxshi ketdi, yolg‘iz ulgurmay qoldi. U ishchilarni yolladi — partiyalar kattalashdi, retsept va yondashuv esa o‘sha bo‘lib qoldi.' } },
-  { year:'',
-    ru:{ h:'Свой цех',
-         p:'Появилось помещение и оборудование. Курт пошёл в разных формах — кубиками, шариками, палочками. Следом добавился сыр.' },
-    uz:{ h:'O‘z sexi',
-         p:'Bino va uskuna paydo bo‘ldi. Qurt turli shaklda chiqa boshladi — kubik, dumaloq, tayoqcha. Ketidan pishloq qo‘shildi.' } },
+         p:'Ishlar yaxshi ketdi, yolg‘iz ulgurmay qoldi. Sexda ishchilar paydo bo‘ldi — retsept va yondashuv esa o‘sha bo‘lib qoldi.' } },
+
   { year:'',
     ru:{ h:'Сегодня',
-         p:'ООО «FUN NUTS GROUP», производство в Ташкенте. Курт, сырные палочки, косичка и семечки едут в магазины по всей стране.' },
+         p:'ООО «FUN NUTS GROUP», производство в Ташкенте. Курт в четырёх формах, сырные палочки, косичка и семечки едут в магазины по всей стране.' },
     uz:{ h:'Bugun',
-         p:'"FUN NUTS GROUP" MChJ, ishlab chiqarish Toshkentda. Qurt, pishloq tayoqchalari, oʻrim va pista butun mamlakat do‘konlariga boradi.' } },
+         p:'"FUN NUTS GROUP" MChJ, ishlab chiqarish Toshkentda. To‘rt xil shakldagi qurt, pishloq tayoqchalari, oʻrim va pista butun mamlakat do‘konlariga boradi.' } },
 ];
 
 const CATS = [
@@ -971,7 +974,7 @@ function renderProducts(){
 function renderStory(){
   document.getElementById('rail').innerHTML = HISTORY.map(m => `
     <div class="mile rv">
-      <span class="yr">${m.year}</span>
+      <span class="yr">${typeof m.year === 'string' ? m.year : (m.year[lang] || '')}</span>
       <h3>${m[lang].h}</h3>
       <p>${m[lang].p}</p>
     </div>`).join('');
