@@ -58,9 +58,9 @@ build-standalone.py   собирает dist
 
 ```js
 socials: [
-  { name:'Facebook',  url:'' },   // ← вставьте сюда ссылку
+  { name:'Facebook',  url:'https://www.facebook.com/share/1HkTk4ZkMF/' },
   { name:'Instagram', url:'https://www.instagram.com/machos_uz' },
-  { name:'Telegram',  url:'' },
+  { name:'Telegram',  url:'' },   // ← ссылки пока нет, кнопка приглушена
 ],
 ```
 
