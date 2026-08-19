@@ -1103,9 +1103,9 @@ consultDlg.addEventListener('click', (e) => {
   if(e.target === consultDlg) consultDlg.close();
 });
 
-/* Кнопка звонка. На телефоне ссылка tel: набирает номер сама, а на
-   компьютере она ничего не делает — там копируем номер и показываем его,
-   чтобы нажатие не выглядело пустым. */
+/* Кнопка звонка. На телефоне ссылка tel: открывает набор с номером —
+   в это вмешиваться не нужно. На компьютере она ничего не делает, поэтому
+   там номер копируется и всплывает подсказка. */
 function toast(text){
   const el = document.getElementById('toast');
   el.textContent = text;
@@ -1135,9 +1135,21 @@ function fallbackCopy(text){
 document.addEventListener('click', (e) => {
   const link = e.target.closest('a[href^="tel:"]');
   if(!link) return;
-  // не мешаем набору на телефоне: ссылку не перехватываем, только копируем
-  copyText(CONTACTS.phone);
-  toast(`${t('copied')}: ${CONTACTS.phone}`);
+  const tel = link.getAttribute('href');
+
+  // Страница может быть открыта внутри песочницы (превью, встроенный
+  // просмотрщик), где обычный переход по tel: блокируется. Пробуем открыть
+  // набор отдельным окном — так дозваниваемся и оттуда.
+  let opened = null;
+  try{ opened = window.open(tel, '_blank'); }catch(err){}
+  if(opened) e.preventDefault();
+
+  // На компьютере звонить нечем: кладём номер в буфер и показываем его,
+  // чтобы нажатие не осталось без ответа.
+  if(!matchMedia('(pointer: coarse)').matches){
+    copyText(CONTACTS.phone);
+    toast(`${t('copied')}: ${CONTACTS.phone}`);
+  }
 });
 
 const burger = document.getElementById('burger');
