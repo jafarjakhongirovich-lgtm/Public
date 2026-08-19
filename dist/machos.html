@@ -102,6 +102,31 @@ section{ padding:clamp(64px,9vw,124px) var(--pad); position:relative; z-index:2;
 .btn.dark:hover{ background:transparent; border-color:#0A0A0A; color:#0A0A0A; }
 
 /* ============================================================
+   Экран загрузки
+   ============================================================ */
+#loader{
+  position:fixed; inset:0; z-index:400; background:var(--bg);
+  display:grid; place-content:center; justify-items:center; gap:26px;
+  transition:opacity .55s var(--ease), visibility .55s;
+}
+#loader.done{ opacity:0; visibility:hidden; }
+.ld-mark{
+  font-family:var(--display); font-weight:800; letter-spacing:-.03em;
+  font-size:clamp(34px,7vw,64px); line-height:1;
+}
+.ld-mark i{ color:var(--brand); font-style:normal; }
+.ld-bar{
+  width:min(240px,58vw); height:3px; border-radius:3px;
+  background:rgba(246,243,233,.14); overflow:hidden;
+}
+.ld-bar i{ display:block; height:100%; width:0; background:var(--brand); border-radius:3px; }
+.ld-pct{
+  font-family:var(--display); font-weight:700; font-size:13px;
+  letter-spacing:.18em; color:var(--dim);
+}
+@media (prefers-reduced-motion: reduce){ #loader{ transition:none; } }
+
+/* ============================================================
    3D-сцена: фотография пачки живёт в объёме
    ============================================================ */
 #stage{ position:fixed; inset:0; z-index:1; pointer-events:none; transition:opacity .6s var(--ease); }
@@ -414,6 +439,51 @@ footer{ position:relative; z-index:2; background:var(--bg-2); padding:clamp(44px
 
 <a class="skip" href="#main" data-i18n="skip">Перейти к содержимому</a>
 
+<div id="loader" role="status" aria-live="polite" aria-label="Загрузка">
+  <div class="ld-mark">Machos<i>.uz</i></div>
+  <div class="ld-bar"><i id="ldFill"></i></div>
+  <span class="ld-pct" id="ldPct">0%</span>
+</div>
+
+<script>
+/* Экран загрузки. Полоса ползёт к цели, которую двигают вехи загрузки:
+   разметка → фотографии → первый кадр сцены. Если что-то подвисло,
+   сторожевой таймер всё равно откроет сайт. */
+(function(){
+  const fill = document.getElementById('ldFill');
+  const pct  = document.getElementById('ldPct');
+  const box  = document.getElementById('loader');
+  const done = { dom:25, photos:70, scene:100 };
+  let target = 8, shown = 0, closed = false;
+
+  const tick = () => {
+    shown += (target - shown) * 0.12;
+    if(target - shown < 0.4) shown = target;
+    fill.style.width = shown + '%';
+    pct.textContent = Math.round(shown) + '%';
+    if(shown >= 99.6 && !closed){
+      closed = true;
+      setTimeout(() => {
+        box.classList.add('done');
+        setTimeout(() => box.remove(), 700);
+      }, 260);
+      return;
+    }
+    if(!closed) requestAnimationFrame(tick);
+  };
+  requestAnimationFrame(tick);
+
+  window.__loader = {
+    step(name){ target = Math.max(target, done[name] || target); },
+    finish(){ target = 100; },
+  };
+
+  addEventListener('DOMContentLoaded', () => window.__loader.step('dom'));
+  // страница не должна залипнуть на загрузке, что бы ни случилось
+  setTimeout(() => window.__loader.finish(), 7000);
+})();
+</script>
+
 <div id="toast" role="status" aria-live="polite"></div>
 <div id="stage" aria-hidden="true"></div>
 <div id="fallback" aria-hidden="true"></div>
@@ -646,7 +716,6 @@ const CONTACTS = {
   socials: [
     { name:'Facebook',  url:'https://www.facebook.com/share/1HkTk4ZkMF/' },
     { name:'Instagram', url:'https://www.instagram.com/machos_uz' },
-    { name:'Telegram',  url:'' },
   ],
 };
 
@@ -870,7 +939,6 @@ const TAPE = {
 const SOCIAL_ICONS = {
   Facebook:'<svg viewBox="0 0 24 24"><path d="M13.5 22v-8h2.7l.4-3.1h-3.1V8.9c0-.9.25-1.5 1.55-1.5H16.7V4.6A21 21 0 0 0 14.3 4.5c-2.4 0-4 1.45-4 4.1v2.3H7.6V14h2.7v8h3.2z"/></svg>',
   Instagram:'<svg viewBox="0 0 24 24"><path d="M12 2.2c3.2 0 3.6 0 4.85.07 1.17.05 1.8.25 2.23.42.56.22.96.48 1.38.9.42.42.68.82.9 1.38.16.42.36 1.06.41 2.23.06 1.25.07 1.62.07 4.8s0 3.56-.07 4.81c-.05 1.17-.25 1.8-.41 2.23-.22.56-.48.96-.9 1.38-.42.42-.82.68-1.38.9-.43.16-1.06.36-2.23.41-1.25.06-1.62.07-4.85.07s-3.6 0-4.85-.07c-1.17-.05-1.8-.25-2.23-.41a3.8 3.8 0 0 1-1.38-.9 3.8 3.8 0 0 1-.9-1.38c-.16-.43-.36-1.06-.41-2.23C2.21 15.56 2.2 15.2 2.2 12s0-3.55.07-4.8c.05-1.17.25-1.81.41-2.23.22-.56.48-.96.9-1.38.42-.42.82-.68 1.38-.9.43-.17 1.06-.37 2.23-.42C8.44 2.2 8.8 2.2 12 2.2zm0 1.98c-3.14 0-3.5.01-4.74.07-1.14.05-1.76.24-2.17.4-.55.21-.94.47-1.35.88-.41.41-.67.8-.88 1.35-.16.41-.35 1.03-.4 2.17-.06 1.24-.07 1.6-.07 4.74s.01 3.5.07 4.74c.05 1.14.24 1.76.4 2.17.21.55.47.94.88 1.35.41.41.8.67 1.35.88.41.16 1.03.35 2.17.4 1.24.06 1.6.07 4.74.07s3.5-.01 4.74-.07c1.14-.05 1.76-.24 2.17-.4.55-.21.94-.47 1.35-.88.41-.41.67-.8.88-1.35.16-.41.35-1.03.4-2.17.06-1.24.07-1.6.07-4.74s-.01-3.5-.07-4.74c-.05-1.14-.24-1.76-.4-2.17a3.6 3.6 0 0 0-.88-1.35 3.6 3.6 0 0 0-1.35-.88c-.41-.16-1.03-.35-2.17-.4-1.24-.06-1.6-.07-4.74-.07zm0 3.37a5.45 5.45 0 1 1 0 10.9 5.45 5.45 0 0 1 0-10.9zm0 8.99a3.54 3.54 0 1 0 0-7.08 3.54 3.54 0 0 0 0 7.08zm6.94-9.2a1.27 1.27 0 1 1-2.55 0 1.27 1.27 0 0 1 2.55 0z"/></svg>',
-  Telegram:'<svg viewBox="0 0 24 24"><path d="M21.7 4.1 18.9 19c-.2.9-.8 1.1-1.6.7l-4.4-3.2-2.1 2c-.24.24-.43.43-.87.43l.3-4.4 8.1-7.3c.35-.3-.08-.48-.55-.18L7.8 12.3l-4.3-1.35c-.94-.3-.95-.94.2-1.4l16.8-6.5c.78-.28 1.46.18 1.2 1.05z"/></svg>',
 };
 </script>
 
@@ -912,6 +980,7 @@ async function loadPhotos(){
   const missing = PRODUCTS.filter(p => !photoUrl.has(p.id)).map(p => p.ru.name);
   if(missing.length) console.info('Нет фотографии, позиция скрыта:', missing.join(', '));
   render();
+  window.__loader && window.__loader.step('photos');
   document.dispatchEvent(new CustomEvent('photos-ready'));
 }
 
@@ -1519,6 +1588,11 @@ function tick(){
   camera.lookAt(0, 0, 0);
 
   renderer.render(scene, camera);
+
+  if(!tick.first){                      // первый кадр — сцена готова
+    tick.first = true;
+    window.__loader && window.__loader.finish();
+  }
 }
 
 function showFallback(){
@@ -1545,7 +1619,10 @@ if(supportsWebGL()){
     showFallback();
   }
 }else{
-  document.addEventListener('photos-ready', showFallback, { once:true });
+  document.addEventListener('photos-ready', () => {
+    showFallback();
+    window.__loader && window.__loader.finish();
+  }, { once:true });
 }
 }
 </script>
