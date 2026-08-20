@@ -3,7 +3,7 @@
 <head>
 <meta charset="utf-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-<title>Machos.uz</title>
+<title>Machos.uz — курт, сырные палочки и семечки из Ташкента</title>
 <meta name="description" content="Machos.uz — производство снеков в Ташкенте: курт трёх форм, сырные палочки, сырная косичка и солёные семечки. Натуральный состав, поставки оптом по Узбекистану." />
 <meta name="theme-color" content="#0A0A0A" />
 
@@ -396,6 +396,22 @@ dialog#consult::backdrop{ background:rgba(0,0,0,.82); backdrop-filter:blur(4px);
   transition:opacity .25s var(--ease);
 }
 .phone-xl:hover{ opacity:.75; }
+.lead-form{ gap:14px; }
+.lead-form label{ display:grid; gap:6px; }
+.lead-form label span{ font-size:12px; font-weight:600; letter-spacing:.14em; text-transform:uppercase; color:var(--dim); }
+.lead-form input, .lead-form textarea{
+  width:100%; background:var(--bg); border:1px solid var(--line-2); color:var(--text);
+  border-radius:12px; padding:13px 15px; font:inherit; font-size:16px; outline:none;
+  transition:border-color .2s var(--ease);
+}
+.lead-form input:focus, .lead-form textarea:focus{ border-color:var(--brand); }
+.lead-form textarea{ resize:vertical; min-height:56px; }
+.lead-form button{ justify-self:start; margin-top:4px; }
+.lead-form button[disabled]{ opacity:.55; pointer-events:none; }
+#ldTrap{ position:absolute; left:-9999px; width:1px; height:1px; opacity:0; }
+.lead-msg:empty{ display:none; }
+.lead-msg.bad{ color:#FF6B5A; }
+.lead-form.sent label, .lead-form.sent button{ display:none; }
 .crow{ display:grid; gap:4px; padding:18px 0; border-bottom:1px solid var(--line-2); }
 .crow[hidden]{ display:none; }   /* иначе display:grid перебивает атрибут hidden */
 .crow .k{ font-size:12px; font-weight:600; letter-spacing:.16em; text-transform:uppercase; color:var(--dim); }
@@ -662,11 +678,37 @@ footer{ position:relative; z-index:2; background:var(--bg-2); padding:clamp(44px
         <div class="socials rv d3" id="socials"></div>
       </div>
 
-      <div class="map-card rv d1">
-        <h3 data-i18n="ct.prod">Производство</h3>
-        <p class="lead" id="cComp" style="font-size:16px">—</p>
-        <p class="lead" id="cAddr" style="font-size:16px">—</p>
-        <a class="btn brand" id="cardCall" href="#" style="justify-self:start;margin-top:6px" data-i18n="ct.cta">Позвонить</a>
+      <div style="display:grid; gap:18px">
+        <div class="map-card rv d1">
+          <h3 data-i18n="ct.prod">Производство</h3>
+          <p class="lead" id="cComp" style="font-size:16px">—</p>
+          <p class="lead" id="cAddr" style="font-size:16px">—</p>
+          <a class="btn brand" id="cardCall" href="#" style="justify-self:start;margin-top:6px" data-i18n="ct.cta">Позвонить</a>
+        </div>
+
+        <form class="map-card lead-form rv d2" id="leadForm" novalidate>
+          <h3 data-i18n="lead.h">Оставьте номер — перезвоним</h3>
+          <p class="lead" style="font-size:15px;margin:-6px 0 4px" data-i18n="lead.p">Ответим в рабочее время, обычно в течение часа.</p>
+
+          <label>
+            <span data-i18n="lead.name">Как к вам обращаться</span>
+            <input id="ldName" name="name" autocomplete="name" required>
+          </label>
+          <label>
+            <span data-i18n="lead.phone">Телефон</span>
+            <input id="ldPhone" name="phone" type="tel" inputmode="tel" autocomplete="tel" value="+998 " required>
+          </label>
+          <label>
+            <span data-i18n="lead.what">Что интересует</span>
+            <textarea id="ldWhat" name="items" rows="2"></textarea>
+          </label>
+
+          <!-- ловушка для самописных заполнителей: человек этого поля не видит -->
+          <input id="ldTrap" name="company" tabindex="-1" autocomplete="off" aria-hidden="true">
+
+          <button class="btn brand" type="submit" id="ldSend" data-i18n="lead.send">Оставить заявку</button>
+          <p class="lead lead-msg" id="ldMsg" style="font-size:14px;margin:0" role="status"></p>
+        </form>
       </div>
     </div>
   </section>
@@ -877,6 +919,12 @@ const I18N = {
     'ct.eyebrow':'Контакты','ct.h2':'Позвоните или напишите',
     'ct.phone2':'Отдел продаж','ct.mail':'Почта','ct.site':'Сайт',
     'ct.prod':'Производство','ct.cta':'Позвонить',
+    'lead.h':'Оставьте номер — перезвоним','lead.p':'Ответим в рабочее время, обычно в течение часа.',
+    'lead.name':'Как к вам обращаться','lead.phone':'Телефон','lead.what':'Что интересует',
+    'lead.send':'Оставить заявку','lead.sending':'Отправляем…',
+    'lead.needName':'Напишите, как к вам обращаться','lead.needPhone':'Проверьте номер телефона',
+    'lead.ok':'Спасибо! Перезвоним в ближайшее время.',
+    'lead.err':'Не отправилось. Позвоните нам, пожалуйста.',
     'foot.about':'Производство снеков: курт, сырные палочки, косичка и семечки. Ташкент, Узбекистан.',
     'foot.nav':'Разделы','foot.contacts':'Контакты','foot.made':'Сделано в Ташкенте',
     'card.weight':'Вес','card.comp':'Состав',
@@ -917,6 +965,12 @@ const I18N = {
     'ct.eyebrow':'Aloqa','ct.h2':'Qo‘ng‘iroq qiling yoki yozing',
     'ct.phone2':'Savdo bo‘limi','ct.mail':'Pochta','ct.site':'Sayt',
     'ct.prod':'Ishlab chiqarish','ct.cta':'Qo‘ng‘iroq qilish',
+    'lead.h':'Raqamingizni qoldiring — o‘zimiz qo‘ng‘iroq qilamiz','lead.p':'Ish vaqtida, odatda bir soat ichida javob beramiz.',
+    'lead.name':'Sizga qanday murojaat qilaylik','lead.phone':'Telefon','lead.what':'Nima qiziqtiradi',
+    'lead.send':'Ariza qoldirish','lead.sending':'Yuborilmoqda…',
+    'lead.needName':'Ismingizni yozing','lead.needPhone':'Telefon raqamini tekshiring',
+    'lead.ok':'Rahmat! Tez orada qo‘ng‘iroq qilamiz.',
+    'lead.err':'Yuborilmadi. Iltimos, o‘zingiz qo‘ng‘iroq qiling.',
     'foot.about':'Gazak ishlab chiqarish: qurt, pishloq tayoqchalari, oʻrim va pista. Toshkent, O‘zbekiston.',
     'foot.nav':'Bo‘limlar','foot.contacts':'Aloqa','foot.made':'Toshkentda tayyorlangan',
     'card.weight':'Vazn','card.comp':'Tarkibi',
@@ -1246,7 +1300,108 @@ navLinks.addEventListener('click', (e) => {
 
 document.getElementById('year').textContent = new Date().getFullYear();
 observeReveals();
-loadPhotos();
+/* ------------------------------------------------------------------
+   Свежее содержимое из кабинета.
+   Витрина от сервера не зависит: ждём его коротко, и если он молчит —
+   показываем то, что вшито в страницу, и идём дальше.
+   ------------------------------------------------------------------ */
+const CONTENT_URL = 'https://mudkpsypkfzsxvixoqho.supabase.co/functions/v1/content';
+
+function applyContent(c){
+  if(!c || typeof c !== 'object') return;
+  if(Array.isArray(c.products) && c.products.length){
+    PRODUCTS.length = 0; PRODUCTS.push(...c.products);
+  }
+  if(Array.isArray(c.history) && c.history.length){
+    HISTORY.length = 0; HISTORY.push(...c.history);
+  }
+  if(c.contacts && typeof c.contacts === 'object') Object.assign(CONTACTS, c.contacts);
+  if(c.consult  && typeof c.consult  === 'object') Object.assign(CONSULT,  c.consult);
+}
+
+async function loadContent(){
+  const stop  = new AbortController();
+  const timer = setTimeout(() => stop.abort(), 1500);
+  try{
+    const res = await fetch(CONTENT_URL, { signal: stop.signal });
+    const data = await res.json();
+    if(data && data.published) applyContent(data.published);
+  }catch(e){
+    console.info('Свежее содержимое недоступно, показываем встроенное');
+  }finally{
+    clearTimeout(timer);
+  }
+}
+
+/* ------------------------------------------------------------------
+   Заявка с витрины: имя и телефон уходят в кабинет.
+   ------------------------------------------------------------------ */
+const LEAD_URL = 'https://mudkpsypkfzsxvixoqho.supabase.co/functions/v1/lead';
+const openedAt = Date.now();
+
+(() => {
+  const form = document.getElementById('leadForm');
+  if(!form) return;
+  const phone = document.getElementById('ldPhone');
+  const msg   = document.getElementById('ldMsg');
+
+  // тот же вид номера, что и на кнопках: +998 90 123 45 67
+  phone.addEventListener('input', () => {
+    let d = phone.value.replace(/\D/g, '');
+    if(d.startsWith('998')) d = d.slice(3);
+    d = d.slice(0, 9);
+    const parts = ['+998'];
+    if(d.length)     parts.push(d.slice(0, 2));
+    if(d.length > 2) parts.push(d.slice(2, 5));
+    if(d.length > 5) parts.push(d.slice(5, 7));
+    if(d.length > 7) parts.push(d.slice(7, 9));
+    phone.value = parts.join(' ') + (d.length ? '' : ' ');
+  });
+  phone.addEventListener('focus', () => {
+    if(!phone.value.trim()) phone.value = '+998 ';
+    requestAnimationFrame(() => phone.setSelectionRange(99, 99));
+  });
+
+  const say = (text, bad) => {
+    msg.textContent = text || '';
+    msg.className = 'lead lead-msg' + (bad ? ' bad' : '');
+    msg.style.fontSize = '14px';
+  };
+
+  form.addEventListener('submit', async (e) => {
+    e.preventDefault();
+    const name  = document.getElementById('ldName').value.trim();
+    const digits = phone.value.replace(/\D/g, '');
+    if(!name){ say(t('lead.needName'), true); document.getElementById('ldName').focus(); return; }
+    if(digits.length < 12){ say(t('lead.needPhone'), true); phone.focus(); return; }
+
+    const btn = document.getElementById('ldSend');
+    btn.disabled = true;
+    say(t('lead.sending'));
+    try{
+      const res = await fetch(LEAD_URL, {
+        method:'POST',
+        headers:{ 'content-type':'application/json' },
+        body: JSON.stringify({
+          name,
+          phone: digits,
+          items: document.getElementById('ldWhat').value.trim(),
+          company: document.getElementById('ldTrap').value,
+          dwell: Date.now() - openedAt,
+        }),
+      });
+      const data = await res.json().catch(() => ({}));
+      if(!res.ok) throw new Error(data.error || t('lead.err'));
+      form.classList.add('sent');
+      say(t('lead.ok'));
+    }catch(err){
+      say(err.message || t('lead.err'), true);
+      btn.disabled = false;
+    }
+  });
+})();
+
+loadContent().then(loadPhotos);
 </script>
 
 <!-- ============================================================

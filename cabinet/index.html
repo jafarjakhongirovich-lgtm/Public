@@ -343,7 +343,8 @@ function open(staff){
   $('top').hidden = false;
   $('panel').hidden = false;
   $('whoami').textContent = staff.name;
-  document.title = 'Кабинет — ' + staff.name;
+  myName = staff.name;
+  badge(0);
   ROLE = staff.role;
   const owner = ROLE === 'owner';
   $('tabPeople').textContent = owner ? 'Люди' : 'Пароль';
@@ -820,11 +821,32 @@ async function loadLeads(){
     if(r.total) parts.push('Показано ' + r.leads.length + ' из ' + r.total);
     if(r.fresh) parts.push('новых с сайта: ' + r.fresh);
     $('leadsCount').textContent = parts.length ? parts.join(', ') + '.' : '';
+    badge(r.fresh || 0);
     renderLeads();
   }catch(err){
     toast(err.message, true);
   }
 }
+
+/* Новые заявки видно по вкладке браузера, даже если кабинет свёрнут. */
+let myName = '';
+function badge(n){
+  document.title = (n ? '(' + n + ') ' : '') + 'Кабинет' + (myName ? ' — ' + myName : '');
+}
+
+/* Список сам обновляется, пока кабинет открыт. Если что-то раскрыто или
+   набрано — не трогаем, иначе набранное пропадёт под руками. */
+function busy(){
+  if(document.querySelector('#leads .box[open]')) return true;
+  return [...document.querySelectorAll('#newDocBody input, #newDocBody textarea, ' +
+    '#newLead input, #newLead textarea')].some(el => el.value.trim());
+}
+setInterval(() => {
+  if(document.hidden || busy()) return;
+  if($('tab-leads').hidden && !document.hidden) { loadLeads(); return; }
+  loadLeads();
+}, 120000);
+document.addEventListener('visibilitychange', () => { if(!document.hidden && !busy()) loadLeads(); });
 
 let qTimer = null;
 $('q').addEventListener('input', () => {
