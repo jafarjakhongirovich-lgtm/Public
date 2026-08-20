@@ -194,6 +194,7 @@ section[hidden]{display:none}
   <p class="logo">Machos<b>.uz</b></p>
   <nav class="tabs" id="tabs">
     <button data-tab="leads" aria-current="true">Заявки</button>
+    <button data-tab="docs">Документы</button>
     <button data-tab="products">Товары</button>
     <button data-tab="contacts">Контакты</button>
     <button data-tab="history">История</button>
@@ -227,6 +228,18 @@ section[hidden]{display:none}
 
     <div id="leads"></div>
     <p class="note" id="leadsCount"></p>
+  </section>
+
+  <section id="tab-docs" hidden>
+    <h1>Документы и цены</h1>
+    <p class="lead">Прайсы, договоры, макеты упаковки, сертификаты. Файлы лежат в закрытом хранилище: ссылка на скачивание выдаётся только вошедшему и живёт десять минут. До 25 МБ на файл.</p>
+
+    <details class="box" id="newDoc" open>
+      <summary><b>Загрузить файл</b><i></i></summary>
+      <div class="body" id="newDocBody"></div>
+    </details>
+
+    <div id="docs" style="margin-top:22px"></div>
   </section>
 
   <section id="tab-products" hidden>
@@ -434,6 +447,7 @@ function fld(label, value, oninput, multiline){
   const wrap = document.createElement('div'); wrap.className = 'f';
   const lab  = document.createElement('label'); lab.textContent = label;
   const inp  = document.createElement(multiline ? 'textarea' : 'input');
+  if(!multiline) inp.type = 'text';
   inp.value = value == null ? '' : String(value);
   inp.addEventListener('input', () => { oninput(inp.value); touch(); });
   wrap.append(lab, inp);
@@ -644,10 +658,10 @@ $('addTier').addEventListener('click', () => {
 /* Кнопки сохранения и публикации относятся только к содержимому витрины,
    поэтому на вкладке заявок их не показываем. */
 function showTab(name){
-  ['leads','products','contacts','history','bonus'].forEach((id) => {
+  ['leads','docs','products','contacts','history','bonus'].forEach((id) => {
     $('tab-' + id).hidden = id !== name;
   });
-  const site = name !== 'leads';
+  const site = name !== 'leads' && name !== 'docs';
   $('siteTools').hidden = !site;
   $('stamp').hidden = !site;
   $('tabs').querySelectorAll('button').forEach(x =>
@@ -862,6 +876,168 @@ $('q').addEventListener('input', () => {
   qTimer = setTimeout(loadLeads, 300);
 });
 
+/* ==================================================================
+   Документы и цены
+   ================================================================== */
+const DOCS_API = 'https://mudkpsypkfzsxvixoqho.supabase.co/functions/v1/docs';
+const KINDS = { price:'Прайс', contract:'Договор', artwork:'Макет упаковки', cert:'Сертификат', other:'Прочее' };
+
+async function callDocs(action, extra){
+  const res = await fetch(DOCS_API, {
+    method:'POST',
+    headers:{ 'authorization':'Bearer ' + ANON, 'apikey': ANON, 'content-type':'application/json' },
+    body: JSON.stringify(Object.assign({ action, token: localStorage.getItem(KEY) }, extra)),
+  });
+  let data = {};
+  try{ data = await res.json(); }catch(e){}
+  if(res.status === 401){ localStorage.removeItem(KEY); location.reload(); }
+  if(!res.ok) throw new Error(data.error || 'Сервер не ответил');
+  return data;
+}
+
+function weight(bytes){
+  if(!bytes) return '';
+  if(bytes < 1024) return bytes + ' Б';
+  if(bytes < 1024*1024) return Math.round(bytes/1024) + ' КБ';
+  return (bytes/1024/1024).toFixed(1).replace('.0','') + ' МБ';
+}
+
+function renderNewDoc(){
+  const host = $('newDocBody'); host.textContent = '';
+  const d = { title:'', kind:'price', note:'' };
+  let file = null;
+
+  const pick = document.createElement('div'); pick.className = 'f';
+  const pl = document.createElement('label'); pl.textContent = 'Файл';
+  const pi = document.createElement('input'); pi.type = 'file';
+  pi.style.cssText = 'padding:10px 13px';
+  pi.addEventListener('change', () => {
+    file = pi.files[0] || null;
+    if(file && !d.title){
+      const dot = file.name.lastIndexOf('.');
+      d.title = dot > 0 ? file.name.slice(0, dot) : file.name;
+      titleInput.querySelector('input').value = d.title;
+    }
+    hint.textContent = file ? weight(file.size) : '';
+  });
+  pick.append(pl, pi);
+
+  const hint = document.createElement('span');
+  hint.style.cssText = 'font-size:12px;color:var(--dim)';
+
+  const titleInput = fld('Название', d.title, v => { d.title = v; });
+  const kindInput  = selectField('Что это', d.kind, KINDS, v => { d.kind = v; });
+
+  const go = document.createElement('button');
+  go.className = 'pub'; go.type = 'button'; go.textContent = 'Загрузить';
+  go.addEventListener('click', async () => {
+    if(!file){ toast('Сначала выберите файл', true); return; }
+    go.disabled = true; go.textContent = 'Загружаем…';
+    try{
+      const begin = await callDocs('upload_begin', { filename:file.name, size:file.size });
+      const put = await fetch(begin.url, { method:'PUT', body:file });
+      if(!put.ok) throw new Error('Файл не дошёл до хранилища');
+      await callDocs('upload_done', {
+        path:begin.path, title:d.title || file.name, kind:d.kind,
+        filename:file.name, size:file.size, mime:file.type, note:d.note,
+      });
+      toast('Файл загружен');
+      renderNewDoc();
+      await loadDocs();
+    }catch(err){
+      toast(err.message, true);
+      go.disabled = false; go.textContent = 'Загрузить';
+    }
+  });
+
+  host.append(
+    pair(pick, titleInput),
+    pair(kindInput, fld('Заметка', d.note, v => { d.note = v; })),
+    row(go, hint),
+  );
+}
+
+let docsCache = [];
+
+function renderDocs(){
+  const host = $('docs'); host.textContent = '';
+  if(!docsCache.length){
+    const p = document.createElement('p'); p.className = 'note';
+    p.textContent = 'Пока пусто. Загруженные файлы появятся здесь.';
+    host.append(p);
+    return;
+  }
+
+  Object.entries(KINDS).forEach(([kind, name]) => {
+    const group = docsCache.filter(x => x.kind === kind);
+    if(!group.length) return;
+
+    const h = document.createElement('h2');
+    h.style.cssText = 'font-family:var(--display);font-size:15px;font-weight:600;margin:26px 0 10px;color:var(--muted)';
+    h.textContent = name;
+    host.append(h);
+
+    group.forEach((doc) => {
+      const bits = [weight(doc.size), human(doc.created_at)];
+      if(doc.staff && doc.staff.name) bits.push(doc.staff.name);
+      const b = box(doc.title, bits.filter(Boolean).join(' · '), []);
+      const body = b.querySelector('.body');
+      b.addEventListener('toggle', () => {
+        if(!b.open || body.dataset.ready) return;
+        body.dataset.ready = '1';
+        body.textContent = '';
+
+        const local = { title:doc.title, kind:doc.kind, note:doc.note || '' };
+        const get = document.createElement('button');
+        get.className = 'pub'; get.type = 'button'; get.textContent = 'Скачать';
+        get.addEventListener('click', async () => {
+          get.disabled = true;
+          try{
+            const r = await callDocs('link', { id: doc.id });
+            location.href = r.url;
+          }catch(err){ toast(err.message, true); }
+          get.disabled = false;
+        });
+
+        const keep = document.createElement('button');
+        keep.className = 'ghost'; keep.type = 'button'; keep.textContent = 'Сохранить описание';
+        keep.addEventListener('click', async () => {
+          keep.disabled = true;
+          try{
+            await callDocs('update', Object.assign({ id: doc.id }, local));
+            toast('Описание обновлено');
+            await loadDocs();
+          }catch(err){ toast(err.message, true); keep.disabled = false; }
+        });
+
+        body.append(
+          pair(fld('Название', local.title, v => { local.title = v; }),
+               selectField('Что это', local.kind, KINDS, v => { local.kind = v; })),
+          row(fld('Заметка', local.note, v => { local.note = v; })),
+          (() => { const p = document.createElement('p'); p.className = 'note';
+            p.textContent = 'Файл: ' + doc.filename; return p; })(),
+          row(get, keep, killer('Удалить', async () => {
+            if(!confirm('Удалить «' + doc.title + '» насовсем?')) return;
+            try{ await callDocs('delete', { id: doc.id }); toast('Файл удалён'); await loadDocs(); }
+            catch(err){ toast(err.message, true); }
+          })),
+        );
+      });
+      host.append(b);
+    });
+  });
+}
+
+async function loadDocs(){
+  try{
+    const r = await callDocs('list');
+    docsCache = r.docs;
+    renderDocs();
+  }catch(err){
+    toast(err.message, true);
+  }
+}
+
 async function bootEditor(){
   try{
     const r = await callPanel('draft.get');
@@ -884,6 +1060,8 @@ async function bootEditor(){
   refreshFlags();
   renderNewLead();
   loadLeads();
+  renderNewDoc();
+  loadDocs();
   showTab('leads');
 }
 
