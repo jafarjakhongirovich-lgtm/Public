@@ -1,0 +1,308 @@
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="robots" content="noindex, nofollow">
+<title>Кабинет Machos.uz</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;500;700&family=Rubik:wght@600;800&display=swap" rel="stylesheet">
+
+<style>
+:root{
+  --bg:#0A0A0A; --bg-2:#131311; --panel:#191917; --line:#2A2A26;
+  --brand:#FFD400; --brand-2:#E8BE00;
+  --text:#F6F3E9; --muted:#9E998C; --dim:#6B675D; --bad:#FF6B5A;
+  --display:"Rubik",system-ui,sans-serif; --sans:"Manrope",system-ui,sans-serif;
+}
+*{box-sizing:border-box}
+html,body{margin:0;height:100%}
+body{
+  background:var(--bg); color:var(--text); font-family:var(--sans);
+  -webkit-font-smoothing:antialiased; display:flex; flex-direction:column;
+}
+button{font:inherit;color:inherit}
+input{font:inherit}
+
+/* ---------- вход ---------- */
+.gate{
+  flex:1; display:grid; place-items:center; padding:24px;
+  background:
+    radial-gradient(60vw 60vw at 50% -10%, rgba(255,212,0,.10), transparent 60%),
+    var(--bg);
+}
+.card{
+  width:100%; max-width:380px; background:var(--panel);
+  border:1px solid var(--line); border-radius:20px; padding:32px 28px;
+}
+.logo{
+  font-family:var(--display); font-weight:800; font-size:26px; letter-spacing:-.02em;
+  margin:0 0 4px;
+}
+.logo b{color:var(--brand)}
+.sub{margin:0 0 26px; color:var(--muted); font-size:14px; line-height:1.5}
+label{display:block; font-size:13px; color:var(--muted); margin:0 0 8px}
+.field{
+  width:100%; background:var(--bg-2); border:1px solid var(--line); color:var(--text);
+  border-radius:12px; padding:14px 16px; outline:none; transition:border-color .15s;
+}
+.field:focus{border-color:var(--brand)}
+.field::placeholder{color:var(--dim)}
+#code{letter-spacing:.5em; text-align:center; font-size:22px; font-weight:700}
+.go{
+  width:100%; margin-top:18px; background:var(--brand); color:#111; border:0;
+  border-radius:12px; padding:15px; font-weight:700; cursor:pointer;
+  transition:background .15s, opacity .15s;
+}
+.go:hover:not(:disabled){background:var(--brand-2)}
+.go:disabled{opacity:.5; cursor:default}
+.link{
+  display:block; width:100%; margin-top:14px; background:none; border:0;
+  color:var(--muted); font-size:13px; cursor:pointer; text-align:center;
+}
+.link:hover:not(:disabled){color:var(--text)}
+.link:disabled{cursor:default; color:var(--dim)}
+.msg{margin-top:16px; font-size:13px; line-height:1.5; min-height:1.2em}
+.msg.bad{color:var(--bad)}
+.msg.ok{color:var(--muted)}
+.shown{
+  margin:0 0 22px; padding:16px; border:1px dashed var(--brand);
+  border-radius:12px; text-align:center;
+}
+.shown i{display:block; font-style:normal; font-size:12px; color:var(--muted); margin-bottom:8px}
+.shown b{font-family:var(--display); font-size:30px; letter-spacing:.15em; color:var(--brand)}
+[hidden]{display:none !important}
+
+/* ---------- панель ---------- */
+.top{
+  display:flex; align-items:center; gap:16px; padding:16px 22px;
+  border-bottom:1px solid var(--line); background:var(--bg-2);
+}
+.top .logo{font-size:18px; margin:0}
+.who{margin-left:auto; font-size:13px; color:var(--muted)}
+.out{background:none; border:1px solid var(--line); border-radius:9px; padding:8px 14px; font-size:13px; cursor:pointer}
+.out:hover{border-color:var(--brand); color:var(--brand)}
+main{flex:1; padding:32px 22px; max-width:900px; width:100%; margin:0 auto}
+h1{font-family:var(--display); font-weight:800; font-size:clamp(24px,4vw,34px); margin:0 0 6px}
+.lead{color:var(--muted); margin:0 0 30px; line-height:1.6}
+.tiles{display:grid; gap:14px; grid-template-columns:repeat(auto-fit,minmax(230px,1fr))}
+.tile{
+  background:var(--panel); border:1px solid var(--line); border-radius:16px;
+  padding:22px; display:flex; flex-direction:column; gap:8px;
+}
+.tile h2{font-family:var(--display); font-size:17px; margin:0}
+.tile p{margin:0; color:var(--muted); font-size:14px; line-height:1.55}
+.tile span{margin-top:auto; padding-top:12px; font-size:12px; color:var(--dim)}
+.tile.on{border-color:var(--brand)}
+.tile.on span{color:var(--brand)}
+</style>
+
+<!-- ======================= ВХОД ======================= -->
+<section class="gate" id="gate">
+  <div class="card">
+    <p class="logo">Machos<b>.uz</b></p>
+    <p class="sub" id="sub">Кабинет для своих. Введите номер — пришлём код.</p>
+
+    <form id="step-phone">
+      <label for="phone">Номер телефона</label>
+      <input class="field" id="phone" type="tel" inputmode="tel" autocomplete="tel"
+             placeholder="+998 __ ___ __ __" value="+998 ">
+      <button class="go" type="submit" id="ask">Получить код</button>
+    </form>
+
+    <div class="shown" id="shown" hidden>
+      <i>Бот ещё не подключён — код показан здесь</i>
+      <b id="shownCode"></b>
+    </div>
+
+    <form id="step-code" hidden>
+      <label for="code">Код из сообщения</label>
+      <input class="field" id="code" inputmode="numeric" autocomplete="one-time-code"
+             maxlength="6" placeholder="······">
+      <button class="go" type="submit" id="enter">Войти</button>
+      <button class="link" type="button" id="again">Отправить код заново</button>
+      <button class="link" type="button" id="back">Другой номер</button>
+    </form>
+
+    <p class="msg" id="msg"></p>
+  </div>
+</section>
+
+<!-- ======================= ПАНЕЛЬ ======================= -->
+<header class="top" id="top" hidden>
+  <p class="logo">Machos<b>.uz</b></p>
+  <span class="who" id="who"></span>
+  <button class="out" id="logout">Выйти</button>
+</header>
+
+<main id="panel" hidden>
+  <h1>Кабинет</h1>
+  <p class="lead">Вход работает. Разделы подключаются по очереди — первым идёт управление сайтом.</p>
+  <div class="tiles">
+    <article class="tile on">
+      <h2>Управление сайтом</h2>
+      <p>Товары, вес, описания, телефоны и фотографии витрины. Правите здесь — сайт пересобирается сам.</p>
+      <span>В работе</span>
+    </article>
+    <article class="tile">
+      <h2>Документы и цены</h2>
+      <p>Прайс-листы, договоры, макеты упаковки, сертификаты — в одном месте, а не в переписке.</p>
+      <span>Дальше</span>
+    </article>
+    <article class="tile">
+      <h2>Заявки и клиенты</h2>
+      <p>Точки, контакты, что заказали и когда перезвонить.</p>
+      <span>Дальше</span>
+    </article>
+    <article class="tile">
+      <h2>Цифры по работе</h2>
+      <p>Цех и отгрузки. Заработает, когда решите, кто вносит данные каждый день.</p>
+      <span>Последним</span>
+    </article>
+  </div>
+</main>
+
+<script>
+const API  = 'https://mudkpsypkfzsxvixoqho.supabase.co/functions/v1/auth';
+const ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Im11ZGtwc3lwa2Z6c3h2aXhvcWhvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODcyMjIzMTUsImV4cCI6MjEwMjc5ODMxNX0.4G0yVSjNtTq16h22X6r6iRtqqrgRL5P_uGRqn3K5wKc';
+const KEY  = 'machos-cabinet-token';
+
+const $ = (id) => document.getElementById(id);
+const gate = $('gate'), stepPhone = $('step-phone'), stepCode = $('step-code');
+let phone = '';
+
+function say(text, bad){
+  $('msg').textContent = text || '';
+  $('msg').className = 'msg' + (text ? (bad ? ' bad' : ' ok') : '');
+}
+
+async function call(action, extra){
+  const res = await fetch(API, {
+    method:'POST',
+    headers:{ 'authorization':'Bearer ' + ANON, 'apikey': ANON, 'content-type':'application/json' },
+    body: JSON.stringify(Object.assign({ action }, extra)),
+  });
+  let data = {};
+  try { data = await res.json(); } catch(e){}
+  if(!res.ok) throw new Error(data.error || 'Сервер не ответил');
+  return data;
+}
+
+/* ---- маска номера: +998 90 123 45 67 ---- */
+function mask(raw){
+  let d = raw.replace(/\D/g, '');
+  if(d.startsWith('998')) d = d.slice(3);
+  d = d.slice(0, 9);
+  const p = ['+998'];
+  if(d.length) p.push(d.slice(0,2));
+  if(d.length > 2) p.push(d.slice(2,5));
+  if(d.length > 5) p.push(d.slice(5,7));
+  if(d.length > 7) p.push(d.slice(7,9));
+  return p.join(' ') + (d.length ? '' : ' ');
+}
+$('phone').addEventListener('input', (e) => { e.target.value = mask(e.target.value); });
+$('phone').addEventListener('focus', (e) => {
+  if(!e.target.value.trim()) e.target.value = '+998 ';
+  requestAnimationFrame(() => e.target.setSelectionRange(99, 99));
+});
+
+/* ---- отсчёт до повторной отправки ---- */
+let tick = null;
+function countdown(sec){
+  clearInterval(tick);
+  const btn = $('again');
+  const run = () => {
+    if(sec <= 0){ clearInterval(tick); btn.disabled = false; btn.textContent = 'Отправить код заново'; return; }
+    btn.disabled = true;
+    btn.textContent = 'Отправить код заново — через ' + sec + ' с';
+    sec--;
+  };
+  run();
+  tick = setInterval(run, 1000);
+}
+
+/* ---- шаг 1: запросить код ---- */
+async function askCode(){
+  const digits = $('phone').value.replace(/\D/g, '');
+  if(digits.length < 12){ say('Введите номер полностью', true); return; }
+  $('ask').disabled = true; say('Отправляем…');
+  try{
+    const r = await call('request', { phone: digits });
+    phone = digits;
+    stepPhone.hidden = true; stepCode.hidden = false;
+    $('sub').textContent = 'Код отправлен на ' + mask(digits) + '.';
+    if(r.channel === 'screen'){
+      $('shownCode').textContent = r.code;
+      $('shown').hidden = false;
+      say('');
+    } else {
+      $('shown').hidden = true;
+      say('Проверьте Telegram — код придёт сообщением.');
+    }
+    countdown(60);
+    $('code').focus();
+  }catch(err){
+    say(err.message, true);
+  }finally{
+    $('ask').disabled = false;
+  }
+}
+stepPhone.addEventListener('submit', (e) => { e.preventDefault(); askCode(); });
+$('again').addEventListener('click', askCode);
+
+/* ---- шаг 2: проверить код ---- */
+stepCode.addEventListener('submit', async (e) => {
+  e.preventDefault();
+  const code = $('code').value.replace(/\D/g, '');
+  if(code.length !== 6){ say('Код состоит из шести цифр', true); return; }
+  $('enter').disabled = true; say('Проверяем…');
+  try{
+    const r = await call('verify', { phone, code });
+    localStorage.setItem(KEY, r.token);
+    open(r.staff);
+  }catch(err){
+    say(err.message, true);
+    $('code').select();
+  }finally{
+    $('enter').disabled = false;
+  }
+});
+$('code').addEventListener('input', (e) => {
+  e.target.value = e.target.value.replace(/\D/g, '');
+  if(e.target.value.length === 6) stepCode.requestSubmit();
+});
+
+$('back').addEventListener('click', () => {
+  clearInterval(tick);
+  stepCode.hidden = true; stepPhone.hidden = false; $('shown').hidden = true;
+  $('sub').textContent = 'Кабинет для своих. Введите номер — пришлём код.';
+  $('code').value = ''; say('');
+  $('phone').focus();
+});
+
+/* ---- панель ---- */
+function open(staff){
+  gate.hidden = true;
+  $('top').hidden = false;
+  $('panel').hidden = false;
+  $('who').textContent = staff.name;
+  document.title = 'Кабинет — ' + staff.name;
+}
+
+$('logout').addEventListener('click', async () => {
+  const token = localStorage.getItem(KEY);
+  localStorage.removeItem(KEY);
+  try{ await call('logout', { token }); }catch(e){}
+  location.reload();
+});
+
+/* ---- уже входили? ---- */
+(async () => {
+  const token = localStorage.getItem(KEY);
+  if(!token) return;
+  try{
+    const r = await call('session', { token });
+    open(r.staff);
+  }catch(e){
+    localStorage.removeItem(KEY);
+  }
+})();
+</script>
