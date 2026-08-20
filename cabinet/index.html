@@ -179,7 +179,7 @@ section[hidden]{display:none}
     <form id="step-code" hidden>
       <label for="code">Код из сообщения</label>
       <input class="field" id="code" inputmode="numeric" autocomplete="one-time-code"
-             maxlength="6" placeholder="······">
+             maxlength="4" placeholder="····">
       <button class="go" type="submit" id="enter">Войти</button>
       <button class="link" type="button" id="again">Отправить код заново</button>
       <button class="link" type="button" id="back">Другой номер</button>
@@ -366,7 +366,7 @@ $('again').addEventListener('click', askCode);
 stepCode.addEventListener('submit', async (e) => {
   e.preventDefault();
   const code = $('code').value.replace(/\D/g, '');
-  if(code.length !== 6){ say('Код состоит из шести цифр', true); return; }
+  if(code.length !== 4){ say('Код состоит из четырёх цифр', true); return; }
   $('enter').disabled = true; say('Проверяем…');
   try{
     const r = await call('verify', { phone, code });
@@ -381,7 +381,7 @@ stepCode.addEventListener('submit', async (e) => {
 });
 $('code').addEventListener('input', (e) => {
   e.target.value = e.target.value.replace(/\D/g, '');
-  if(e.target.value.length === 6) stepCode.requestSubmit();
+  if(e.target.value.length === 4) stepCode.requestSubmit();
 });
 
 $('back').addEventListener('click', () => {
