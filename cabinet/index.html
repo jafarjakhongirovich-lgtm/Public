@@ -796,6 +796,7 @@ function renderLeads(){
   leadsCache.forEach((L) => {
     const title = (L.name || L.phone || 'без имени');
     const bits = [human(L.called_at)];
+    if(L.source === 'site') bits.push('с сайта');
     if(L.phone && L.name) bits.push(L.phone);
     if(L.amount) bits.push(money(L.amount));
     if(L.status !== 'new') bits.push(STATUS[L.status]);
@@ -815,9 +816,10 @@ async function loadLeads(){
   try{
     const r = await callLeads('list', { query: $('q').value.trim() });
     leadsCache = r.leads;
-    $('leadsCount').textContent = r.total
-      ? 'Показано ' + r.leads.length + ' из ' + r.total + '.'
-      : '';
+    const parts = [];
+    if(r.total) parts.push('Показано ' + r.leads.length + ' из ' + r.total);
+    if(r.fresh) parts.push('новых с сайта: ' + r.fresh);
+    $('leadsCount').textContent = parts.length ? parts.join(', ') + '.' : '';
     renderLeads();
   }catch(err){
     toast(err.message, true);
