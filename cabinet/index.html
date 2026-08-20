@@ -46,7 +46,7 @@ label{display:block; font-size:13px; color:var(--muted); margin:0 0 8px}
 }
 .field:focus{border-color:var(--brand)}
 .field::placeholder{color:var(--dim)}
-#code{letter-spacing:.5em; text-align:center; font-size:22px; font-weight:700}
+#pass{letter-spacing:.5em; text-align:center; font-size:22px; font-weight:700}
 .go{
   width:100%; margin-top:18px; background:var(--brand); color:#111; border:0;
   border-radius:12px; padding:15px; font-weight:700; cursor:pointer;
@@ -63,12 +63,6 @@ label{display:block; font-size:13px; color:var(--muted); margin:0 0 8px}
 .msg{margin-top:16px; font-size:13px; line-height:1.5; min-height:1.2em}
 .msg.bad{color:var(--bad)}
 .msg.ok{color:var(--muted)}
-.shown{
-  margin:0 0 22px; padding:16px; border:1px dashed var(--brand);
-  border-radius:12px; text-align:center;
-}
-.shown i{display:block; font-style:normal; font-size:12px; color:var(--muted); margin-bottom:8px}
-.shown b{font-family:var(--display); font-size:30px; letter-spacing:.15em; color:var(--brand)}
 [hidden]{display:none !important}
 
 /* ---------- панель ---------- */
@@ -162,27 +156,18 @@ section[hidden]{display:none}
 <section class="gate" id="gate">
   <div class="card">
     <p class="logo">Machos<b>.uz</b></p>
-    <p class="sub" id="sub">Кабинет для своих. Введите номер — пришлём код.</p>
+    <p class="sub">Кабинет для своих.</p>
 
-    <form id="step-phone">
-      <label for="phone">Номер телефона</label>
-      <input class="field" id="phone" type="tel" inputmode="tel" autocomplete="tel"
-             placeholder="+998 __ ___ __ __" value="+998 ">
-      <button class="go" type="submit" id="ask">Получить код</button>
-    </form>
+    <form id="step-login">
+      <label for="who">Имя</label>
+      <input class="field" id="who" autocomplete="username" autocapitalize="words"
+             placeholder="как вас зовут">
 
-    <div class="shown" id="shown" hidden>
-      <i>Бот ещё не подключён — код показан здесь</i>
-      <b id="shownCode"></b>
-    </div>
+      <label for="pass" style="margin-top:20px">Пароль</label>
+      <input class="field" id="pass" type="password" inputmode="numeric"
+             autocomplete="current-password" placeholder="······">
 
-    <form id="step-code" hidden>
-      <label for="code">Код из сообщения</label>
-      <input class="field" id="code" inputmode="numeric" autocomplete="one-time-code"
-             maxlength="4" placeholder="····">
       <button class="go" type="submit" id="enter">Войти</button>
-      <button class="link" type="button" id="again">Отправить код заново</button>
-      <button class="link" type="button" id="back">Другой номер</button>
     </form>
 
     <p class="msg" id="msg"></p>
@@ -199,6 +184,7 @@ section[hidden]{display:none}
     <button data-tab="contacts">Контакты</button>
     <button data-tab="history">История</button>
     <button data-tab="bonus">Бонусы</button>
+    <button data-tab="people" id="tabPeople">Люди</button>
   </nav>
   <div class="tools">
     <span id="siteTools" style="display:flex; align-items:center; gap:10px" hidden>
@@ -206,7 +192,7 @@ section[hidden]{display:none}
       <button class="ghost" id="save" disabled>Сохранить</button>
       <button class="pub" id="publish" disabled>Опубликовать</button>
     </span>
-    <span class="who" id="who"></span>
+    <span class="who" id="whoami"></span>
     <button class="out" id="logout">Выйти</button>
   </div>
 </header>
@@ -269,6 +255,23 @@ section[hidden]{display:none}
     <button class="add" id="addTier">Добавить ступень</button>
   </section>
 
+  <section id="tab-people" hidden>
+    <h1 id="peopleHead">Люди</h1>
+    <p class="lead" id="peopleLead"></p>
+
+    <details class="box" id="newPerson">
+      <summary><b>Добавить человека</b><i></i></summary>
+      <div class="body" id="newPersonBody"></div>
+    </details>
+
+    <div id="people" style="margin-top:14px"></div>
+
+    <details class="box" id="myPass" style="margin-top:26px">
+      <summary><b>Сменить свой пароль</b><i></i></summary>
+      <div class="body" id="myPassBody"></div>
+    </details>
+  </section>
+
   <p class="note" id="stamp"></p>
 </main>
 
@@ -280,6 +283,7 @@ const ANON = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZ
 const KEY  = 'machos-cabinet-token';
 
 const $ = (id) => document.getElementById(id);
+let ROLE = 'manager';
 const gate = $('gate'), stepPhone = $('step-phone'), stepCode = $('step-code');
 let phone = '';
 
@@ -300,96 +304,37 @@ async function call(action, extra){
   return data;
 }
 
-/* ---- маска номера: +998 90 123 45 67 ---- */
-function mask(raw){
-  let d = raw.replace(/\D/g, '');
-  if(d.startsWith('998')) d = d.slice(3);
-  d = d.slice(0, 9);
-  const p = ['+998'];
-  if(d.length) p.push(d.slice(0,2));
-  if(d.length > 2) p.push(d.slice(2,5));
-  if(d.length > 5) p.push(d.slice(5,7));
-  if(d.length > 7) p.push(d.slice(7,9));
-  return p.join(' ') + (d.length ? '' : ' ');
-}
-$('phone').addEventListener('input', (e) => { e.target.value = mask(e.target.value); });
-$('phone').addEventListener('focus', (e) => {
-  if(!e.target.value.trim()) e.target.value = '+998 ';
-  requestAnimationFrame(() => e.target.setSelectionRange(99, 99));
+/* ---- вход по имени и паролю ---- */
+const stepLogin = $('step-login');
+
+// имя вводят один раз — дальше оно подставляется само
+$('who').value = localStorage.getItem('machos-who') || '';
+if($('who').value) $('pass').focus(); else $('who').focus();
+
+$('pass').addEventListener('input', (e) => {
+  e.target.value = e.target.value.replace(/\D/g, '').slice(0, 6);
 });
 
-/* ---- отсчёт до повторной отправки ---- */
-let tick = null;
-function countdown(sec){
-  clearInterval(tick);
-  const btn = $('again');
-  const run = () => {
-    if(sec <= 0){ clearInterval(tick); btn.disabled = false; btn.textContent = 'Отправить код заново'; return; }
-    btn.disabled = true;
-    btn.textContent = 'Отправить код заново — через ' + sec + ' с';
-    sec--;
-  };
-  run();
-  tick = setInterval(run, 1000);
-}
-
-/* ---- шаг 1: запросить код ---- */
-async function askCode(){
-  const digits = $('phone').value.replace(/\D/g, '');
-  if(digits.length < 12){ say('Введите номер полностью', true); return; }
-  $('ask').disabled = true; say('Отправляем…');
-  try{
-    const r = await call('request', { phone: digits });
-    phone = digits;
-    stepPhone.hidden = true; stepCode.hidden = false;
-    $('sub').textContent = 'Код отправлен на ' + mask(digits) + '.';
-    if(r.channel === 'screen'){
-      $('shownCode').textContent = r.code;
-      $('shown').hidden = false;
-      say('');
-    } else {
-      $('shown').hidden = true;
-      say('Проверьте Telegram — код придёт сообщением.');
-    }
-    countdown(60);
-    $('code').focus();
-  }catch(err){
-    say(err.message, true);
-  }finally{
-    $('ask').disabled = false;
-  }
-}
-stepPhone.addEventListener('submit', (e) => { e.preventDefault(); askCode(); });
-$('again').addEventListener('click', askCode);
-
-/* ---- шаг 2: проверить код ---- */
-stepCode.addEventListener('submit', async (e) => {
+stepLogin.addEventListener('submit', async (e) => {
   e.preventDefault();
-  const code = $('code').value.replace(/\D/g, '');
-  if(code.length !== 4){ say('Код состоит из четырёх цифр', true); return; }
+  const who  = $('who').value.trim();
+  const pass = $('pass').value.replace(/\D/g, '');
+  if(!who){ say('Введите имя', true); $('who').focus(); return; }
+  if(pass.length !== 6){ say('Пароль — шесть цифр', true); $('pass').focus(); return; }
+
   $('enter').disabled = true; say('Проверяем…');
   try{
-    const r = await call('verify', { phone, code });
+    const r = await call('login', { name: who, password: pass });
     localStorage.setItem(KEY, r.token);
+    localStorage.setItem('machos-who', who);
+    $('pass').value = '';
     open(r.staff);
   }catch(err){
     say(err.message, true);
-    $('code').select();
+    $('pass').select();
   }finally{
     $('enter').disabled = false;
   }
-});
-$('code').addEventListener('input', (e) => {
-  e.target.value = e.target.value.replace(/\D/g, '');
-  if(e.target.value.length === 4) stepCode.requestSubmit();
-});
-
-$('back').addEventListener('click', () => {
-  clearInterval(tick);
-  stepCode.hidden = true; stepPhone.hidden = false; $('shown').hidden = true;
-  $('sub').textContent = 'Кабинет для своих. Введите номер — пришлём код.';
-  $('code').value = ''; say('');
-  $('phone').focus();
 });
 
 /* ---- панель ---- */
@@ -397,8 +342,17 @@ function open(staff){
   gate.hidden = true;
   $('top').hidden = false;
   $('panel').hidden = false;
-  $('who').textContent = staff.name;
+  $('whoami').textContent = staff.name;
   document.title = 'Кабинет — ' + staff.name;
+  ROLE = staff.role;
+  const owner = ROLE === 'owner';
+  $('tabPeople').textContent = owner ? 'Люди' : 'Пароль';
+  $('peopleHead').textContent = owner ? 'Люди' : 'Пароль';
+  $('peopleLead').textContent = owner
+    ? 'Кто может входить в кабинет. Регистрации нет: человек появляется здесь и только здесь. Пароль — шесть цифр, придумываете вы.'
+    : 'Здесь меняется ваш пароль. Список людей ведёт владелец.';
+  $('newPerson').hidden = !owner;
+  $('people').hidden = !owner;
   bootEditor();
 }
 
@@ -658,10 +612,10 @@ $('addTier').addEventListener('click', () => {
 /* Кнопки сохранения и публикации относятся только к содержимому витрины,
    поэтому на вкладке заявок их не показываем. */
 function showTab(name){
-  ['leads','docs','products','contacts','history','bonus'].forEach((id) => {
+  ['leads','docs','products','contacts','history','bonus','people'].forEach((id) => {
     $('tab-' + id).hidden = id !== name;
   });
-  const site = name !== 'leads' && name !== 'docs';
+  const site = !['leads','docs','people'].includes(name);
   $('siteTools').hidden = !site;
   $('stamp').hidden = !site;
   $('tabs').querySelectorAll('button').forEach(x =>
@@ -695,7 +649,7 @@ $('publish').addEventListener('click', async () => {
     dirtyLocal = false;
     const r = await callPanel('draft.publish');
     dirtyServer = false;
-    stamp({ published_at: r.published_at, updated_at: new Date().toISOString(), updated_by: $('who').textContent });
+    stamp({ published_at: r.published_at, updated_at: new Date().toISOString(), updated_by: $('whoami').textContent });
     toast('Опубликовано. На сайте появится в течение минуты');
   }catch(err){
     toast(err.message, true);
@@ -1038,6 +992,154 @@ async function loadDocs(){
   }
 }
 
+/* ==================================================================
+   Люди
+   ================================================================== */
+const ROLES = { owner:'Владелец', manager:'Сотрудник' };
+
+function passField(label, holder, key){
+  const w = document.createElement('div'); w.className = 'f';
+  const l = document.createElement('label'); l.textContent = label;
+  const i = document.createElement('input');
+  i.type = 'text'; i.inputMode = 'numeric'; i.placeholder = '······';
+  i.autocomplete = 'off';
+  i.style.cssText = 'width:100%;background:var(--bg-2);border:1px solid var(--line);color:var(--text);border-radius:10px;padding:11px 13px;font-size:16px;letter-spacing:.35em';
+  i.addEventListener('input', () => {
+    i.value = i.value.replace(/\D/g, '').slice(0, 6);
+    holder[key] = i.value;
+  });
+  w.append(l, i);
+  return w;
+}
+
+function renderNewPerson(){
+  const host = $('newPersonBody'); host.textContent = '';
+  const d = { name:'', role:'manager', pass:'' };
+
+  const go = document.createElement('button');
+  go.className = 'pub'; go.type = 'button'; go.textContent = 'Добавить';
+  go.addEventListener('click', async () => {
+    if(d.pass.length !== 6){ toast('Пароль — ровно шесть цифр', true); return; }
+    go.disabled = true;
+    try{
+      await callAuth('people.save', { name:d.name, role:d.role, password:d.pass });
+      toast('Человек добавлен');
+      $('newPerson').open = false;
+      renderNewPerson();
+      await loadPeople();
+    }catch(err){ toast(err.message, true); go.disabled = false; }
+  });
+
+  host.append(
+    pair(fld('Имя', d.name, v => { d.name = v; }),
+         selectField('Права', d.role, ROLES, v => { d.role = v; })),
+    pair(passField('Пароль, шесть цифр', d, 'pass'),
+         (() => { const n = document.createElement('p'); n.className = 'note';
+           n.textContent = 'Владелец видит эту вкладку и ведёт список. Сотрудник — всё остальное.';
+           return n; })()),
+    row(go),
+  );
+}
+
+function renderMyPass(){
+  const host = $('myPassBody'); host.textContent = '';
+  const d = { pass:'' };
+  const go = document.createElement('button');
+  go.className = 'pub'; go.type = 'button'; go.textContent = 'Сменить';
+  go.addEventListener('click', async () => {
+    if(d.pass.length !== 6){ toast('Пароль — ровно шесть цифр', true); return; }
+    go.disabled = true;
+    try{
+      await callAuth('me.password', { password:d.pass });
+      toast('Пароль изменён');
+      renderMyPass();
+      $('myPass').open = false;
+    }catch(err){ toast(err.message, true); go.disabled = false; }
+  });
+  host.append(pair(passField('Новый пароль', d, 'pass'),
+    (() => { const n = document.createElement('p'); n.className = 'note';
+      n.textContent = 'Старый перестанет работать сразу. Уже открытые сеансы не закрываются.';
+      return n; })()), row(go));
+}
+
+async function callAuth(action, extra){
+  try{
+    return await call(action, Object.assign({ token: localStorage.getItem(KEY) }, extra));
+  }catch(err){
+    if(/Сессия/.test(err.message)){ localStorage.removeItem(KEY); location.reload(); }
+    throw err;
+  }
+}
+
+let peopleCache = [];
+
+function renderPeople(){
+  const host = $('people'); host.textContent = '';
+  peopleCache.forEach((P) => {
+    const marks = [ROLES[P.role] || P.role];
+    if(!P.active)  marks.push('вход закрыт');
+    if(!P.has_pass) marks.push('без пароля');
+    if(P.locked)   marks.push('заблокирован до конца четверти часа');
+    if(P.self)     marks.push('это вы');
+
+    const b = box(P.name, marks.join(' · '), []);
+    const body = b.querySelector('.body');
+    b.addEventListener('toggle', () => {
+      if(!b.open || body.dataset.ready) return;
+      body.dataset.ready = '1';
+      body.textContent = '';
+
+      const d = { name:P.name, role:P.role, active:P.active, pass:'' };
+
+      const keep = document.createElement('button');
+      keep.className = 'pub'; keep.type = 'button'; keep.textContent = 'Сохранить';
+      keep.addEventListener('click', async () => {
+        if(d.pass && d.pass.length !== 6){ toast('Пароль — ровно шесть цифр', true); return; }
+        keep.disabled = true;
+        try{
+          await callAuth('people.save', {
+            id:P.id, name:d.name, role:d.role, active:d.active,
+            password: d.pass || undefined,
+          });
+          toast('Сохранено');
+          await loadPeople();
+        }catch(err){ toast(err.message, true); keep.disabled = false; }
+      });
+
+      const nodes = [
+        pair(fld('Имя', d.name, v => { d.name = v; }),
+             selectField('Права', d.role, ROLES, v => { d.role = v; })),
+        pair(passField('Новый пароль — оставьте пустым, чтобы не менять', d, 'pass'),
+             selectField('Вход', d.active ? 'yes' : 'no',
+               { yes:'разрешён', no:'закрыт' }, v => { d.active = v === 'yes'; })),
+      ];
+
+      const actions = row(keep);
+      if(!P.self){
+        actions.append(killer('Убрать совсем', async () => {
+          if(!confirm('Убрать ' + P.name + ' из кабинета?')) return;
+          try{ await callAuth('people.delete', { id:P.id }); toast('Убран'); await loadPeople(); }
+          catch(err){ toast(err.message, true); }
+        }));
+      }
+      nodes.push(actions);
+      body.append(...nodes);
+    });
+    host.append(b);
+  });
+}
+
+async function loadPeople(){
+  if(ROLE !== 'owner') return;
+  try{
+    const r = await callAuth('people.list');
+    peopleCache = r.people;
+    renderPeople();
+  }catch(err){
+    toast(err.message, true);
+  }
+}
+
 async function bootEditor(){
   try{
     const r = await callPanel('draft.get');
@@ -1062,6 +1164,8 @@ async function bootEditor(){
   loadLeads();
   renderNewDoc();
   loadDocs();
+  if(ROLE === 'owner'){ renderNewPerson(); loadPeople(); }
+  renderMyPass();
   showTab('leads');
 }
 
