@@ -73,26 +73,89 @@ label{display:block; font-size:13px; color:var(--muted); margin:0 0 8px}
 
 /* ---------- панель ---------- */
 .top{
-  display:flex; align-items:center; gap:16px; padding:16px 22px;
+  display:flex; align-items:center; gap:14px; padding:12px 20px;
   border-bottom:1px solid var(--line); background:var(--bg-2);
+  position:sticky; top:0; z-index:10; flex-wrap:wrap;
 }
 .top .logo{font-size:18px; margin:0}
-.who{margin-left:auto; font-size:13px; color:var(--muted)}
-.out{background:none; border:1px solid var(--line); border-radius:9px; padding:8px 14px; font-size:13px; cursor:pointer}
-.out:hover{border-color:var(--brand); color:var(--brand)}
-main{flex:1; padding:32px 22px; max-width:900px; width:100%; margin:0 auto}
-h1{font-family:var(--display); font-weight:800; font-size:clamp(24px,4vw,34px); margin:0 0 6px}
-.lead{color:var(--muted); margin:0 0 30px; line-height:1.6}
-.tiles{display:grid; gap:14px; grid-template-columns:repeat(auto-fit,minmax(230px,1fr))}
-.tile{
-  background:var(--panel); border:1px solid var(--line); border-radius:16px;
-  padding:22px; display:flex; flex-direction:column; gap:8px;
+.tabs{display:flex; gap:4px; flex-wrap:wrap}
+.tabs button{
+  background:none; border:1px solid transparent; border-radius:9px;
+  padding:8px 13px; font-size:14px; color:var(--muted); cursor:pointer;
 }
-.tile h2{font-family:var(--display); font-size:17px; margin:0}
-.tile p{margin:0; color:var(--muted); font-size:14px; line-height:1.55}
-.tile span{margin-top:auto; padding-top:12px; font-size:12px; color:var(--dim)}
-.tile.on{border-color:var(--brand)}
-.tile.on span{color:var(--brand)}
+.tabs button:hover{color:var(--text)}
+.tabs button[aria-current="true"]{background:var(--panel); border-color:var(--line); color:var(--text)}
+.tools{margin-left:auto; display:flex; align-items:center; gap:10px; flex-wrap:wrap}
+.who{font-size:13px; color:var(--muted)}
+.out,.ghost{
+  background:none; border:1px solid var(--line); border-radius:9px;
+  padding:9px 14px; font-size:13px; cursor:pointer;
+}
+.out:hover,.ghost:hover:not(:disabled){border-color:var(--brand); color:var(--brand)}
+.ghost:disabled{opacity:.4; cursor:default}
+.pub{
+  background:var(--brand); color:#111; border:0; border-radius:9px;
+  padding:10px 16px; font-size:13px; font-weight:700; cursor:pointer;
+}
+.pub:hover:not(:disabled){background:var(--brand-2)}
+.pub:disabled{opacity:.45; cursor:default}
+.flag{
+  font-size:12px; padding:5px 10px; border-radius:20px;
+  border:1px solid var(--line); color:var(--muted); white-space:nowrap;
+}
+.flag.warn{border-color:var(--brand); color:var(--brand)}
+
+main{flex:1; padding:26px 20px 80px; max-width:920px; width:100%; margin:0 auto}
+h1{font-family:var(--display); font-weight:800; font-size:clamp(21px,3.4vw,28px); margin:0 0 6px}
+.lead{color:var(--muted); margin:0 0 24px; line-height:1.6; font-size:14px}
+section[hidden]{display:none}
+
+.box{
+  background:var(--panel); border:1px solid var(--line); border-radius:14px;
+  margin:0 0 12px; overflow:hidden;
+}
+.box > summary{
+  list-style:none; cursor:pointer; padding:15px 18px;
+  display:flex; align-items:center; gap:10px;
+}
+.box > summary::-webkit-details-marker{display:none}
+.box > summary::after{content:"⌄"; margin-left:auto; color:var(--dim); font-size:18px; line-height:1}
+.box[open] > summary::after{content:"⌃"}
+.box > summary b{font-family:var(--display); font-size:15px; font-weight:600}
+.box > summary i{font-style:normal; font-size:12px; color:var(--dim)}
+.body{padding:4px 18px 20px; border-top:1px solid var(--line)}
+
+.pair{display:grid; gap:12px; grid-template-columns:1fr 1fr; margin:16px 0 0}
+@media (max-width:620px){ .pair{grid-template-columns:1fr} }
+.f label{display:block; font-size:12px; color:var(--muted); margin:0 0 6px}
+.f input, .f textarea{
+  width:100%; background:var(--bg-2); border:1px solid var(--line); color:var(--text);
+  border-radius:10px; padding:11px 13px; outline:none; font-size:14px;
+  transition:border-color .15s; font-family:inherit;
+}
+.f input:focus, .f textarea:focus{border-color:var(--brand)}
+.f textarea{resize:vertical; min-height:76px; line-height:1.5}
+.row{display:flex; gap:10px; align-items:flex-end; margin-top:16px; flex-wrap:wrap}
+.row .f{flex:1; min-width:140px}
+.del{
+  background:none; border:1px solid var(--line); color:var(--muted);
+  border-radius:9px; padding:10px 13px; font-size:13px; cursor:pointer;
+}
+.del:hover{border-color:var(--bad); color:var(--bad)}
+.add{
+  background:none; border:1px dashed var(--line); color:var(--muted);
+  border-radius:12px; padding:13px; font-size:14px; cursor:pointer; width:100%;
+}
+.add:hover{border-color:var(--brand); color:var(--brand)}
+.note{font-size:13px; color:var(--dim); line-height:1.6; margin:18px 0 0}
+.toast{
+  position:fixed; left:50%; bottom:24px; transform:translateX(-50%) translateY(20px);
+  background:var(--panel); border:1px solid var(--line); border-radius:12px;
+  padding:13px 20px; font-size:14px; opacity:0; pointer-events:none;
+  transition:opacity .2s, transform .2s; z-index:50; max-width:90vw; text-align:center;
+}
+.toast.show{opacity:1; transform:translateX(-50%) translateY(0)}
+.toast.bad{border-color:var(--bad); color:var(--bad)}
 </style>
 
 <!-- ======================= ВХОД ======================= -->
@@ -129,36 +192,74 @@ h1{font-family:var(--display); font-weight:800; font-size:clamp(24px,4vw,34px); 
 <!-- ======================= ПАНЕЛЬ ======================= -->
 <header class="top" id="top" hidden>
   <p class="logo">Machos<b>.uz</b></p>
-  <span class="who" id="who"></span>
-  <button class="out" id="logout">Выйти</button>
+  <nav class="tabs" id="tabs">
+    <button data-tab="leads" aria-current="true">Заявки</button>
+    <button data-tab="products">Товары</button>
+    <button data-tab="contacts">Контакты</button>
+    <button data-tab="history">История</button>
+    <button data-tab="bonus">Бонусы</button>
+  </nav>
+  <div class="tools">
+    <span id="siteTools" style="display:flex; align-items:center; gap:10px" hidden>
+      <span class="flag" id="flag">загружаем…</span>
+      <button class="ghost" id="save" disabled>Сохранить</button>
+      <button class="pub" id="publish" disabled>Опубликовать</button>
+    </span>
+    <span class="who" id="who"></span>
+    <button class="out" id="logout">Выйти</button>
+  </div>
 </header>
 
 <main id="panel" hidden>
-  <h1>Кабинет</h1>
-  <p class="lead">Вход работает. Разделы подключаются по очереди — первым идёт управление сайтом.</p>
-  <div class="tiles">
-    <article class="tile on">
-      <h2>Управление сайтом</h2>
-      <p>Товары, вес, описания, телефоны и фотографии витрины. Правите здесь — сайт пересобирается сам.</p>
-      <span>В работе</span>
-    </article>
-    <article class="tile">
-      <h2>Документы и цены</h2>
-      <p>Прайс-листы, договоры, макеты упаковки, сертификаты — в одном месте, а не в переписке.</p>
-      <span>Дальше</span>
-    </article>
-    <article class="tile">
-      <h2>Заявки и клиенты</h2>
-      <p>Точки, контакты, что заказали и когда перезвонить.</p>
-      <span>Дальше</span>
-    </article>
-    <article class="tile">
-      <h2>Цифры по работе</h2>
-      <p>Цех и отгрузки. Заработает, когда решите, кто вносит данные каждый день.</p>
-      <span>Последним</span>
-    </article>
-  </div>
+  <section id="tab-leads">
+    <h1>Заявки</h1>
+    <p class="lead">Кто позвонил, когда и что заказал. Записывается вручную — на витрине формы нет, все обращения идут через телефон.</p>
+
+    <details class="box" id="newLead" open>
+      <summary><b>Новая заявка</b><i id="newHint"></i></summary>
+      <div class="body" id="newBody"></div>
+    </details>
+
+    <div class="f" style="margin:22px 0 14px">
+      <label for="q">Поиск по имени, телефону, магазину или товару</label>
+      <input id="q" placeholder="начните вводить…">
+    </div>
+
+    <div id="leads"></div>
+    <p class="note" id="leadsCount"></p>
+  </section>
+
+  <section id="tab-products" hidden>
+    <h1>Товары</h1>
+    <p class="lead">Что видно в каталоге витрины. Позиция без фотографии на сайт не попадает — фотографии лежат в папке <code>assets</code> и называются по опознавательному имени позиции.</p>
+    <div id="products"></div>
+    <button class="add" id="addProduct">Добавить позицию</button>
+  </section>
+
+  <section id="tab-contacts" hidden>
+    <h1>Контакты</h1>
+    <p class="lead">Телефон, почта и адрес в подвале витрины и в окне консультации. Ссылки на соцсети: пустая ссылка делает кнопку приглушённой и некликабельной.</p>
+    <div id="contacts"></div>
+  </section>
+
+  <section id="tab-history" hidden>
+    <h1>История</h1>
+    <p class="lead">Вехи в разделе «История». Год выводится, только если поле заполнено — у последней вехи оно пустое намеренно.</p>
+    <div id="history"></div>
+    <button class="add" id="addMilestone">Добавить веху</button>
+  </section>
+
+  <section id="tab-bonus" hidden>
+    <h1>Бонусы за объём</h1>
+    <p class="lead">Лестница в окне «Консультация». Суммы в сумах, порядок — по возрастанию, разряды расставляются сами.</p>
+    <div id="bonus"></div>
+    <button class="add" id="addTier">Добавить ступень</button>
+  </section>
+
+  <p class="note" id="stamp"></p>
 </main>
+
+<div class="toast" id="toast"></div>
 
 <script>
 const API  = 'https://mudkpsypkfzsxvixoqho.supabase.co/functions/v1/auth';
@@ -285,6 +386,7 @@ function open(staff){
   $('panel').hidden = false;
   $('who').textContent = staff.name;
   document.title = 'Кабинет — ' + staff.name;
+  bootEditor();
 }
 
 $('logout').addEventListener('click', async () => {
@@ -293,6 +395,497 @@ $('logout').addEventListener('click', async () => {
   try{ await call('logout', { token }); }catch(e){}
   location.reload();
 });
+
+/* ==================================================================
+   Редактор содержимого витрины
+   ================================================================== */
+const PANEL  = 'https://mudkpsypkfzsxvixoqho.supabase.co/functions/v1/panel';
+const SOURCE = '../content.json';   // то, что сейчас вшито в витрину
+
+let content = null;        // рабочая копия
+let dirtyLocal  = false;   // правки не сохранены
+let dirtyServer = false;   // сохранено, но на сайте ещё не видно
+let seeded = false;        // черновик только что взят из витрины и ещё не сохранялся
+
+async function callPanel(action, extra){
+  const res = await fetch(PANEL, {
+    method:'POST',
+    headers:{ 'authorization':'Bearer ' + ANON, 'apikey': ANON, 'content-type':'application/json' },
+    body: JSON.stringify(Object.assign({ action, token: localStorage.getItem(KEY) }, extra)),
+  });
+  let data = {};
+  try{ data = await res.json(); }catch(e){}
+  if(res.status === 401){ localStorage.removeItem(KEY); location.reload(); }
+  if(!res.ok) throw new Error(data.error || 'Сервер не ответил');
+  return data;
+}
+
+let toastTimer = null;
+function toast(text, bad){
+  const el = $('toast');
+  el.textContent = text;
+  el.className = 'toast show' + (bad ? ' bad' : '');
+  clearTimeout(toastTimer);
+  toastTimer = setTimeout(() => { el.className = 'toast'; }, 3200);
+}
+
+/* ---- кирпичики формы ---- */
+function fld(label, value, oninput, multiline){
+  const wrap = document.createElement('div'); wrap.className = 'f';
+  const lab  = document.createElement('label'); lab.textContent = label;
+  const inp  = document.createElement(multiline ? 'textarea' : 'input');
+  inp.value = value == null ? '' : String(value);
+  inp.addEventListener('input', () => { oninput(inp.value); touch(); });
+  wrap.append(lab, inp);
+  return wrap;
+}
+function pair(a, b){
+  const d = document.createElement('div'); d.className = 'pair'; d.append(a, b); return d;
+}
+function row(...nodes){
+  const d = document.createElement('div'); d.className = 'row'; d.append(...nodes); return d;
+}
+function killer(text, fn){
+  const b = document.createElement('button');
+  b.className = 'del'; b.type = 'button'; b.textContent = text;
+  b.addEventListener('click', fn);
+  return b;
+}
+function box(title, sub, nodes){
+  const d = document.createElement('details'); d.className = 'box';
+  const sum = document.createElement('summary');
+  const b = document.createElement('b'); b.textContent = title || '(без названия)';
+  const i = document.createElement('i'); i.textContent = sub || '';
+  sum.append(b, i);
+  const body = document.createElement('div'); body.className = 'body';
+  body.append(...nodes);
+  d.append(sum, body);
+  return d;
+}
+
+function touch(){ dirtyLocal = true; seeded = false; refreshFlags(); }
+
+function refreshFlags(){
+  const flag = $('flag');
+  if(dirtyLocal){
+    flag.textContent = seeded ? 'черновик ещё не сохранён' : 'есть несохранённые правки';
+    flag.className = 'flag warn';
+  }
+  else if(dirtyServer){ flag.textContent = 'сохранено, на сайте ещё нет'; flag.className = 'flag warn'; }
+  else { flag.textContent = 'всё опубликовано'; flag.className = 'flag'; }
+  $('save').disabled    = !dirtyLocal;
+  $('publish').disabled = !(dirtyLocal || dirtyServer);
+}
+
+function stamp(r){
+  const when = (iso) => iso ? new Date(iso).toLocaleString('ru-RU', { day:'numeric', month:'long', hour:'2-digit', minute:'2-digit' }) : null;
+  const parts = [];
+  if(r.published_at) parts.push('На сайте — от ' + when(r.published_at));
+  else parts.push('На сайте пока встроенное содержимое: ничего не публиковали');
+  if(r.updated_at) parts.push('черновик правил' + (r.updated_by ? ' ' + r.updated_by : '') + ' ' + when(r.updated_at));
+  $('stamp').textContent = parts.join('. ') + '.';
+}
+
+/* ---- товары ---- */
+const CATS = { kurt:'Курт', cheese:'Сыр', seeds:'Семечки' };
+
+function renderProducts(){
+  const host = $('products'); host.textContent = '';
+  content.products.forEach((p, idx) => {
+    p.ru = p.ru || {}; p.uz = p.uz || {};
+    p.spec = p.spec || {};
+    p.spec.weight = p.spec.weight || { ru:'', uz:'' };
+    p.spec.comp   = p.spec.comp   || { ru:'', uz:'' };
+
+    const cat = document.createElement('div'); cat.className = 'f';
+    const cl = document.createElement('label'); cl.textContent = 'Категория';
+    const cs = document.createElement('select');
+    cs.className = ''; cs.style.cssText = 'width:100%;background:var(--bg-2);border:1px solid var(--line);color:var(--text);border-radius:10px;padding:11px 13px;font-size:14px';
+    Object.entries(CATS).forEach(([id, name]) => {
+      const o = document.createElement('option'); o.value = id; o.textContent = name;
+      if(p.cat === id) o.selected = true;
+      cs.append(o);
+    });
+    cs.addEventListener('change', () => { p.cat = cs.value; touch(); });
+    cat.append(cl, cs);
+
+    host.append(box(p.ru.name, p.id, [
+      pair(fld('Название, русский',  p.ru.name,  v => { p.ru.name = v; }),
+           fld('Nomi, o‘zbekcha',    p.uz.name,  v => { p.uz.name = v; })),
+      pair(fld('Подпись, русский',   p.ru.sub,   v => { p.ru.sub = v; }),
+           fld('Izoh, o‘zbekcha',    p.uz.sub,   v => { p.uz.sub = v; })),
+      pair(fld('Описание, русский',  p.ru.about, v => { p.ru.about = v; }, true),
+           fld('Tavsif, o‘zbekcha',  p.uz.about, v => { p.uz.about = v; }, true)),
+      pair(fld('Вес, русский',       p.spec.weight.ru, v => { p.spec.weight.ru = v; }),
+           fld('Og‘irligi',          p.spec.weight.uz, v => { p.spec.weight.uz = v; })),
+      pair(fld('Состав, русский',    p.spec.comp.ru,   v => { p.spec.comp.ru = v; }),
+           fld('Tarkibi',            p.spec.comp.uz,   v => { p.spec.comp.uz = v; })),
+      row(fld('Имя файла фотографии', p.id, v => { p.id = v.trim(); }), cat,
+          killer('Убрать позицию', () => {
+            if(!confirm('Убрать «' + (p.ru.name || p.id) + '» из каталога?')) return;
+            content.products.splice(idx, 1); touch(); renderProducts();
+          })),
+    ]));
+  });
+}
+
+/* ---- контакты ---- */
+function renderContacts(){
+  const host = $('contacts'); host.textContent = '';
+  const k = content.contacts;
+  host.append(box('Организация', '', [
+    pair(fld('Юридическое лицо', k.company, v => { k.company = v; }),
+         fld('Адрес сайта',      k.site,    v => { k.site = v; })),
+    row(fld('Адрес', k.address, v => { k.address = v; })),
+  ]));
+  host.append(box('Телефон и почта', k.phone || '', [
+    pair(fld('Телефон, как показывать', k.phone,    v => { k.phone = v; k.phoneRaw = '+' + v.replace(/\D/g,''); }),
+         fld('Почта',                   k.email,    v => { k.email = v; })),
+    pair(fld('Второй телефон',          k.phone2,   v => { k.phone2 = v; k.phone2Raw = '+' + v.replace(/\D/g,''); }),
+         fld('', '', () => {})),
+    (() => { const n = document.createElement('p'); n.className = 'note';
+      n.textContent = 'Пока второй телефон совпадает с основным, вторая строка в контактах на витрине скрыта — она появится сама, когда номера станут разными.';
+      return n; })(),
+  ]));
+
+  const socials = document.createElement('div');
+  (k.socials || []).forEach((sn, i) => {
+    socials.append(row(
+      fld('Название', sn.name, v => { sn.name = v; }),
+      fld('Ссылка',   sn.url,  v => { sn.url = v; }),
+      killer('Убрать', () => { k.socials.splice(i, 1); touch(); renderContacts(); }),
+    ));
+  });
+  const add = document.createElement('button');
+  add.className = 'add'; add.type = 'button'; add.textContent = 'Добавить соцсеть';
+  add.style.marginTop = '16px';
+  add.addEventListener('click', () => {
+    k.socials = k.socials || [];
+    k.socials.push({ name:'', url:'' }); touch(); renderContacts();
+  });
+  host.append(box('Соцсети', (k.socials || []).length + ' шт.', [socials, add]));
+}
+
+/* ---- история ---- */
+function renderHistory(){
+  const host = $('history'); host.textContent = '';
+  content.history.forEach((m, idx) => {
+    m.ru = m.ru || {}; m.uz = m.uz || {};
+    const y = (typeof m.year === 'object' && m.year) ? m.year : { ru: m.year || '', uz: m.year || '' };
+    const setYear = () => {
+      m.year = (y.ru === y.uz) ? y.ru : { ru:y.ru, uz:y.uz };
+    };
+    host.append(box(m.ru.h, (typeof m.year === 'object' ? m.year.ru : m.year) || 'без года', [
+      pair(fld('Год или дата, русский', y.ru, v => { y.ru = v; setYear(); }),
+           fld('Yil yoki sana',         y.uz, v => { y.uz = v; setYear(); })),
+      pair(fld('Заголовок, русский',    m.ru.h, v => { m.ru.h = v; }),
+           fld('Sarlavha, o‘zbekcha',   m.uz.h, v => { m.uz.h = v; })),
+      pair(fld('Текст, русский',        m.ru.p, v => { m.ru.p = v; }, true),
+           fld('Matn, o‘zbekcha',       m.uz.p, v => { m.uz.p = v; }, true)),
+      row(killer('Убрать веху', () => {
+        if(!confirm('Убрать веху «' + (m.ru.h || '') + '»?')) return;
+        content.history.splice(idx, 1); touch(); renderHistory();
+      })),
+    ]));
+  });
+}
+
+/* ---- бонусы ---- */
+function renderBonus(){
+  const host = $('bonus'); host.textContent = '';
+  const c = content.consult;
+  (c.steps || []).forEach((st, i) => {
+    st.ru = st.ru || {}; st.uz = st.uz || {};
+    host.append(box('Шаг ' + (i + 1) + ': ' + (st.ru.h || ''), '', [
+      pair(fld('Заголовок, русский',  st.ru.h, v => { st.ru.h = v; }),
+           fld('Sarlavha, o‘zbekcha', st.uz.h, v => { st.uz.h = v; })),
+      pair(fld('Текст, русский',      st.ru.p, v => { st.ru.p = v; }, true),
+           fld('Matn, o‘zbekcha',     st.uz.p, v => { st.uz.p = v; }, true)),
+    ]));
+  });
+  (c.tiers || []).forEach((tr, i) => {
+    host.append(box((tr.sum ? tr.sum.toLocaleString('ru-RU') + ' сум' : 'ступень'), tr.ru || '', [
+      row(fld('Сумма заказа, сум', tr.sum, v => { tr.sum = parseInt(v.replace(/\D/g,''), 10) || 0; })),
+      pair(fld('Что даём, русский',  tr.ru, v => { tr.ru = v; }),
+           fld('Nima beramiz',       tr.uz, v => { tr.uz = v; })),
+      row(killer('Убрать ступень', () => {
+        if(!confirm('Убрать эту ступень?')) return;
+        c.tiers.splice(i, 1); touch(); renderBonus();
+      })),
+    ]));
+  });
+}
+
+function renderAll(){ renderProducts(); renderContacts(); renderHistory(); renderBonus(); }
+
+/* ---- кнопки ---- */
+$('addProduct').addEventListener('click', () => {
+  content.products.push({
+    id:'', cat:'kurt',
+    ru:{ name:'', sub:'', about:'' }, uz:{ name:'', sub:'', about:'' },
+    spec:{ weight:{ru:'',uz:''}, comp:{ru:'',uz:''} },
+  });
+  touch(); renderProducts();
+  $('products').lastElementChild.open = true;
+  $('products').lastElementChild.scrollIntoView({ behavior:'smooth', block:'center' });
+});
+$('addMilestone').addEventListener('click', () => {
+  content.history.push({ year:'', ru:{h:'',p:''}, uz:{h:'',p:''} });
+  touch(); renderHistory();
+  $('history').lastElementChild.open = true;
+});
+$('addTier').addEventListener('click', () => {
+  content.consult.tiers = content.consult.tiers || [];
+  content.consult.tiers.push({ sum:0, ru:'', uz:'' });
+  touch(); renderBonus();
+  $('bonus').lastElementChild.open = true;
+});
+
+/* Кнопки сохранения и публикации относятся только к содержимому витрины,
+   поэтому на вкладке заявок их не показываем. */
+function showTab(name){
+  ['leads','products','contacts','history','bonus'].forEach((id) => {
+    $('tab-' + id).hidden = id !== name;
+  });
+  const site = name !== 'leads';
+  $('siteTools').hidden = !site;
+  $('stamp').hidden = !site;
+  $('tabs').querySelectorAll('button').forEach(x =>
+    x.setAttribute('aria-current', String(x.dataset.tab === name)));
+}
+
+$('tabs').addEventListener('click', (e) => {
+  const b = e.target.closest('button[data-tab]');
+  if(!b) return;
+  showTab(b.dataset.tab);
+  scrollTo({ top:0 });
+});
+
+async function save(){
+  $('save').disabled = true;
+  try{
+    await callPanel('draft.save', { content });
+    dirtyLocal = false; dirtyServer = true;
+    toast('Черновик сохранён');
+  }catch(err){
+    toast(err.message, true);
+  }
+  refreshFlags();
+}
+$('save').addEventListener('click', save);
+
+$('publish').addEventListener('click', async () => {
+  $('publish').disabled = true;
+  try{
+    if(dirtyLocal) await callPanel('draft.save', { content });
+    dirtyLocal = false;
+    const r = await callPanel('draft.publish');
+    dirtyServer = false;
+    stamp({ published_at: r.published_at, updated_at: new Date().toISOString(), updated_by: $('who').textContent });
+    toast('Опубликовано. На сайте появится в течение минуты');
+  }catch(err){
+    toast(err.message, true);
+  }
+  refreshFlags();
+});
+
+addEventListener('beforeunload', (e) => {
+  if(dirtyLocal){ e.preventDefault(); e.returnValue = ''; }
+});
+
+/* ==================================================================
+   Журнал заявок
+   ================================================================== */
+const LEADS_API = 'https://mudkpsypkfzsxvixoqho.supabase.co/functions/v1/leads';
+
+const STATUS = { new:'новая', done:'выполнена', refused:'отказ' };
+
+async function callLeads(action, extra){
+  const res = await fetch(LEADS_API, {
+    method:'POST',
+    headers:{ 'authorization':'Bearer ' + ANON, 'apikey': ANON, 'content-type':'application/json' },
+    body: JSON.stringify(Object.assign({ action, token: localStorage.getItem(KEY) }, extra)),
+  });
+  let data = {};
+  try{ data = await res.json(); }catch(e){}
+  if(res.status === 401){ localStorage.removeItem(KEY); location.reload(); }
+  if(!res.ok) throw new Error(data.error || 'Сервер не ответил');
+  return data;
+}
+
+function localStamp(iso){
+  const d = iso ? new Date(iso) : new Date();
+  const pad = (n) => String(n).padStart(2, '0');
+  return d.getFullYear() + '-' + pad(d.getMonth()+1) + '-' + pad(d.getDate())
+       + 'T' + pad(d.getHours()) + ':' + pad(d.getMinutes());
+}
+function human(iso){
+  if(!iso) return '';
+  return new Date(iso).toLocaleString('ru-RU',
+    { day:'numeric', month:'long', hour:'2-digit', minute:'2-digit' });
+}
+function money(n){
+  return n ? Number(n).toLocaleString('ru-RU').replace(/ /g,' ') + ' сум' : '';
+}
+
+function selectField(label, value, options, onchange){
+  const wrap = document.createElement('div'); wrap.className = 'f';
+  const lab = document.createElement('label'); lab.textContent = label;
+  const sel = document.createElement('select');
+  sel.style.cssText = 'width:100%;background:var(--bg-2);border:1px solid var(--line);color:var(--text);border-radius:10px;padding:11px 13px;font-size:14px';
+  Object.entries(options).forEach(([v, name]) => {
+    const o = document.createElement('option'); o.value = v; o.textContent = name;
+    if(v === value) o.selected = true;
+    sel.append(o);
+  });
+  sel.addEventListener('change', () => onchange(sel.value));
+  wrap.append(lab, sel);
+  return wrap;
+}
+
+/* Форма заявки: одна и та же для новой записи и для правки. */
+function leadForm(lead, onDone, onCancel){
+  const d = Object.assign({ name:'', phone:'', shop:'', items:'', amount:'', note:'', status:'new' }, lead);
+  const stamp = { value: localStamp(lead && lead.called_at) };
+  const nodes = [];
+
+  nodes.push(pair(
+    fld('Имя', d.name,   v => { d.name = v; }),
+    fld('Телефон', d.phone, v => { d.phone = v; }),
+  ));
+  nodes.push(pair(
+    fld('Магазин или точка', d.shop, v => { d.shop = v; }),
+    (() => {
+      const w = document.createElement('div'); w.className = 'f';
+      const l = document.createElement('label'); l.textContent = 'Когда позвонили';
+      const i = document.createElement('input'); i.type = 'datetime-local'; i.value = stamp.value;
+      i.style.colorScheme = 'dark';
+      i.addEventListener('input', () => { stamp.value = i.value; });
+      w.append(l, i); return w;
+    })(),
+  ));
+  nodes.push(pair(
+    fld('Что заказали', d.items, v => { d.items = v; }, true),
+    fld('Заметка', d.note, v => { d.note = v; }, true),
+  ));
+  nodes.push(row(
+    fld('Сумма, сум', d.amount || '', v => { d.amount = v; }),
+    selectField('Состояние', d.status, STATUS, v => { d.status = v; }),
+  ));
+
+  const save = document.createElement('button');
+  save.className = 'pub'; save.type = 'button'; save.textContent = lead && lead.id ? 'Сохранить' : 'Записать';
+  save.addEventListener('click', async () => {
+    save.disabled = true;
+    try{
+      await callLeads('save', Object.assign({}, d, { id: lead && lead.id, called_at: stamp.value }));
+      toast(lead && lead.id ? 'Заявка обновлена' : 'Заявка записана');
+      onDone();
+    }catch(err){
+      toast(err.message, true);
+      save.disabled = false;
+    }
+  });
+
+  const actions = row(save);
+  if(lead && lead.id){
+    actions.append(killer('Удалить', async () => {
+      if(!confirm('Удалить заявку от ' + (d.name || d.phone) + '?')) return;
+      try{ await callLeads('delete', { id: lead.id }); toast('Заявка удалена'); onDone(); }
+      catch(err){ toast(err.message, true); }
+    }));
+  }
+  if(onCancel){
+    const c = document.createElement('button');
+    c.className = 'del'; c.type = 'button'; c.textContent = 'Отмена';
+    c.addEventListener('click', onCancel);
+    actions.append(c);
+  }
+  nodes.push(actions);
+  return nodes;
+}
+
+let leadsCache = [];
+
+function renderNewLead(){
+  const host = $('newBody'); host.textContent = '';
+  host.append(...leadForm(null, async () => {
+    $('newLead').open = false;
+    await loadLeads();
+    $('newLead').open = true;
+    renderNewLead();
+  }));
+}
+
+function renderLeads(){
+  const host = $('leads'); host.textContent = '';
+  if(!leadsCache.length){
+    const p = document.createElement('p'); p.className = 'note';
+    p.textContent = 'Пока пусто. Первая запись появится здесь.';
+    host.append(p);
+    return;
+  }
+  leadsCache.forEach((L) => {
+    const title = (L.name || L.phone || 'без имени');
+    const bits = [human(L.called_at)];
+    if(L.phone && L.name) bits.push(L.phone);
+    if(L.amount) bits.push(money(L.amount));
+    if(L.status !== 'new') bits.push(STATUS[L.status]);
+    const b = box(title, bits.join(' · '), []);
+    const body = b.querySelector('.body');
+    b.addEventListener('toggle', () => {
+      if(!b.open || body.dataset.ready) return;
+      body.dataset.ready = '1';
+      body.textContent = '';
+      body.append(...leadForm(L, async () => { await loadLeads(); }));
+    });
+    host.append(b);
+  });
+}
+
+async function loadLeads(){
+  try{
+    const r = await callLeads('list', { query: $('q').value.trim() });
+    leadsCache = r.leads;
+    $('leadsCount').textContent = r.total
+      ? 'Показано ' + r.leads.length + ' из ' + r.total + '.'
+      : '';
+    renderLeads();
+  }catch(err){
+    toast(err.message, true);
+  }
+}
+
+let qTimer = null;
+$('q').addEventListener('input', () => {
+  clearTimeout(qTimer);
+  qTimer = setTimeout(loadLeads, 300);
+});
+
+async function bootEditor(){
+  try{
+    const r = await callPanel('draft.get');
+    content = r.draft;
+    dirtyServer = !!r.dirty;
+    stamp(r);
+    if(!content){
+      content = await fetch(SOURCE, { cache:'no-store' }).then(x => x.json());
+      dirtyLocal = true; seeded = true;   // первый черновик ещё не сохраняли
+    }
+  }catch(err){
+    toast(err.message, true);
+    return;
+  }
+  content.products = content.products || [];
+  content.history  = content.history  || [];
+  content.consult  = content.consult  || { steps:[], tiers:[] };
+  content.contacts = content.contacts || {};
+  renderAll();
+  refreshFlags();
+  renderNewLead();
+  loadLeads();
+  showTab('leads');
+}
 
 /* ---- уже входили? ---- */
 (async () => {

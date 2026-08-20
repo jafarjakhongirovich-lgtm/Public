@@ -1244,7 +1244,40 @@ navLinks.addEventListener('click', (e) => {
 
 document.getElementById('year').textContent = new Date().getFullYear();
 observeReveals();
-loadPhotos();
+/* ------------------------------------------------------------------
+   Свежее содержимое из кабинета.
+   Витрина от сервера не зависит: ждём его коротко, и если он молчит —
+   показываем то, что вшито в страницу, и идём дальше.
+   ------------------------------------------------------------------ */
+const CONTENT_URL = 'https://mudkpsypkfzsxvixoqho.supabase.co/functions/v1/content';
+
+function applyContent(c){
+  if(!c || typeof c !== 'object') return;
+  if(Array.isArray(c.products) && c.products.length){
+    PRODUCTS.length = 0; PRODUCTS.push(...c.products);
+  }
+  if(Array.isArray(c.history) && c.history.length){
+    HISTORY.length = 0; HISTORY.push(...c.history);
+  }
+  if(c.contacts && typeof c.contacts === 'object') Object.assign(CONTACTS, c.contacts);
+  if(c.consult  && typeof c.consult  === 'object') Object.assign(CONSULT,  c.consult);
+}
+
+async function loadContent(){
+  const stop  = new AbortController();
+  const timer = setTimeout(() => stop.abort(), 1500);
+  try{
+    const res = await fetch(CONTENT_URL, { signal: stop.signal });
+    const data = await res.json();
+    if(data && data.published) applyContent(data.published);
+  }catch(e){
+    console.info('Свежее содержимое недоступно, показываем встроенное');
+  }finally{
+    clearTimeout(timer);
+  }
+}
+
+loadContent().then(loadPhotos);
 </script>
 
 <!-- ============================================================

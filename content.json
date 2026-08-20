@@ -1,0 +1,374 @@
+{
+  "version": 1,
+  "contacts": {
+    "company": "ООО «FUN NUTS GROUP»",
+    "address": "Ташкент, Шайхантахурский район, пр. Гормонский, 3А",
+    "phone": "+998 95 194 55 15",
+    "phoneRaw": "+998951945515",
+    "phone2": "+998 95 194 55 15",
+    "phone2Raw": "+998951945515",
+    "email": "info@machos.uz",
+    "site": "machos.uz",
+    "socials": [
+      {
+        "name": "Facebook",
+        "url": "https://www.facebook.com/share/1HkTk4ZkMF/"
+      },
+      {
+        "name": "Instagram",
+        "url": "https://www.instagram.com/machos_uz"
+      }
+    ]
+  },
+  "consult": {
+    "steps": [
+      {
+        "ru": {
+          "h": "Приедет в ваш магазин",
+          "p": "Представитель Machos.uz сам приезжает по адресу — в удобное для вас время."
+        },
+        "uz": {
+          "h": "Do‘koningizga keladi",
+          "p": "Machos.uz vakili o‘zi manzilingizga keladi — sizga qulay vaqtda."
+        }
+      },
+      {
+        "ru": {
+          "h": "Спросит, что нужно",
+          "p": "Посмотрит полку и уточнит, какие позиции и в каком объёме вам нужны."
+        },
+        "uz": {
+          "h": "Nima kerakligini so‘raydi",
+          "p": "Javonni ko‘radi va qaysi mahsulot, qancha kerakligini aniqlaydi."
+        }
+      },
+      {
+        "ru": {
+          "h": "Запишет и передаст дилеру",
+          "p": "Заявка уходит дилеру — он согласует отгрузку, сроки и цену."
+        },
+        "uz": {
+          "h": "Yozib, dilerga uzatadi",
+          "p": "Ariza dilerga boradi — u jo‘natish, muddat va narxni kelishadi."
+        }
+      }
+    ],
+    "tiers": [
+      {
+        "sum": 200000,
+        "kind": "min",
+        "ru": "Минимальная сумма заказа",
+        "uz": "Eng kam buyurtma summasi"
+      },
+      {
+        "sum": 500000,
+        "ru": "Скидка 5%",
+        "uz": "5% chegirma"
+      },
+      {
+        "sum": 750000,
+        "ru": "Скидка 10%",
+        "uz": "10% chegirma"
+      },
+      {
+        "sum": 1000000,
+        "kind": "top",
+        "ru": "Фирменная стойка в подарок",
+        "uz": "Sovg‘aga firma javoni",
+        "ru2": "Витрина для выкладки Machos.uz",
+        "uz2": "Machos.uz mahsulotlari uchun javon"
+      }
+    ]
+  },
+  "history": [
+    {
+      "year": "2012",
+      "ru": {
+        "h": "Начал один",
+        "p": "Всё делал сам: покупал сырьё, сушил, солил, фасовал и сам развозил по магазинам Ташкента."
+      },
+      "uz": {
+        "h": "Yolg‘iz boshladi",
+        "p": "Hammasini o‘zi qildi: xomashyo oldi, quritdi, tuzladi, qadoqladi va Toshkent do‘konlariga o‘zi tarqatdi."
+      }
+    },
+    {
+      "year": "2013",
+      "ru": {
+        "h": "Открыл цех",
+        "p": "Через год работа переехала из дома в своё помещение. Появилось оборудование, партии стали ровнее и больше."
+      },
+      "uz": {
+        "h": "Sex ochdi",
+        "p": "Bir yildan so‘ng ish uydan o‘z binosiga ko‘chdi. Uskuna paydo bo‘ldi, partiyalar tekis va kattaroq bo‘ldi."
+      }
+    },
+    {
+      "year": {
+        "ru": "7 февраля 2014",
+        "uz": "2014-yil 7-fevral"
+      },
+      "ru": {
+        "h": "Нанял людей",
+        "p": "Дела пошли хорошо, и одному перестало хватать рук. В цехе появились работники — рецепт и подход остались прежними."
+      },
+      "uz": {
+        "h": "Odamlarni ishga oldi",
+        "p": "Ishlar yaxshi ketdi, yolg‘iz ulgurmay qoldi. Sexda ishchilar paydo bo‘ldi — retsept va yondashuv esa o‘sha bo‘lib qoldi."
+      }
+    },
+    {
+      "year": "",
+      "ru": {
+        "h": "Сегодня",
+        "p": "ООО «FUN NUTS GROUP», производство в Ташкенте. Курт в четырёх формах, сырные палочки, косичка и семечки едут в магазины по всей стране."
+      },
+      "uz": {
+        "h": "Bugun",
+        "p": "\"FUN NUTS GROUP\" MChJ, ishlab chiqarish Toshkentda. To‘rt xil shakldagi qurt, pishloq tayoqchalari, oʻrim va pista butun mamlakat do‘konlariga boradi."
+      }
+    }
+  ],
+  "products": [
+    {
+      "id": "kurt-cube",
+      "cat": "kurt",
+      "ru": {
+        "name": "Курт кубиками",
+        "sub": "классический, солёный",
+        "about": "Плотный солёный курт кубиками. Четыре штуки в пачке — удобно взять с собой."
+      },
+      "uz": {
+        "name": "Qurt, kubik shaklida",
+        "sub": "klassik, sho‘r",
+        "about": "Zich, sho‘r qurt. Qadoqda to‘rt dona — o‘zingiz bilan olib yurish qulay."
+      },
+      "spec": {
+        "weight": {
+          "ru": "30 ± 5 г",
+          "uz": "30 ± 5 g"
+        },
+        "comp": {
+          "ru": "Молоко, йодированная соль",
+          "uz": "Sut, yodlangan tuz"
+        }
+      }
+    },
+    {
+      "id": "kurt-ball",
+      "cat": "kurt",
+      "ru": {
+        "name": "Курт шариками",
+        "sub": "классический, круглый",
+        "about": "Курт привычной круглой формы. Тот же состав и вкус, другая подача."
+      },
+      "uz": {
+        "name": "Qurt, dumaloq",
+        "sub": "klassik, dumaloq",
+        "about": "Odatiy dumaloq shakldagi qurt. Tarkibi va ta’mi o‘sha, ko‘rinishi boshqa."
+      },
+      "spec": {
+        "weight": {
+          "ru": "30 ± 5 г",
+          "uz": "30 ± 5 g"
+        },
+        "comp": {
+          "ru": "Молоко, йодированная соль",
+          "uz": "Sut, yodlangan tuz"
+        }
+      }
+    },
+    {
+      "id": "kurt-ball-12",
+      "cat": "kurt",
+      "ru": {
+        "name": "Курт шариками",
+        "sub": "большая пачка",
+        "about": "Та же круглая форма, но пачка больше — двенадцать шариков. Берут домой, а не на один раз."
+      },
+      "uz": {
+        "name": "Qurt, dumaloq",
+        "sub": "katta qadoq",
+        "about": "O‘sha dumaloq shakl, faqat qadoq kattaroq — o‘n ikki dona. Bir martaga emas, uyga olishadi."
+      },
+      "spec": {
+        "weight": {
+          "ru": "48 г",
+          "uz": "48 g"
+        },
+        "comp": {
+          "ru": "Молоко, йодированная соль",
+          "uz": "Sut, yodlangan tuz"
+        }
+      }
+    },
+    {
+      "id": "kurt-stick",
+      "cat": "kurt",
+      "ru": {
+        "name": "Курт палочками",
+        "sub": "батончики",
+        "about": "Курт в форме батончиков: удобно есть на ходу и делить с друзьями."
+      },
+      "uz": {
+        "name": "Qurt, tayoqcha shaklida",
+        "sub": "batonchalar",
+        "about": "Tayoqcha shaklidagi qurt: yo‘lda yeyish va bo‘lishish uchun qulay."
+      },
+      "spec": {
+        "weight": {
+          "ru": "48 г",
+          "uz": "48 g"
+        },
+        "comp": {
+          "ru": "Молоко, йодированная соль",
+          "uz": "Sut, yodlangan tuz"
+        }
+      }
+    },
+    {
+      "id": "kurt-big",
+      "cat": "kurt",
+      "ru": {
+        "name": "Курт крупными кусками",
+        "sub": "классический, солёный",
+        "about": "Курт крупными кусками ручной лепки. Один кусок — полноценный перекус."
+      },
+      "uz": {
+        "name": "Qurt, yirik boʻlaklarda",
+        "sub": "klassik, sho‘r",
+        "about": "Qo‘lda tayyorlangan yirik bo‘laklardagi qurt. Bitta bo‘lak — to‘liq gazak."
+      },
+      "spec": {
+        "weight": {
+          "ru": "48 г",
+          "uz": "48 g"
+        },
+        "comp": {
+          "ru": "Молоко, йодированная соль",
+          "uz": "Sut, yodlangan tuz"
+        }
+      }
+    },
+    {
+      "id": "sticks",
+      "cat": "cheese",
+      "ru": {
+        "name": "Сырные палочки",
+        "sub": "солёные, тянущиеся",
+        "about": "Плотные солёные сырные палочки. Тянутся нитями — берут к чаю и к пиву."
+      },
+      "uz": {
+        "name": "Pishloq tayoqchalari",
+        "sub": "sho‘r, cho‘ziluvchan",
+        "about": "Zich, sho‘r pishloq tayoqchalari. Tolalarga ajraladi — choyga ham, pivoga ham."
+      },
+      "spec": {
+        "weight": {
+          "ru": "60 г",
+          "uz": "60 g"
+        },
+        "comp": {
+          "ru": "Сыр, соль",
+          "uz": "Pishloq, tuz"
+        }
+      }
+    },
+    {
+      "id": "braid",
+      "cat": "cheese",
+      "ru": {
+        "name": "Сырная косичка",
+        "sub": "плетёная, солёная",
+        "about": "Классическая плетёная сырная косичка. Разбирается на нити — самый «долгий» снек."
+      },
+      "uz": {
+        "name": "Pishloq oʻrimi",
+        "sub": "oʻrilgan, sho‘r",
+        "about": "Klassik oʻrilgan pishloq. Tolalarga ajraladi — eng “uzoq” gazak."
+      },
+      "spec": {
+        "weight": {
+          "ru": "60 г",
+          "uz": "60 g"
+        },
+        "comp": {
+          "ru": "Сыр, соль",
+          "uz": "Pishloq, tuz"
+        }
+      }
+    },
+    {
+      "id": "sticks-cyan",
+      "cat": "cheese",
+      "ru": {
+        "name": "Сырные палочки",
+        "sub": "бирюзовая упаковка",
+        "about": "Те же солёные палочки в бирюзовой пачке — второй формат линейки."
+      },
+      "uz": {
+        "name": "Pishloq tayoqchalari",
+        "sub": "feruza qadoq",
+        "about": "O‘sha sho‘r tayoqchalar feruza qadoqda — liniyaning ikkinchi formati."
+      },
+      "spec": {
+        "weight": {
+          "ru": "60 г",
+          "uz": "60 g"
+        },
+        "comp": {
+          "ru": "Сыр, соль",
+          "uz": "Pishloq, tuz"
+        }
+      }
+    },
+    {
+      "id": "braid-green",
+      "cat": "cheese",
+      "ru": {
+        "name": "Сырная косичка",
+        "sub": "зелёная упаковка",
+        "about": "Плетёная косичка в зелёной пачке — второй формат линейки."
+      },
+      "uz": {
+        "name": "Pishloq oʻrimi",
+        "sub": "yashil qadoq",
+        "about": "Oʻrilgan pishloq yashil qadoqda — liniyaning ikkinchi formati."
+      },
+      "spec": {
+        "weight": {
+          "ru": "60 г",
+          "uz": "60 g"
+        },
+        "comp": {
+          "ru": "Сыр, соль",
+          "uz": "Pishloq, tuz"
+        }
+      }
+    },
+    {
+      "id": "seeds",
+      "cat": "seeds",
+      "ru": {
+        "name": "Семечки с солью",
+        "sub": "жареные, крупные",
+        "about": "Крупная калиброванная семечка с солью. Пачка 90 г — та самая, к вечеру и в дорогу."
+      },
+      "uz": {
+        "name": "Tuzli pista",
+        "sub": "qovurilgan, yirik",
+        "about": "Yirik, kalibrlangan tuzli pista. 90 g qadoq — kechqurunga ham, yo‘lga ham."
+      },
+      "spec": {
+        "weight": {
+          "ru": "90 г",
+          "uz": "90 g"
+        },
+        "comp": {
+          "ru": "Семена подсолнечника, соль",
+          "uz": "Kungaboqar urugʻi, tuz"
+        }
+      }
+    }
+  ]
+}
