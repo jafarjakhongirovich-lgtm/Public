@@ -1,15 +1,27 @@
 name: CI
 
 on:
-  # Faqat main uchun push — feature branchlar PR orqali tekshiriladi, aks holda
-  # har bir push CI'ni ikki marta ishga tushirardi (push + pull_request).
+  # Push ham, PR ham tekshiriladi.
+  #
+  # Ilgari bu yerda faqat `main` turardi: feature branchlar PR orqali
+  # tekshiriladi deb hisoblangan edi. Lekin `pull_request` hodisasi PR ning
+  # MERGE natijasida ishlaydi, ya'ni GitHub avval branchni `main` bilan
+  # qo'shib ko'radi. Konflikt chiqsa, bunday merge yasab bo'lmaydi va CI
+  # umuman ishga tushmaydi — hech qanday xato ko'rsatilmaydi, shunchaki
+  # tekshiruv yo'qoladi. Aynan shunday bo'ldi: konflikt paydo bo'lgach,
+  # keyingi commitlar tekshirilmay o'tib ketdi.
+  #
+  # Push hodisasi merge yasashni talab qilmaydi, shuning uchun u konflikt
+  # bo'lganda ham ishlaydi.
   push:
-    branches: [main]
   pull_request:
 
 concurrency:
-  # Bir branchga ketma-ket push qilinsa, oldingi ishlayotgan runni to'xtatadi.
-  group: ci-${{ github.workflow }}-${{ github.ref }}
+  # Bitta branch uchun push va pull_request runlari BIR guruhda bo'lishi
+  # kerak, aks holda har bir commit CI'ni ikki marta ishga tushiradi.
+  # `head_ref` faqat PR da to'ladi, `ref_name` esa push da — natijada
+  # ikkalasi ham bir xil nom beradi.
+  group: ci-${{ github.workflow }}-${{ github.head_ref || github.ref_name }}
   cancel-in-progress: true
 
 jobs:
