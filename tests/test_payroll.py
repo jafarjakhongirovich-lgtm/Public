@@ -10,6 +10,8 @@ from __future__ import annotations
 from datetime import date, datetime, time
 from decimal import Decimal
 
+import pytest
+
 from app import attendance as att_mod
 from app import payroll as payroll_mod
 from app.models import EventType, Holiday, Leave, LeaveKind
@@ -109,8 +111,7 @@ def test_late_within_grace_costs_nothing(db, employee, schedule):
 def test_half_hour_late_is_a_fine_not_a_salary_cut(db, employee, schedule):
     """Yarim soat kechikish: oylik kamaymaydi, jarima yoziladi.
 
-    30 daqiqa kechikdi, 10 daqiqa bepul -> 20 daqiqa jarima ostida.
-    20/60 x 100 000 = 33 333,33 so'm.
+    30 daqiqa — eng yuqori pog'onadan (20 daqiqa) katta, ya'ni 200 000 so'm.
     """
     days = work_days_of(schedule)
     full_day(db, employee, days[0], arrive=time(9, 30))
@@ -120,15 +121,15 @@ def test_half_hour_late_is_a_fine_not_a_salary_cut(db, employee, schedule):
     res = payroll_mod.compute_employee(db, employee, PERIOD)
     assert res.late_count == 1
     assert res.total_late_minutes == 30
-    assert res.total_fined_late_minutes == 20
+    assert res.fined_late_days == 1
 
     # Kechikkan vaqt oylikdan ushlanmaydi — hisoblangan summa to'liq
     assert res.unpaid_minutes == 0
     assert res.accrued == SALARY
     assert res.unpaid_time_deduction == Decimal("0.00")
 
-    assert res.late_fine == Decimal("33333.33")
-    assert res.net_payable == SALARY - Decimal("33333.33")
+    assert res.late_fine == Decimal("200000.00")
+    assert res.net_payable == SALARY - Decimal("200000.00")
 
 
 def test_early_leave_and_lunch_overrun_add_up(db, employee, schedule):
@@ -149,8 +150,8 @@ def test_early_leave_and_lunch_overrun_add_up(db, employee, schedule):
     # Erta ketish 30-5=25 va tushlik oshig'i 30-5=25 — oylikdan ushlanadi.
     # Kechikish esa ushlanmaydi: uning o'rniga jarima bor.
     assert res.unpaid_minutes == 25 + 25
-    assert res.total_fined_late_minutes == 10  # 20 - 10 bepul
-    assert res.late_fine == Decimal("16666.67")
+    # 20 daqiqa kechikish — eng yuqori pog'ona
+    assert res.late_fine == Decimal("200000.00")
 
 
 def test_missing_checkout_costs_nothing_extra_but_is_flagged(db, employee, schedule):
@@ -352,10 +353,15 @@ def test_excel_export_produces_a_workbook(db, employee, schedule):
 
 
 # --------------------------------------------------------------------------- #
-# Kechikish uchun soatbay jarima
+# Kechikish uchun pog'onali jarima
 #
-# Ofis qoidasi: 10 daqiqagacha bepul, undan keyin har soat uchun 100 000 so'm,
-# proporsional. Kechikkan vaqt oylikdan alohida ushlanmaydi.
+# Ofis qoidasi:
+#     9 daqiqagacha  ->        0
+#     10 daqiqadan   ->   50 000
+#     15 daqiqadan   ->  100 000
+#     20 daqiqadan   ->  200 000  (undan katta hamma kechikishlar ham)
+#
+# Jarima kunlik: qaysi pog'onaga tushsa — o'sha summa, daqiqa boshiga emas.
 # --------------------------------------------------------------------------- #
 
 
@@ -368,53 +374,80 @@ def _one_late_day(db, employee, schedule, arrive: time):
     return payroll_mod.compute_employee(db, employee, PERIOD)
 
 
-def test_ten_minutes_late_is_free(db, employee, schedule):
-    """Foydalanuvchi aytgan holat: 5-10 daqiqa kechikishga jarima yo'q."""
-    res = _one_late_day(db, employee, schedule, time(9, 10))
-    assert res.total_late_minutes == 10
-    assert res.total_fined_late_minutes == 0
+def test_five_minutes_late_is_free(db, employee, schedule):
+    """Foydalanuvchi aytgan birinchi holat: 5 daqiqaga jarima yo'q."""
+    res = _one_late_day(db, employee, schedule, time(9, 5))
+    assert res.total_late_minutes == 5
+    assert res.fined_late_days == 0
     assert res.late_fine == Decimal("0.00")
     assert res.net_payable == SALARY
 
 
-def test_one_hour_late_costs_one_hundred_thousand(db, employee, schedule):
-    """Aynan foydalanuvchi so'ragan raqam: 1 soat kechikish -> 100 000 so'm.
+def test_ten_minutes_late_costs_fifty_thousand(db, employee, schedule):
+    res = _one_late_day(db, employee, schedule, time(9, 10))
+    assert res.total_late_minutes == 10
+    assert res.fined_late_days == 1
+    assert res.late_fine == Decimal("50000.00")
+    assert res.net_payable == SALARY - Decimal("50000.00")
 
-    Bepul 10 daqiqa hisobga olinadi, shuning uchun to'liq 100 000 chiqishi
-    uchun 1 soat 10 daqiqa kechikish kerak.
-    """
-    res = _one_late_day(db, employee, schedule, time(10, 10))
-    assert res.total_late_minutes == 70
-    assert res.total_fined_late_minutes == 60
+
+def test_fifteen_minutes_late_costs_one_hundred_thousand(db, employee, schedule):
+    res = _one_late_day(db, employee, schedule, time(9, 15))
     assert res.late_fine == Decimal("100000.00")
-    assert res.net_payable == SALARY - Decimal("100000.00")
 
 
-def test_two_hours_late_costs_two_hundred_thousand(db, employee, schedule):
-    """«2 soat -> 200 ming» — stavka chiziqli."""
-    res = _one_late_day(db, employee, schedule, time(11, 10))
-    assert res.total_fined_late_minutes == 120
+def test_twenty_minutes_late_costs_two_hundred_thousand(db, employee, schedule):
+    res = _one_late_day(db, employee, schedule, time(9, 20))
     assert res.late_fine == Decimal("200000.00")
 
 
-def test_ninety_minutes_late_costs_one_and_a_half_rates(db, employee, schedule):
-    """Butun soatgacha yaxlitlanmaydi: 1 soat 30 daqiqa -> 150 000."""
-    res = _one_late_day(db, employee, schedule, time(10, 40))
-    assert res.total_fined_late_minutes == 90
-    assert res.late_fine == Decimal("150000.00")
+@pytest.mark.parametrize(
+    ("minutes", "expected"),
+    [
+        (0, "0"),
+        (1, "0"),
+        (9, "0"),
+        (10, "50000"),
+        (12, "50000"),   # oraliq daqiqa — pastdagi pog'onada qoladi
+        (14, "50000"),
+        (15, "100000"),
+        (19, "100000"),
+        (20, "200000"),
+        (45, "200000"),  # eng yuqori pog'ona undan katta hammasiga amal qiladi
+        (600, "200000"),
+    ],
+)
+def test_step_table_covers_every_gap(minutes, expected):
+    """Pog'onalar orasidagi daqiqalar ham aniq javob berishi kerak."""
+    amount = payroll_mod.step_fine(minutes, payroll_mod.DEFAULT_POLICY.late_fine_steps)
+    assert amount == Decimal(expected)
 
 
-def test_fine_grows_with_each_late_day(db, employee, schedule):
-    """Jarima oy bo'yicha jamlanadi, kunlar alohida-alohida emas."""
+def test_each_late_day_is_fined_separately(db, employee, schedule):
+    """Ikki marta 15 daqiqa kechikish = 200 000, bir marta 30 daqiqaday emas."""
     days = work_days_of(schedule)
-    full_day(db, employee, days[0], arrive=time(10, 10))  # 60 daqiqa jarima ostida
-    full_day(db, employee, days[1], arrive=time(9, 40))   # 30 daqiqa jarima ostida
+    full_day(db, employee, days[0], arrive=time(9, 15))
+    full_day(db, employee, days[1], arrive=time(9, 15))
     for day in days[2:]:
         full_day(db, employee, day)
 
     res = payroll_mod.compute_employee(db, employee, PERIOD)
-    assert res.total_fined_late_minutes == 90
-    assert res.late_fine == Decimal("150000.00")
+    assert res.fined_late_days == 2
+    assert res.late_fine == Decimal("200000.00")
+
+
+def test_different_steps_add_up(db, employee, schedule):
+    days = work_days_of(schedule)
+    full_day(db, employee, days[0], arrive=time(9, 10))  # 50 000
+    full_day(db, employee, days[1], arrive=time(9, 15))  # 100 000
+    full_day(db, employee, days[2], arrive=time(9, 25))  # 200 000
+    full_day(db, employee, days[3], arrive=time(9, 5))   # 0
+    for day in days[4:]:
+        full_day(db, employee, day)
+
+    res = payroll_mod.compute_employee(db, employee, PERIOD)
+    assert res.fined_late_days == 3
+    assert res.late_fine == Decimal("350000.00")
 
 
 def test_fine_is_capped_by_the_legal_limit(db, employee, schedule):
@@ -423,11 +456,10 @@ def test_fine_is_capped_by_the_legal_limit(db, employee, schedule):
     Mehnat kodeksi ushlanmani cheklaydi, shuning uchun jamlangan jarima
     `max_deduction_percent` bilan kesiladi — va bu hisobotda ko'rinadi.
     """
-    fill_month(db, employee, schedule, arrive=time(11, 10))  # har kuni 2 soat
+    fill_month(db, employee, schedule, arrive=time(9, 25))  # har kuni 200 000
 
     res = payroll_mod.compute_employee(db, employee, PERIOD)
-    raw = Decimal(res.total_fined_late_minutes) * Decimal("100000") / Decimal("60")
-    assert res.late_fine == raw.quantize(Decimal("0.01"))
+    assert res.late_fine == Decimal("200000.00") * WORK_DAYS
 
     cap = SALARY * Decimal("20") / Decimal("100")
     assert res.late_fine > cap  # chegara haqiqatan ishga tushdi
@@ -438,10 +470,15 @@ def test_fine_is_capped_by_the_legal_limit(db, employee, schedule):
 
 def test_daily_breakdown_shows_the_fine_per_day(db, employee, schedule):
     """Nizo chiqqanda «qaysi kun uchun qancha» degan savolga javob bo'lsin."""
-    res = _one_late_day(db, employee, schedule, time(10, 10))
+    res = _one_late_day(db, employee, schedule, time(9, 15))
     late_day = next(d for d in res.days if d.late_minutes > 0)
-    assert late_day.fined_late_minutes == 60
+    assert late_day.late_minutes == 15
     assert late_day.late_fine == Decimal("100000.00")
+
+
+def test_free_late_minutes_comes_from_the_first_step(db, employee, schedule):
+    """Bot «necha daqiqagacha bepul» deb yozadi — raqam jadvaldan olinsin."""
+    assert payroll_mod.free_late_minutes() == 9
 
 
 def test_late_time_can_still_be_unpaid_if_the_office_wants_it(db, employee, schedule):

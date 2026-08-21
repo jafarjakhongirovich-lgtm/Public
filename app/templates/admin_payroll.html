@@ -42,7 +42,7 @@
         <th class="num">Ta'til</th>
         <th class="num">Kechikish</th>
         <th class="num">Kechikish (daq)</th>
-        <th class="num">Jarima ostida</th>
+        <th class="num">Jarimali kun</th>
         <th class="num">Kechikish jarimasi</th>
         <th class="num">To'lanmaydigan</th>
         <th class="num">Ishlanmagan vaqt</th>
@@ -61,7 +61,7 @@
         <td class="num">{{ r.leave_days or '—' }}</td>
         <td class="num">{% if r.late_count %}<span class="tag warn">{{ r.late_count }}</span>{% else %}—{% endif %}</td>
         <td class="num">{{ r.total_late_minutes|daqiqa }}</td>
-        <td class="num">{{ r.total_fined_late_minutes|daqiqa if r.total_fined_late_minutes else '—' }}</td>
+        <td class="num">{{ r.fined_late_days or '—' }}</td>
         <td class="num">{{ '−{:,.0f}'.format(r.late_fine) if r.late_fine else '—' }}</td>
         <td class="num">{{ r.unpaid_minutes|daqiqa }}</td>
         <td class="num">{{ '−{:,.0f}'.format(r.unpaid_time_deduction) if r.unpaid_time_deduction else '—' }}</td>

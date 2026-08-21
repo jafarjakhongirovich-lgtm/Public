@@ -61,28 +61,28 @@ to'lanadigan = hisoblangan − ustama kamayishi
 norma, to'lovsiz ruxsat kuni uchun to'liq kunlik norma. Bayram va dam olish
 kunlari normaga umuman kirmaydi.
 
-### Kechikish uchun soatbay jarima
+### Kechikish uchun pog'onali jarima
 
-Kechikish oylikdan vaqt sifatida ushlanmaydi — uning o'rniga **soatbay jarima**
-qo'llanadi. Ikkalasini birga qo'llash bir aybga ikki jazo bo'lardi.
+Kechikish oylikdan vaqt sifatida ushlanmaydi — uning o'rniga **pog'onali
+jarima** qo'llanadi. Ikkalasini birga qo'llash bir aybga ikki jazo bo'lardi.
 
 Qoida (`app/payroll.py` → `DEFAULT_POLICY`):
 
-* **10 daqiqagacha — jarima yo'q**
-* undan keyin **har bir soat uchun 100 000 so'm**, proporsional
+| Kechikish | Jarima |
+|---|---|
+| 9 daqiqagacha | **0** |
+| 10–14 daqiqa | **50 000 so'm** |
+| 15–19 daqiqa | **100 000 so'm** |
+| 20 daqiqa va undan ko'p | **200 000 so'm** |
 
-| Kechikish | Jarima ostidagi vaqt | Jarima |
-|---|---|---|
-| 8 daqiqa | — | **0** |
-| 10 daqiqa | — | **0** |
-| 40 daqiqa | 30 daqiqa | **50 000 so'm** |
-| 1 soat 10 daqiqa | 1 soat | **100 000 so'm** |
-| 1 soat 40 daqiqa | 1 s 30 daq | **150 000 so'm** |
-| 2 soat 10 daqiqa | 2 soat | **200 000 so'm** |
+Jarima **daqiqa boshiga emas, pog'ona bo'yicha**: 12 daqiqa ham, 14 daqiqa
+ham 50 000 so'm. Eng yuqori pog'ona undan katta hamma kechikishlarga amal
+qiladi — 20 daqiqa ham, 3 soat ham 200 000 so'm. Kerak bo'lsa `late_fine_steps`
+ro'yxatiga yangi qator qo'shiladi, masalan `(60, Decimal("400000"))`.
 
-Summani o'zgartirish uchun `DEFAULT_POLICY` dagi `late_fine_per_hour` ni
-tahrirlaysiz. Butun soatgacha yaxlitlanmaydi: 12 daqiqa kechikkan odam bir
-soatlik jarima to'lamaydi.
+Hisob **har kunga alohida** yuritiladi va oy oxirida qo'shiladi: ikki marta
+15 daqiqa kechikkan xodim 200 000 so'm to'laydi, bir marta 30 daqiqa
+kechikkanday emas.
 
 **Boshqa misollar** (oylik 10 000 000 so'm, 23 ish kuni, kunlik norma 480
 daqiqa, grace 5 daqiqa):

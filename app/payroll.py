@@ -16,11 +16,11 @@ Yakuniy summa:
     hisoblangan (accrued) = oylik x (to'lanadigan daqiqa / jadvaldagi daqiqa)
     to'lanadigan (net)    = hisoblangan - ustama kamayishi
 
-KECHIKISH UCHUN SOATBAY JARIMA
-------------------------------
-Kechikish alohida qoida bo'yicha hisoblanadi: `late_fine_free_minutes`
-daqiqagacha bepul, undan keyin har bir soat uchun `late_fine_per_hour`
-so'm, PROPORSIONAL (30 daqiqa — yarim stavka, 1 soat 30 daqiqa — bir yarim).
+KECHIKISH UCHUN POG'ONALI JARIMA
+--------------------------------
+Kechikish alohida qoida bo'yicha hisoblanadi: `late_fine_steps` —
+pog'onali jadval. Kechikish qaysi pog'onaga tushsa, o'sha summa olinadi;
+daqiqa boshiga emas. Jarima har kun uchun alohida hisoblanib qo'shiladi.
 
 Kechikkan vaqt ayni paytda oylikdan ushlanmaydi (`late_time_is_unpaid=False`):
 aks holda bitta kechikish uchun ikki marta to'lash kerak bo'lardi. Jarima
@@ -71,16 +71,17 @@ class DeductionPolicy:
     hisoblanadi. Summalarni admin panelda yoki bu yerda sozlash mumkin.
     """
 
-    # --- Kechikish uchun soatbay jarima ---
-    # Bir soat kechikish uchun summa (so'm). Hisob proporsional: aynan 1 soat —
-    # to'liq summa, 1 soat 30 daqiqa — bir yarim baravar, 2 soat — ikki baravar.
-    late_fine_per_hour: Decimal = Decimal("0")
-    # Shu daqiqagacha kechikish umuman hisoblanmaydi (jarima ham, ushlanma ham).
-    late_fine_free_minutes: int = 10
+    # --- Kechikish uchun pog'onali jarima ---
+    # Har bir pog'ona: (necha daqiqadan boshlab, qancha so'm). Kechikish
+    # daqiqasi qaysi pog'onaga tushsa, o'sha summa olinadi — daqiqa boshiga
+    # emas. Ro'yxatda yo'q oraliq daqiqalar pastdagi pog'onaga tegishli:
+    # 12 daqiqa -> "10 daqiqadan" pog'onasi.
+    # Eng yuqori pog'ona undan katta hamma kechikishlarga amal qiladi.
+    late_fine_steps: tuple[tuple[int, Decimal], ...] = ()
     # Kechikkan vaqt oylikdan ham ayirilsinmi? Standart holatda — YO'Q.
     # Sabab: aks holda bir kechikish uchun ikki marta javob berilardi — ham
-    # ishlanmagan vaqt sifatida oylik kamayardi, ham soatbay jarima yozilardi.
-    # Soatbay jarima kechikkan vaqt o'rniga qo'llaniladi.
+    # ishlanmagan vaqt sifatida oylik kamayardi, ham jarima yozilardi.
+    # Jarima kechikkan vaqt o'rniga qo'llaniladi.
     late_time_is_unpaid: bool = False
 
     # Oyda shu martagacha kechikish "kechiriladi" (ustama kamaymaydi)
@@ -102,21 +103,28 @@ class DeductionPolicy:
 # SHU OFISDA AMAL QILADIGAN QOIDA
 # --------------------------------------------------------------------------- #
 # Bu — sizning tashkilotingiz uchun sozlangan yagona joy. Summani o'zgartirish
-# uchun shu yerdagi raqamni tahrirlash yetarli.
+# yoki yangi pog'ona qo'shish uchun quyidagi ro'yxatni tahrirlash yetarli.
 #
-#   * 10 daqiqagacha kechikish — jarima yo'q
-#   * undan keyin har bir soat uchun 100 000 so'm, proporsional:
-#       - 30 daqiqa  ->  50 000
-#       - 1 soat     -> 100 000
-#       - 1 s 30 daq -> 150 000
-#       - 2 soat     -> 200 000
+#   9 daqiqagacha  ->        0   (5 daqiqa kechikish — jarima yo'q)
+#   10 daqiqadan   ->   50 000
+#   15 daqiqadan   ->  100 000
+#   20 daqiqadan   ->  200 000   <- eng yuqori pog'ona: undan keyingi hamma
+#                                   kechikishlarga shu summa amal qiladi
+#
+# Jarima HAR KUN uchun alohida hisoblanadi va oy oxirida qo'shiladi: ikki
+# marta 15 daqiqa kechikkan xodim 200 000 so'm to'laydi (100 000 + 100 000),
+# 30 daqiqa bir marta kechikkanday emas.
+#
 #   * kechikkan vaqt oylikdan AYRIM ravishda ushlanmaydi — jarima o'sha
 #     vaqtning o'rniga qo'llaniladi (bir aybga ikki jazo bo'lmasligi uchun)
 #   * `max_deduction_percent` — qonuniy chegara: jami kamayish hisoblangan
 #     summaning shu foizidan oshmaydi
 DEFAULT_POLICY = DeductionPolicy(
-    late_fine_per_hour=Decimal("100000"),
-    late_fine_free_minutes=10,
+    late_fine_steps=(
+        (10, Decimal("50000")),
+        (15, Decimal("100000")),
+        (20, Decimal("200000")),
+    ),
     late_time_is_unpaid=False,
 )
 
@@ -129,7 +137,6 @@ class DayBreakdown:
     status: DayStatus
     late_minutes: int = 0
     billable_late_minutes: int = 0
-    fined_late_minutes: int = 0
     late_fine: Decimal = Decimal("0")
     early_leave_minutes: int = 0
     lunch_overrun_minutes: int = 0
@@ -152,7 +159,8 @@ class PayrollResult:
     heavy_late_count: int = 0
 
     total_late_minutes: int = 0
-    total_fined_late_minutes: int = 0
+    # Jarima yozilgan kunlar soni (jarima kun bo'yicha pog'onadan olinadi)
+    fined_late_days: int = 0
     total_early_leave_minutes: int = 0
     total_lunch_overrun_minutes: int = 0
     scheduled_minutes: int = 0
@@ -179,9 +187,9 @@ def billable_minutes(
 ) -> int:
     """Bir kun uchun to'lanmaydigan daqiqalar (grace har toifaga alohida).
 
-    Kechikish standart holatda bu yerga KIRMAYDI: uning uchun soatbay jarima
-    bor (`fined_late_minutes`). Ikkalasini birga qo'llash bir aybga ikki jazo
-    bo'lardi.
+    Kechikish standart holatda bu yerga KIRMAYDI: uning uchun pog'onali
+    jarima bor (`late_fine_for`). Ikkalasini birga qo'llash bir aybga ikki
+    jazo bo'lardi.
     """
     late = max(0, record.late_minutes - schedule.grace_minutes)
     early = max(0, record.early_leave_minutes - schedule.grace_minutes)
@@ -189,25 +197,32 @@ def billable_minutes(
     return (late if policy.late_time_is_unpaid else 0) + early + lunch
 
 
-def hourly_fine(minutes: int, per_hour: Decimal) -> Decimal:
-    """Daqiqalarni soatbay stavka bo'yicha pulga aylantiradi (proporsional).
+def step_fine(minutes: int, steps: tuple[tuple[int, Decimal], ...]) -> Decimal:
+    """Bir kunlik kechikish uchun jarima — pog'onali jadval bo'yicha.
 
-    Aynan 1 soat — stavkaning o'zi, 1 soat 30 daqiqa — bir yarim baravar,
-    2 soat — ikki baravar. Butun soatgacha yaxlitlanmaydi: 12 daqiqa kechikkan
-    odam bir soatlik jarima to'lamaydi.
+    Kechikish daqiqasidan katta bo'lmagan eng yuqori pog'ona olinadi:
+    10 daqiqadan 50 000 bo'lsa, 12 daqiqa ham 50 000 (keyingi pog'onaga
+    yetmagan). Eng yuqori pog'onadan katta kechikishlar o'sha pog'onada
+    qoladi — shuning uchun oxirgi qatorni ataylab tanlash kerak.
     """
-    if minutes <= 0 or per_hour <= 0:
-        return _money(0)
-    return _money(Decimal(minutes) * Decimal(per_hour) / Decimal("60"))
+    amount = _money(0)
+    for threshold, value in sorted(steps):
+        if minutes >= threshold:
+            amount = _money(value)
+        else:
+            break
+    return amount
 
 
-def fined_late_minutes(record: Attendance, policy: DeductionPolicy = DEFAULT_POLICY) -> int:
-    """Jarima hisoblanadigan kechikish daqiqalari.
+def late_fine_for(record: Attendance, policy: DeductionPolicy = DEFAULT_POLICY) -> Decimal:
+    return step_fine(record.late_minutes, policy.late_fine_steps)
 
-    Bepul daqiqalar to'liq ayiriladi: 10 daqiqa bepul bo'lsa, 12 daqiqa
-    kechikkan odam 2 daqiqa uchun to'laydi, 12 uchun emas.
-    """
-    return max(0, record.late_minutes - policy.late_fine_free_minutes)
+
+def free_late_minutes(policy: DeductionPolicy = DEFAULT_POLICY) -> int:
+    """Shu daqiqagacha kechikishga jarima yo'q (birinchi pog'onadan bittasi kam)."""
+    if not policy.late_fine_steps:
+        return 0
+    return min(threshold for threshold, _ in policy.late_fine_steps) - 1
 
 
 def compute_employee(
@@ -281,10 +296,12 @@ def compute_employee(
 
         result.worked_days += 1
         day_unpaid = billable_minutes(record, schedule, policy)
-        day_fined = fined_late_minutes(record, policy)
+        day_fine = late_fine_for(record, policy)
         result.unpaid_minutes += day_unpaid
         result.total_late_minutes += record.late_minutes
-        result.total_fined_late_minutes += day_fined
+        result.late_fine += day_fine
+        if day_fine > 0:
+            result.fined_late_days += 1
         result.total_early_leave_minutes += record.early_leave_minutes
         result.total_lunch_overrun_minutes += record.lunch_overrun_minutes
 
@@ -302,8 +319,7 @@ def compute_employee(
                 status=record.status,
                 late_minutes=record.late_minutes,
                 billable_late_minutes=record.billable_late_minutes,
-                fined_late_minutes=day_fined,
-                late_fine=hourly_fine(day_fined, policy.late_fine_per_hour),
+                late_fine=day_fine,
                 early_leave_minutes=record.early_leave_minutes,
                 lunch_overrun_minutes=record.lunch_overrun_minutes,
                 unpaid_minutes=day_unpaid,
@@ -332,9 +348,9 @@ def _apply_money(result: PayrollResult, policy: DeductionPolicy) -> None:
     result.accrued = _money(salary * ratio)
     result.unpaid_time_deduction = _money(salary - result.accrued)
 
-    # Kechikish uchun soatbay jarima. Kunlar bo'yicha emas, oylik jamidan
-    # hisoblanadi — shunda kunlarni yaxlitlash xatosi to'planmaydi.
-    result.late_fine = hourly_fine(result.total_fined_late_minutes, policy.late_fine_per_hour)
+    # `result.late_fine` kunlar bo'yicha allaqachon yig'ilgan (pog'ona har
+    # kunga alohida qo'llaniladi), shuning uchun bu yerda faqat yaxlitlaymiz.
+    result.late_fine = _money(result.late_fine)
 
     extra_late = max(0, result.late_count - policy.free_late_count)
     raw_bonus_cut = (
