@@ -95,11 +95,27 @@ label{display:block; font-size:13px; color:var(--muted); margin:0 0 8px}
 }
 @keyframes draw{ to{ stroke-dashoffset:0 } }
 
+/* крест рисуется так же, как галочка, только двумя росчерками */
+#stepFail{ text-align:center }
+.tick.bad circle{ stroke:var(--bad) }
+.tick.bad path{
+  stroke:var(--bad); stroke-width:3.5; stroke-dasharray:23; stroke-dashoffset:23;
+  animation:draw .22s cubic-bezier(.65,0,.45,1) forwards;
+}
+.tick.bad path.x1{ animation-delay:.4s }
+.tick.bad path.x2{ animation-delay:.56s }
+.tick.bad svg{ animation:nudge .5s .62s cubic-bezier(.36,.07,.19,.97) }
+@keyframes nudge{
+  0%,100%{ transform:translateX(0) }
+  20%{ transform:translateX(-7px) } 40%{ transform:translateX(6px) }
+  65%{ transform:translateX(-4px) } 85%{ transform:translateX(2px) }
+}
+
 .gate.leaving .card{ animation:cardOut .3s ease-in forwards }
 @keyframes cardOut{ to{ opacity:0; transform:translateY(-8px) scale(.98) } }
 
 @media (prefers-reduced-motion: reduce){
-  .step,.cell.on,.cells.err,.tick circle,.tick path,.gate.leaving .card{ animation:none }
+  .step,.cell.on,.cells.err,.tick circle,.tick path,.tick.bad svg,.gate.leaving .card{ animation:none }
   .tick circle,.tick path{ stroke-dashoffset:0 }
 }
 
@@ -227,6 +243,18 @@ section[hidden]{display:none}
       <p class="gp">Шесть цифр. Проверим сами, как только введёте.</p>
       <div class="cells" id="cells"></div>
       <button class="link" type="button" id="notMe">Это не я</button>
+    </div>
+
+    <div class="step" id="stepFail" hidden>
+      <div class="tick bad" aria-hidden="true">
+        <svg viewBox="0 0 52 52">
+          <circle cx="26" cy="26" r="24"></circle>
+          <path class="x1" d="M18 18 L34 34"></path>
+          <path class="x2" d="M34 18 L18 34"></path>
+        </svg>
+      </div>
+      <h2 class="gh">Не подошёл</h2>
+      <p class="gp" id="why"></p>
     </div>
 
     <div class="step" id="stepDone" hidden>
@@ -379,7 +407,7 @@ const LEN = 6;
 let entering = false;
 
 function step(name){
-  ['stepName','stepPass','stepDone'].forEach((id) => {
+  ['stepName','stepPass','stepFail','stepDone'].forEach((id) => {
     const el = $(id);
     const show = id === name;
     if(show && el.hidden){            // перезапускаем появление
@@ -473,15 +501,16 @@ cells.forEach((c, i) => {
 });
 
 function wrong(text){
-  const box = $('cells');
-  box.classList.remove('busy');
-  box.classList.add('err');
-  say(text, true);
+  $('cells').classList.remove('busy');
+  say('');
+  $('why').textContent = text;
+  step('stepFail');
+  // показали причину — и обратно к цифрам, поле уже чистое
   setTimeout(() => {
-    box.classList.remove('err');
     clearCells();
-    cells[0].focus();
-  }, 480);
+    step('stepPass');
+    setTimeout(() => cells[0].focus(), 60);
+  }, 1700);
 }
 
 async function submit(){
