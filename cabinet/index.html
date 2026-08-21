@@ -464,6 +464,7 @@ cells.forEach((c, i) => {
     const d = c.value.replace(/\D/g, '');
     c.value = d.slice(-1);
     if(c.value){
+      say('');
       c.classList.remove('on'); void c.offsetWidth; c.classList.add('on');
       if(i < LEN - 1) cells[i + 1].focus();
     }
@@ -506,9 +507,12 @@ function wrong(text){
   $('why').textContent = text;
   step('stepFail');
   // показали причину — и обратно к цифрам, поле уже чистое
+  // Причина не должна исчезнуть вместе с крестом: без неё человек видит
+  // пустые клетки и не понимает, почему его не пускают.
   setTimeout(() => {
     clearCells();
     step('stepPass');
+    say(text, true);
     setTimeout(() => cells[0].focus(), 60);
   }, 1700);
 }
